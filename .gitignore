@@ -1,0 +1,4 @@
+*.obj
+*.exe
+powershell.exe
+.sconsign.dblite

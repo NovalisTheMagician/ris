@@ -1,7 +1,9 @@
-#include "Config.h"
+#include "Config.hpp"
 #include <fstream>
 
-#include "StringSupport.h"
+#include <exception>
+
+#include "StringSupport.hpp"
 
 using std::string;
 using std::wstring;
@@ -12,22 +14,12 @@ using std::ofstream;
 
 namespace RIS
 {
-	Config::Config()
-		: configMap(), configPath(L""), open(false)
-	{
-
-	}
-
-	Config::~Config()
-	{
-		Close();
-	}
-
-	bool Config::Open(const wstring &configPath)
+	Config::Config(const std::wstring &configPath)
+		: configMap(), configPath(configPath), isDirty(false)
 	{
 		ifstream inputStream(configPath);
 		if (!inputStream)
-			return false;
+			throw std::exception();
 
 		this->configPath = configPath;
 		string line;
@@ -45,20 +37,14 @@ namespace RIS
 
 			configMap[key] = value;
 		}
-
-		open = true;
-		return true;
 	}
 
-	void Config::Close(const std::wstring &forceConfigPath)
+	Config::~Config()
 	{
-		if (open || !forceConfigPath.empty())
+		if (isDirty)
 		{
 			ofstream outputStream;
-			if (!forceConfigPath.empty())
-				outputStream.open(forceConfigPath);
-			else
-				outputStream.open(configPath);
+			outputStream.open(configPath);
 
 			if (outputStream)
 			{
@@ -69,8 +55,6 @@ namespace RIS
 			}
 
 			configMap.clear();
-
-			open = false;
 		}
 	}
 
@@ -90,6 +74,7 @@ namespace RIS
 			return configMap.at(key);
 		}
 		configMap[key] = def;
+		isDirty = true;
 		return def;
 	}
 
@@ -115,6 +100,7 @@ namespace RIS
 			return val;
 		}
 		configMap[key] = std::to_string(def);
+		isDirty = true;
 		return def;
 	}
 }

@@ -1,7 +1,7 @@
-#include "Args.h"
+#include "Args.hpp"
 
 #include <sstream>
-#include "StringSupport.h"
+#include "StringSupport.hpp"
 
 using std::wstring;
 using std::map;

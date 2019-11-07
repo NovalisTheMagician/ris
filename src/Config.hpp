@@ -9,13 +9,10 @@ namespace RIS
 	class Config
 	{
 	public:
-		Config();
+		Config(const std::wstring &configPath);
 		~Config();
 		Config(const Config&) = delete;
 		Config& operator=(const Config&) = delete;
-
-		bool Open(const std::wstring &configPath);
-		void Close(const std::wstring &forceConfigPath = L"");
 
 		const std::string& GetString(const std::string &key, const std::string &def) const;
 		const std::string& GetString(const std::string &key, const std::string &def);
@@ -29,7 +26,7 @@ namespace RIS
 		std::map<std::string, std::string> configMap;
 		std::wstring configPath;
 
-		bool open;
+		bool isDirty;
 
 	};
 
@@ -39,5 +36,6 @@ namespace RIS
 		std::stringstream sstream;
 		sstream << value;
 		configMap[key] = sstream.str();
+		isDirty = true;
 	}
 }

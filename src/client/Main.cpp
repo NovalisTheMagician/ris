@@ -1,5 +1,3 @@
-#include <Windows.h>
-
 #include <glbinding/gl46core/gl.h>
 #include <glbinding/glbinding.h>
 
@@ -21,8 +19,6 @@ using namespace RIS;
 
 int main(int argc, char *argv[])
 {
-    FreeConsole();
-
     Args args(argc, argv);
 
     GLFWwindow* window;

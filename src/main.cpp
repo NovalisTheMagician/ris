@@ -5,6 +5,7 @@
 #include <glbinding/glbinding.h>
 
 //#define GLFW_DLL
+#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
 #include <string>
@@ -14,7 +15,7 @@ using std::string;
 using std::cout;
 using std::endl;
 
-using namespace gl;
+using namespace gl46core;
 
 int main(int argc, char *argv[])
 {
@@ -31,7 +32,7 @@ int main(int argc, char *argv[])
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(800, 600, "Hello World", NULL, NULL);
+    window = glfwCreateWindow(800, 600, "RIS", nullptr, nullptr);
     if (!window)
     {
         glfwTerminate();
@@ -53,9 +54,8 @@ int main(int argc, char *argv[])
     cout << vendor << endl;
 
     glEnable(GL_FRAMEBUFFER_SRGB);
-    //glEnable(GL_TEXTURE);
 
-    gl::glClearColor(0.392f, 0.584f, 0.929f, 1.0f);
+    glClearColor(0.392f, 0.584f, 0.929f, 1.0f);
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))

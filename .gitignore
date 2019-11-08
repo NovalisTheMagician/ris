@@ -1,4 +1,5 @@
 *.obj
 *.exe
+*.pdb
 powershell.exe
 .sconsign.dblite

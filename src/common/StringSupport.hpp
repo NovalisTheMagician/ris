@@ -43,6 +43,12 @@ namespace RIS
 		return str;
 	}
 
+	inline std::string& lowerCase(std::string &str)
+	{
+		std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c){ return std::tolower(c); });
+		return str;
+	}
+
 #pragma warning(push)
 #pragma warning(disable:4996)
 	inline std::string wstringToString(const std::wstring &str)

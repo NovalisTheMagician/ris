@@ -1,25 +1,29 @@
-#define UNICODE
 #include <Windows.h>
 
 #include <glbinding/gl46core/gl.h>
 #include <glbinding/glbinding.h>
 
-//#define GLFW_DLL
+#define GLFW_DLL
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
 #include <string>
 #include <iostream>
 
+#include "common/Args.hpp"
+
 using std::string;
 using std::cout;
 using std::endl;
 
 using namespace gl46core;
+using namespace RIS;
 
 int main(int argc, char *argv[])
 {
-    //FreeConsole();
+    FreeConsole();
+
+    Args args(argc, argv);
 
     GLFWwindow* window;
 
@@ -54,6 +58,7 @@ int main(int argc, char *argv[])
     cout << vendor << endl;
 
     glEnable(GL_FRAMEBUFFER_SRGB);
+    
 
     glClearColor(0.392f, 0.584f, 0.929f, 1.0f);
 

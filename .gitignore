@@ -3,3 +3,4 @@
 *.pdb
 powershell.exe
 .sconsign.dblite
+settings.json

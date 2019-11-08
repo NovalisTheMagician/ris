@@ -3,32 +3,36 @@
 #include <sstream>
 #include "StringSupport.hpp"
 
-using std::wstring;
+#include <exception>
+
+using std::string;
 using std::map;
 using std::vector;
-using std::wstringstream;
+using std::stringstream;
 
 namespace RIS
 {
-	const wstring Args::EMPTY_STRING = L"";
-	const vector<wstring> Args::EMPTY_PARAMETERS = vector<wstring>();
-
-	Args::Args(const wstring &cmdLine)
+	using namespace std::string_literals;
+	
+	Args::Args(int argc, char *argv[])
 		: args()
 	{
-		wstringstream ss(cmdLine);
-		wstring flag;
-		vector<wstring> parameters;
+		int index = 1;
+		string flag;
+		vector<string> parameters;
 
-		ss >> flag;
+		if(argc <= 1)
+			return;
+
+		flag = argv[index];
+
 		flag = lowerCase(flag);
 		if (flag[0] != '-')
 			return;
 
-		while (ss)
+		while (index++ < argc)
 		{
-			wstring parm;
-			ss >> parm;
+			string parm = argv[index];
 			if (parm.empty())
 			{
 				continue;
@@ -53,35 +57,35 @@ namespace RIS
 		args.clear();
 	}
 
-	bool Args::IsSet(const std::wstring &flag) const
+	bool Args::IsSet(const std::string &flag) const
 	{
 		return args.count(flag) > 0;
 	}
 
-	int Args::NumParameters(const std::wstring &flag) const
+	int Args::NumParameters(const std::string &flag) const
 	{
 		if (IsSet(flag))
 		{
 			return static_cast<int>(args.at(flag).size());
 		}
-		return -1;
+		throw ArgsException("Argument not present: "s + flag);
 	}
 
-	const std::wstring& Args::GetParameter(const std::wstring &flag) const
+	const std::string& Args::GetParameter(const std::string &flag) const
 	{
 		if (NumParameters(flag) > 0)
 		{
 			return args.at(flag)[0];
 		}
-		return EMPTY_STRING;
+		throw ArgsException("Argument not present: "s + flag);
 	}
 
-	const std::vector<std::wstring>& Args::GetParameters(const std::wstring &flag) const
+	const std::vector<std::string>& Args::GetParameters(const std::string &flag) const
 	{
 		if (IsSet(flag))
 		{
 			return args.at(flag);
 		}
-		return EMPTY_PARAMETERS;
+		throw ArgsException("Argument not present: "s + flag);
 	}
 }

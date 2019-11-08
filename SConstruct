@@ -14,10 +14,10 @@ defines = []
 
 debug = ARGUMENTS.get('debug', 0)
 if int(debug):
-    cl_flags.append('/Zi')
+    cl_flags.append(['/Zi', '/MTd'])
     defines.append('_DEBUG')
 else:
-    cl_flags.append('/O2')
+    cl_flags.append(['/O2', '/MT'])
 
 client_files = Glob('src/client/*.cpp')
 server_files = Glob('src/server/*.cpp')

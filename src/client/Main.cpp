@@ -58,7 +58,6 @@ int main(int argc, char *argv[])
     cout << vendor << endl;
 
     glEnable(GL_FRAMEBUFFER_SRGB);
-    
 
     glClearColor(0.392f, 0.584f, 0.929f, 1.0f);
 

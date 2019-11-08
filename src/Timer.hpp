@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Windows.h>
+#include <chrono>
 
 namespace RIS
 {
@@ -15,7 +15,9 @@ namespace RIS
 		float Total() const;
 
 	private:
-		double frequency, startTime, prevTime, curTime;
+		using tp = std::chrono::time_point<std::chrono::high_resolution_clock>;
+
+		tp startTime, prevTime, curTime;
 
 	};
 }

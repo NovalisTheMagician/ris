@@ -1,17 +1,17 @@
 #include "Timer.hpp"
 
+#include <Windows.h>
+
+using clock = std::chrono::high_resolution_clock;
+using std::chrono::duration_cast;
+using std::chrono::microseconds;
+
 namespace RIS
 {
 	Timer::Timer()
-		: frequency(), startTime(), prevTime(), curTime()
+		: startTime(), prevTime(), curTime()
 	{
-		LARGE_INTEGER freq;
-		QueryPerformanceFrequency(&freq);
-		frequency = static_cast<double>(freq.QuadPart);
-
-		LARGE_INTEGER counter;
-		QueryPerformanceCounter(&counter);
-		startTime = static_cast<double>(counter.QuadPart) / frequency;
+		startTime = clock::now();
 		prevTime = curTime = startTime;
 	}
 
@@ -22,19 +22,19 @@ namespace RIS
 
 	void Timer::Update()
 	{
-		LARGE_INTEGER counter;
-		QueryPerformanceCounter(&counter);
 		prevTime = curTime;
-		curTime = static_cast<double>(counter.QuadPart) / frequency;
+		curTime = clock::now();
 	}
 
 	float Timer::Delta() const
 	{
-		return static_cast<float>(curTime - prevTime);
+		auto v = duration_cast<microseconds>(curTime - prevTime).count();
+		return static_cast<float>(v / (1000.0f * 1000.0f));
 	}
 
 	float Timer::Total() const
 	{
-		return static_cast<float>(curTime - startTime);
+		auto v = duration_cast<microseconds>(curTime - startTime).count();
+		return static_cast<float>(v / (1000.0f * 1000.0f));
 	}
 }

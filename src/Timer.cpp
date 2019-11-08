@@ -2,7 +2,7 @@
 
 #include <Windows.h>
 
-using clock = std::chrono::high_resolution_clock;
+using hsclock = std::chrono::high_resolution_clock;
 using std::chrono::duration_cast;
 using std::chrono::microseconds;
 
@@ -11,7 +11,7 @@ namespace RIS
 	Timer::Timer()
 		: startTime(), prevTime(), curTime()
 	{
-		startTime = clock::now();
+		startTime = hsclock::now();
 		prevTime = curTime = startTime;
 	}
 
@@ -23,7 +23,7 @@ namespace RIS
 	void Timer::Update()
 	{
 		prevTime = curTime;
-		curTime = clock::now();
+		curTime = hsclock::now();
 	}
 
 	float Timer::Delta() const

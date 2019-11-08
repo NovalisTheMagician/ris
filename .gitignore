@@ -1,6 +1,7 @@
 *.obj
 *.exe
 *.pdb
+*.ilk
 powershell.exe
 .sconsign.dblite
 settings.json

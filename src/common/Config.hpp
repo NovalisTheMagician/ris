@@ -9,7 +9,7 @@ namespace RIS
 	class Config
 	{
 	public:
-		Config(const std::wstring &configPath);
+		Config(const std::string &configPath);
 		~Config();
 		Config(const Config&) = delete;
 		Config& operator=(const Config&) = delete;
@@ -24,7 +24,7 @@ namespace RIS
 
 	private:
 		std::map<std::string, std::string> configMap;
-		std::wstring configPath;
+		std::string configPath;
 
 		bool isDirty;
 

@@ -5,7 +5,7 @@ namespace RIS
     class INetwork
     {
     public:
-        virtual ~INetwork() {};
+        virtual ~INetwork() = default;
         virtual void Setup() = 0;
     };
 }

@@ -25,6 +25,17 @@
             "cwd": "${workspaceFolder}/bin",
             "environment": [],
             "externalConsole": false
-        }
+        },
+        {
+            "name": "barc",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/tools/barc.exe",
+            "args": ["-p", "-f", "test.meow", "test"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/bin/tools",
+            "environment": [],
+            "externalConsole": false
+        },
     ]
 }

@@ -67,7 +67,8 @@
         "xtr1common": "cpp",
         "xtree": "cpp",
         "xutility": "cpp",
-        "SConstruct": "python"
+        "SConstruct": "python",
+        "filesystem": "cpp"
     },
     "python.linting.enabled": false
 }

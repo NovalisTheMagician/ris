@@ -7,7 +7,8 @@
                 "${workspaceFolder}/libs/glfw/include/**",
                 "${workspaceFolder}/libs/glbinding/include/**",
                 "${workspaceFolder}/libs/glm/include/**",
-                "${workspaceFolder}/libs/gli/include/**"
+                "${workspaceFolder}/libs/gli/include/**",
+                "${workspaceFolder}/libs/soloud/include/**"
             ],
             "defines": [
                 "_DEBUG",

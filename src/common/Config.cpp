@@ -14,7 +14,7 @@ using std::ofstream;
 
 namespace RIS
 {
-	Config::Config(const std::wstring &configPath)
+	Config::Config(const std::string &configPath)
 		: configMap(), configPath(configPath), isDirty(false)
 	{
 		ifstream inputStream(configPath);

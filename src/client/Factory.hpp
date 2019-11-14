@@ -1,28 +1,36 @@
 #pragma once
 
-#include "IWindow.hpp"
-#include "IRenderer.hpp"
+#include "common/IWindow.hpp"
+#include "common/IRenderer.hpp"
 #include "common/INetwork.hpp"
+#include "common/IAudio.hpp"
+
+#include "common/SystemLocator.hpp"
 
 #include <memory>
+#include <string>
 
 namespace RIS
 {
-    class WindowFactory
+    class SystemFactory
     {
     public:
-        static std::unique_ptr<IWindow> Create();
-    };
+        SystemFactory(const SystemLocator &locator);
+        ~SystemFactory();
 
-    class RendererFactory
-    {
-    public:
-        static std::unique_ptr<IRenderer> Create();
-    };
+        SystemFactory(const SystemFactory &) = delete;
+        SystemFactory& operator= (const SystemFactory &) = delete;
 
-    class NetworkFactory
-    {
-    public:
-        static std::unique_ptr<INetwork> Create();
+        SystemFactory(SystemFactory &&) = delete;
+        SystemFactory& operator= (SystemFactory &&) = delete;
+
+        std::unique_ptr<IWindow> CreateWindow(const std::string &title) const;
+        std::unique_ptr<IRenderer> CreateRenderer() const;
+        std::unique_ptr<INetwork> CreateNetwork() const;
+        std::unique_ptr<IAudio> CreateAudio() const;
+
+    private:
+        const SystemLocator &locator;
+
     };
 }

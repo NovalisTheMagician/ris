@@ -40,5 +40,9 @@ server = Program('bin/RIS_server', server_objs + common_objs, LIBS=server_libs, 
 dyn_copy = Install('bin/', dyn_libs)
 
 Depends(client, dyn_copy)
-Depends(client, server)
 Default(client)
+
+cl = Alias('client', client)
+sv = Alias('server', server)
+bc = Alias('barc', barc)
+Alias('all', [cl, sv, bc])

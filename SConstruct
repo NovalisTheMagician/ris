@@ -21,16 +21,19 @@ if int(debug):
 else:
     cl_flags.append(['/O2', '/MT'])
 
+barc_files = Glob('src/tools/barc/*cpp')
 client_files = Glob('src/client/*.cpp')
 server_files = Glob('src/server/*.cpp')
 common_files = Glob('src/common/*.cpp')
 
+barc_objs = Object(barc_files, CPPPATH=['src'], CXXFLAGS=cl_flags, CPPDEFINES=defines)
 common_objs = Object(common_files, CPPPATH=common_inc_path, CXXFLAGS=cl_flags, CPPDEFINES=defines)
 client_objs = Object(client_files, CPPPATH=client_inc_path, CXXFLAGS=cl_flags, CPPDEFINES=defines)
 server_objs = Object(server_files, CPPPATH=server_inc_path, CXXFLAGS=cl_flags, CPPDEFINES=defines)
 
-client = Program('RIS', client_objs + common_objs, LIBS=client_libs, LIBPATH=client_lib_path, LINKFLAGS=lk_flags)
-server = Program('RIS_server', server_objs + common_objs, LIBS=server_libs, LIBPATH=server_lib_path, LINKFLAGS=lk_flags)
+barc = Program('bin/tools/barc', barc_objs, LINKFLAGS=lk_flags)
+client = Program('bin/RIS', client_objs + common_objs, LIBS=client_libs, LIBPATH=client_lib_path, LINKFLAGS=lk_flags)
+server = Program('bin/RIS_server', server_objs + common_objs, LIBS=server_libs, LIBPATH=server_lib_path, LINKFLAGS=lk_flags)
 
 Depends(client, server)
 Default(client)

@@ -8,10 +8,10 @@
             "name": "Server",
             "type": "cppvsdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/ris_server.exe",
+            "program": "${workspaceFolder}/bin/ris_server.exe",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/bin",
             "environment": [],
             "externalConsole": false
         },
@@ -19,10 +19,10 @@
             "name": "Client",
             "type": "cppvsdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/ris.exe",
+            "program": "${workspaceFolder}/bin/ris.exe",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/bin",
             "environment": [],
             "externalConsole": false
         }

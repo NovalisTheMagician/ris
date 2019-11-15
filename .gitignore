@@ -3,5 +3,6 @@
 *.pdb
 *.ilk
 bin/
+!libs/*/bin/
 powershell.exe
 .sconsign.dblite

@@ -3,6 +3,7 @@
 #include "GLFWWindow.hpp"
 #include "GLRenderer.hpp"
 #include "SOLAudio.hpp"
+#include "SimpleUserinterface.hpp"
 
 #ifdef _WIN32
 #include "common/WinNetwork.hpp"
@@ -20,8 +21,9 @@ namespace RIS
     using IRendererPtr = std::unique_ptr<IRenderer>;
     using INetworkPtr = std::unique_ptr<INetwork>;
     using IAudioPtr = std::unique_ptr<IAudio>;
+    using IUserinterfacePtr = std::unique_ptr<IUserinterface>;
 
-    SystemFactory::SystemFactory(const SystemLocator &locator) 
+    SystemFactory::SystemFactory(SystemLocator &locator) 
         : locator(locator)
     {
 
@@ -34,25 +36,40 @@ namespace RIS
 
     IWindowPtr SystemFactory::CreateWindow(const string &title) const
     {
-        return std::make_unique<GLFWWindow>(locator, title);
+        auto system = std::make_unique<GLFWWindow>(locator, title);
+        locator.Provide(system.get());
+        return system;
     }
 
     IRendererPtr SystemFactory::CreateRenderer() const
     {
-        return std::make_unique<GLRenderer>(locator);
+        auto system = std::make_unique<GLRenderer>(locator);
+        locator.Provide(system.get());
+        return system;
     }
 
     INetworkPtr SystemFactory::CreateNetwork() const
     {
 #ifdef _WIN32
-        return std::make_unique<WinNetwork>(locator);
+        auto system = std::make_unique<WinNetwork>(locator);
 #elif defined __linux__
-        return std::make_unique<PosixNetwork>(locator);
+        auto system = std::make_unique<PosixNetwork>(locator);
 #endif
+        locator.Provide(system.get());
+        return system;
     }
 
     IAudioPtr SystemFactory::CreateAudio() const
     {
-        return std::make_unique<SOLAudio>(locator);
+        auto system = std::make_unique<SOLAudio>(locator);
+        locator.Provide(system.get());
+        return system;
+    }
+
+    IUserinterfacePtr SystemFactory::CreateUserinterface() const
+    {
+        auto system = std::make_unique<SimpleUserinterface>(locator);
+        locator.Provide(system.get());
+        return system;
     }
 }

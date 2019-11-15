@@ -4,6 +4,7 @@
 #include "common/IRenderer.hpp"
 #include "common/INetwork.hpp"
 #include "common/IAudio.hpp"
+#include "common/IUserinterface.hpp"
 
 #include "common/SystemLocator.hpp"
 
@@ -15,7 +16,7 @@ namespace RIS
     class SystemFactory
     {
     public:
-        SystemFactory(const SystemLocator &locator);
+        SystemFactory(SystemLocator &locator);
         ~SystemFactory();
 
         SystemFactory(const SystemFactory &) = delete;
@@ -28,9 +29,10 @@ namespace RIS
         std::unique_ptr<IRenderer> CreateRenderer() const;
         std::unique_ptr<INetwork> CreateNetwork() const;
         std::unique_ptr<IAudio> CreateAudio() const;
+        std::unique_ptr<IUserinterface> CreateUserinterface() const;
 
     private:
-        const SystemLocator &locator;
+        SystemLocator &locator;
 
     };
 }

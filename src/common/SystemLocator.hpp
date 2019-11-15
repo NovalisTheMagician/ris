@@ -7,6 +7,7 @@
 #include "IRenderer.hpp"
 #include "INetwork.hpp"
 #include "IAudio.hpp"
+#include "IUserinterface.hpp"
 
 namespace RIS
 {
@@ -31,17 +32,20 @@ namespace RIS
         void Provide(IRenderer *renderer);
         void Provide(INetwork *network);
         void Provide(IAudio *audio);
+        void Provide(IUserinterface *userinterface);
 
         IWindow& GetWindow() const;
         IRenderer& GetRenderer() const;
         INetwork& GetNetwork() const;
         IAudio& GetAudio() const;
+        IUserinterface& GetUserinterface() const;
 
     private:
         IWindow *window;
         IRenderer *renderer;
         INetwork *network;
         IAudio *audio;
+        IUserinterface *userinterface;
 
     };
 }

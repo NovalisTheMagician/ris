@@ -3,7 +3,7 @@
 namespace RIS
 {
     SystemLocator::SystemLocator() 
-        : window(nullptr), renderer(nullptr), network(nullptr), audio(nullptr)
+        : window(nullptr), renderer(nullptr), network(nullptr), audio(nullptr), userinterface(nullptr)
     {
 
     }
@@ -31,6 +31,11 @@ namespace RIS
     void SystemLocator::Provide(IAudio *audio)
     {
         this->audio = audio;
+    }
+
+    void SystemLocator::Provide(IUserinterface *userinterface)
+    {
+        this->userinterface = userinterface;
     }
 
     IWindow& SystemLocator::GetWindow() const
@@ -63,5 +68,13 @@ namespace RIS
             throw SystemNotProvidedException("Audio");
             
         return *audio;
+    }
+
+    IUserinterface& SystemLocator::GetUserinterface() const
+    {
+        if(userinterface == nullptr)
+            throw SystemNotProvidedException("Userinterface");
+            
+        return *userinterface;
     }
 }

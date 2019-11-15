@@ -6,6 +6,7 @@
 #include "common/IRenderer.hpp"
 #include "common/INetwork.hpp"
 #include "common/IAudio.hpp"
+#include "common/IUserinterface.hpp"
 #include "Factory.hpp"
 
 #include "common/SystemLocator.hpp"
@@ -29,11 +30,7 @@ int main(int argc, char *argv[])
     unique_ptr<IRenderer> renderer = factory.CreateRenderer();
     unique_ptr<INetwork> network = factory.CreateNetwork();
     unique_ptr<IAudio> audio = factory.CreateAudio();
-    
-    locator.Provide(window.get());
-    locator.Provide(renderer.get());
-    locator.Provide(network.get());
-    locator.Provide(audio.get());
+    unique_ptr<IUserinterface> userinterface = factory.CreateUserinterface();
 
     glm::vec4 clearColor(0.392f, 0.584f, 0.929f, 1.0f);
 

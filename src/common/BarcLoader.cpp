@@ -44,7 +44,7 @@ namespace RIS
     const int VERSION = 1;
 
     BarcLoader::BarcLoader(const SystemLocator &systems, const std::string &assetRoot)
-        : systems(systems), assetRoot(assetRoot), archiveOverlays()
+        : systems(systems), assetRoot(assetRoot), archiveOverlays(), assetTable()
     {
         if(!assetRoot.empty())
             if(!std::filesystem::is_directory(assetRoot))
@@ -71,11 +71,28 @@ namespace RIS
 
         stream.read(reinterpret_cast<char*>(&toc), sizeof toc);
 
-        std::vector<ArchiveTableEntry> textureEntries(toc.numTextures);
-        stream.seekg(toc.textureOffset);
-        stream.read(reinterpret_cast<char*>(&textureEntries[0]), toc.numTextures * sizeof textureEntries[0]);
+        //TODO implement the other asset types
 
-        PopulateTable(AssetType::TEXTURE, textureEntries, stream, streamId);
+        {
+            std::vector<ArchiveTableEntry> entries(toc.numModels);
+            stream.seekg(toc.modelOffset);
+            stream.read(reinterpret_cast<char*>(&entries[0]), toc.numModels * sizeof entries[0]);
+            PopulateTable(AssetType::MODEL, entries, stream, streamId);
+        }
+        
+        {
+            std::vector<ArchiveTableEntry> entries(toc.numTextures);
+            stream.seekg(toc.textureOffset);
+            stream.read(reinterpret_cast<char*>(&entries[0]), toc.numTextures * sizeof entries[0]);
+            PopulateTable(AssetType::TEXTURE, entries, stream, streamId);
+        }
+
+        {
+            std::vector<ArchiveTableEntry> entries(toc.numSounds);
+            stream.seekg(toc.soundOffset);
+            stream.read(reinterpret_cast<char*>(&entries[0]), toc.numSounds * sizeof entries[0]);
+            PopulateTable(AssetType::SOUND, entries, stream, streamId);
+        }
     }
 
     void BarcLoader::PopulateTable(AssetType type, std::vector<ArchiveTableEntry> entries, std::fstream &stream, int streamId)
@@ -116,15 +133,38 @@ namespace RIS
             return LoadAssetFromFilesystem(type, name, size);
         }
 
-        std::fstream &stream = archiveOverlays[assetTable[type][name].streamId];
+        auto &assetEntry = assetTable[type][name];
+        std::fstream &stream = archiveOverlays[assetEntry.streamId];
 
-        //TODO
+        size = assetEntry.size;
+        std::unique_ptr<std::byte[]> data(new std::byte[size]);
+        stream.seekg(assetEntry.offset);
+        stream.read(reinterpret_cast<char*>(data.get()), size);
 
-        return nullptr;
+        return data;
     }
 
     std::unique_ptr<std::byte[]> BarcLoader::LoadAssetFromFilesystem(AssetType type, const std::string &name, std::size_t &size)
     {
-        return nullptr;
+        std::string extension = "";
+        switch(type)
+        {
+        case AssetType::TEXTURE: extension = ".dds"; break;
+        case AssetType::MODEL: extension = ".mdl"; break;
+        case AssetType::SOUND: extension = ".wav"; break;
+        }
+        std::string fileName = name + extension;
+
+        std::fstream stream(fileName, std::fstream::in | std::fstream::binary | std::fstream::ate);
+        if(!stream)
+            throw LoaderException("Asset (" + fileName + ") not found");
+
+        size = stream.tellg();
+        stream.seekg(0);
+
+        std::unique_ptr<std::byte[]> data(new std::byte[size]);
+        stream.read(reinterpret_cast<char*>(data.get()), size);
+
+        return data;
     }
 }

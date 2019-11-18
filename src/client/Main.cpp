@@ -7,6 +7,7 @@
 #include "common/INetwork.hpp"
 #include "common/IAudio.hpp"
 #include "common/IUserinterface.hpp"
+#include "common/ILoader.hpp"
 #include "Factory.hpp"
 
 #include "common/SystemLocator.hpp"
@@ -31,8 +32,10 @@ int main(int argc, char *argv[])
     unique_ptr<INetwork> network = factory.CreateNetwork();
     unique_ptr<IAudio> audio = factory.CreateAudio();
     unique_ptr<IUserinterface> userinterface = factory.CreateUserinterface();
+    unique_ptr<ILoader> loader = factory.CreateLoader("");
 
     glm::vec4 clearColor(0.392f, 0.584f, 0.929f, 1.0f);
+    clearColor = glm::pow(clearColor, glm::vec4(2.2f));
 
     while (!window->HandleMessages())
     {

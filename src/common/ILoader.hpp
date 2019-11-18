@@ -18,9 +18,9 @@ namespace RIS
     public:
         virtual ~ILoader() = default;
 
-        virtual void AddOverlay(const std::string &overlayName);
+        virtual void AddOverlay(const std::string &overlayName) = 0;
 
-        virtual bool HasFile(AssetType type, const std::string &name) const;
-        virtual std::unique_ptr<std::byte[]> LoadFile(AssetType type, const std::string &name, bool ignoreOverlays = false) const;
+        virtual bool HasAsset(AssetType type, const std::string &name) const = 0;
+        virtual std::unique_ptr<std::byte[]> LoadAsset(AssetType type, const std::string &name, std::size_t &size, bool ignoreOverlays = false) = 0;
     };
 }

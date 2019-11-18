@@ -4,6 +4,7 @@
 #include "GLRenderer.hpp"
 #include "SOLAudio.hpp"
 #include "SimpleUserinterface.hpp"
+#include "common/BarcLoader.hpp"
 
 #ifdef _WIN32
 #include "common/WinNetwork.hpp"
@@ -22,6 +23,7 @@ namespace RIS
     using INetworkPtr = std::unique_ptr<INetwork>;
     using IAudioPtr = std::unique_ptr<IAudio>;
     using IUserinterfacePtr = std::unique_ptr<IUserinterface>;
+    using ILoaderPtr = std::unique_ptr<ILoader>;
 
     SystemFactory::SystemFactory(SystemLocator &locator) 
         : locator(locator)
@@ -69,6 +71,13 @@ namespace RIS
     IUserinterfacePtr SystemFactory::CreateUserinterface() const
     {
         auto system = std::make_unique<SimpleUserinterface>(locator);
+        locator.Provide(system.get());
+        return system;
+    }
+
+    ILoaderPtr SystemFactory::CreateLoader(const std::string &debugAssetFolder) const
+    {
+        auto system = std::make_unique<BarcLoader>(locator, debugAssetFolder);
         locator.Provide(system.get());
         return system;
     }

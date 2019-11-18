@@ -5,6 +5,7 @@
 #include "common/INetwork.hpp"
 #include "common/IAudio.hpp"
 #include "common/IUserinterface.hpp"
+#include "common/ILoader.hpp"
 
 #include "common/SystemLocator.hpp"
 
@@ -30,6 +31,7 @@ namespace RIS
         std::unique_ptr<INetwork> CreateNetwork() const;
         std::unique_ptr<IAudio> CreateAudio() const;
         std::unique_ptr<IUserinterface> CreateUserinterface() const;
+        std::unique_ptr<ILoader> CreateLoader(const std::string &debugAssetFolder) const;
 
     private:
         SystemLocator &locator;

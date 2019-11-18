@@ -24,13 +24,6 @@ struct Header
     uint8_t version;
 };
 
-struct FontEntry;
-struct MetaEntry;
-struct ModelEntry;
-struct SoundEntry;
-struct TextureEntry;
-struct TextEntry;
-
 struct TOC
 {
     uint32_t totalItems;
@@ -51,39 +44,9 @@ struct TOC
     uint32_t textOffset;
 };
 
-struct MetaEntry
+struct TableEntry
 {
     uint8_t name[16];
-    uint32_t dataSize;
-    uint32_t dataOffset;
-};
-
-struct ModelEntry
-{
-    uint8_t name[16];
-    uint32_t dataSize;
-    uint32_t dataOffset;
-};
-
-struct SoundEntry
-{
-    uint8_t name[16];
-    uint32_t dataSize;
-    uint32_t dataOffset;
-};
-
-struct TextureEntry
-{
-    uint8_t name[16];
-    uint8_t type;
-    uint32_t dataSize;
-    uint32_t dataOffset;
-};
-
-struct TextEntry
-{
-    uint8_t name[16];
-    uint8_t language;
     uint32_t dataSize;
     uint32_t dataOffset;
 };

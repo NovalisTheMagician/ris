@@ -9,6 +9,8 @@
 #include "IAudio.hpp"
 #include "IUserinterface.hpp"
 #include "ILoader.hpp"
+#include "IPhysics.hpp"
+#include "IWorld.hpp"
 
 namespace RIS
 {
@@ -35,6 +37,8 @@ namespace RIS
         void Provide(IAudio *audio);
         void Provide(IUserinterface *userinterface);
         void Provide(ILoader *loader);
+        void Provide(IPhysics *physics);
+        void Provide(IWorld *world);
 
         IWindow& GetWindow() const;
         IRenderer& GetRenderer() const;
@@ -42,6 +46,8 @@ namespace RIS
         IAudio& GetAudio() const;
         IUserinterface& GetUserinterface() const;
         ILoader& GetLoader() const;
+        IPhysics& GetPhysics() const;
+        IWorld& GetWorld() const;
 
     private:
         IWindow *window;
@@ -50,6 +56,8 @@ namespace RIS
         IAudio *audio;
         IUserinterface *userinterface;
         ILoader *loader;
+        IPhysics *physics;
+        IWorld *world;
 
     };
 }

@@ -3,7 +3,8 @@
 namespace RIS
 {
     SystemLocator::SystemLocator() 
-        : window(nullptr), renderer(nullptr), network(nullptr), audio(nullptr), userinterface(nullptr), loader(nullptr)
+        : window(nullptr), renderer(nullptr), network(nullptr), audio(nullptr), userinterface(nullptr), loader(nullptr),
+        physics(nullptr), world(nullptr)
     {
 
     }
@@ -41,6 +42,16 @@ namespace RIS
     void SystemLocator::Provide(ILoader *loader)
     {
         this->loader = loader;
+    }
+
+    void SystemLocator::Provide(IPhysics *physics)
+    {
+        this->physics = physics;
+    }
+
+    void SystemLocator::Provide(IWorld *world)
+    {
+        this->world = world;
     }
 
     IWindow& SystemLocator::GetWindow() const
@@ -89,5 +100,21 @@ namespace RIS
             throw SystemNotProvidedException("Loader");
             
         return *loader;
+    }
+
+    IPhysics& SystemLocator::GetPhysics() const
+    {
+        if(physics == nullptr)
+            throw SystemNotProvidedException("Physics");
+            
+        return *physics;
+    }
+
+    IWorld& SystemLocator::GetWorld() const
+    {
+        if(world == nullptr)
+            throw SystemNotProvidedException("World");
+            
+        return *world;
     }
 }

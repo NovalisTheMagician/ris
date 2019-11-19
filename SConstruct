@@ -3,11 +3,11 @@ lk_flags = ['/nologo']
 
 dyn_libs = ['libs/glbinding/bin/glbinding.dll', 'libs/glbinding/bin/glbinding-aux.dll', 'libs/glfw/bin/glfw3.dll']
 
-client_inc_path = ['src', 'libs/glm/include', 'libs/gli/include', 'libs/glbinding/include', 'libs/glfw/include', 'libs/soloud/include']
+client_inc_path = ['src', 'libs/glm/include', 'libs/gli/include', 'libs/glbinding/include', 'libs/glfw/include', 'libs/soloud/include', 'libs/rapidjson/include']
 client_lib_path = ['libs/glbinding/lib', 'libs/glfw/lib', 'libs/soloud/lib']
 client_libs = ['user32', 'kernel32', 'gdi32', 'opengl32', 'glbinding', 'glfw3dll', 'soloud_static']
 
-common_inc_path = ['src', 'libs/glm/include']
+common_inc_path = ['src', 'libs/glm/include', 'libs/rapidjson/include']
 
 server_inc_path = ['src']
 server_lib_path = []
@@ -28,7 +28,7 @@ client_files = Glob('src/client/*.cpp')
 server_files = Glob('src/server/*.cpp')
 common_files = Glob('src/common/*.cpp')
 
-barc_objs = Object(barc_files, CPPPATH=[''], CXXFLAGS=cl_flags, CPPDEFINES=defines)
+barc_objs = Object(barc_files, CPPPATH=['src'], CXXFLAGS=cl_flags, CPPDEFINES=defines)
 common_objs = Object(common_files, CPPPATH=common_inc_path, CXXFLAGS=cl_flags, CPPDEFINES=defines)
 client_objs = Object(client_files, CPPPATH=client_inc_path, CXXFLAGS=cl_flags, CPPDEFINES=defines)
 server_objs = Object(server_files, CPPPATH=server_inc_path, CXXFLAGS=cl_flags, CPPDEFINES=defines)

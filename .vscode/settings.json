@@ -68,7 +68,8 @@
         "xtree": "cpp",
         "xutility": "cpp",
         "SConstruct": "python",
-        "filesystem": "cpp"
+        "filesystem": "cpp",
+        "regex": "cpp"
     },
     "python.linting.enabled": false
 }

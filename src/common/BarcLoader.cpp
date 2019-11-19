@@ -143,11 +143,11 @@ namespace RIS
         case AssetType::TEXT: extension = ".txt"; folder = "texts"; break;
         case AssetType::UILAYOUT: extension = ".json"; folder = "ui"; break;
         }
-        std::filesystem::path fileName = folder / (name + extension);
+        std::filesystem::path filePath = folder / (name + extension);
 
-        std::fstream stream(fileName, std::fstream::in | std::fstream::binary | std::fstream::ate);
+        std::fstream stream(filePath, std::fstream::in | std::fstream::binary | std::fstream::ate);
         if(!stream)
-            throw LoaderException("Asset (" + fileName.generic_string() + ") not found");
+            throw LoaderException("Asset (" + filePath.generic_string() + ") not found");
 
         size = stream.tellg();
         stream.seekg(0);

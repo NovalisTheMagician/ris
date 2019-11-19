@@ -10,6 +10,10 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <string>
+
+#include "common/Logger.hpp"
+
 using namespace gl46core;
 
 namespace RIS
@@ -20,6 +24,17 @@ namespace RIS
         glbinding::initialize(glfwGetProcAddress);
 
         glEnable(GL_FRAMEBUFFER_SRGB);
+
+        std::string version = reinterpret_cast<const char*>(glGetString(GL_VERSION));
+        std::string vendor = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
+        std::string shaderVersion = reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION));
+        std::string renderer = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
+
+        auto &log = Logger::Instance();
+        log.Info("GL_Version: " + version);
+        log.Info("GL_Vendor: " + vendor);
+        log.Info("GL_ShaderVersion: " + shaderVersion);
+        log.Info("GL_Renderer: " + renderer);
     }
 
     GLRenderer::~GLRenderer()

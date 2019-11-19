@@ -4,45 +4,10 @@
 
 #include <utility>
 
+#include "ArchiveFormat.hpp"
+
 namespace RIS
 {
-    #pragma pack(push, 1)
-    struct Header
-    {
-        uint8_t magic[4]; // needs to be MEOW
-        uint8_t version;
-    };
-
-    struct TOC
-    {
-        uint32_t totalItems;
-
-        uint32_t numMetas;
-        uint32_t metaOffset;
-
-        uint32_t numModels;
-        uint32_t modelOffset;
-
-        uint32_t numSounds;
-        uint32_t soundOffset;
-
-        uint32_t numTextures;
-        uint32_t textureOffset;
-
-        uint32_t numTexts;
-        uint32_t textOffset;
-    };
-
-    struct ArchiveTableEntry
-    {
-        char name[16];
-        uint32_t dataSize;
-        uint32_t dataOffset;
-    };
-    #pragma pack(pop)
-
-    const int VERSION = 1;
-
     BarcLoader::BarcLoader(const SystemLocator &systems, const std::string &assetRoot)
         : systems(systems), assetRoot(assetRoot), archiveOverlays(), assetTable()
     {
@@ -66,7 +31,7 @@ namespace RIS
         if(std::memcmp(header.magic, "MEOW", 4) != 0)
             throw LoaderException("Unsupported archive type");
 
-        if(header.version != VERSION)
+        if(header.version != ARCHIVE_FORMAT_VERSION)
             throw LoaderException("Unsupported archive version");
 
         stream.read(reinterpret_cast<char*>(&toc), sizeof toc);
@@ -92,6 +57,27 @@ namespace RIS
             stream.seekg(toc.soundOffset);
             stream.read(reinterpret_cast<char*>(&entries[0]), toc.numSounds * sizeof entries[0]);
             PopulateTable(AssetType::SOUND, entries, stream, streamId);
+        }
+
+        {
+            std::vector<ArchiveTableEntry> entries(toc.numTexts);
+            stream.seekg(toc.textOffset);
+            stream.read(reinterpret_cast<char*>(&entries[0]), toc.numTexts * sizeof entries[0]);
+            PopulateTable(AssetType::TEXT, entries, stream, streamId);
+        }
+
+        {
+            std::vector<ArchiveTableEntry> entries(toc.numShaders);
+            stream.seekg(toc.shaderOffset);
+            stream.read(reinterpret_cast<char*>(&entries[0]), toc.numShaders * sizeof entries[0]);
+            PopulateTable(AssetType::SHADER, entries, stream, streamId);
+        }
+
+        {
+            std::vector<ArchiveTableEntry> entries(toc.numUIs);
+            stream.seekg(toc.uiOffset);
+            stream.read(reinterpret_cast<char*>(&entries[0]), toc.numUIs * sizeof entries[0]);
+            PopulateTable(AssetType::UILAYOUT, entries, stream, streamId);
         }
     }
 
@@ -147,17 +133,21 @@ namespace RIS
     std::unique_ptr<std::byte[]> BarcLoader::LoadAssetFromFilesystem(AssetType type, const std::string &name, std::size_t &size)
     {
         std::string extension = "";
+        std::filesystem::path folder = "";
         switch(type)
         {
-        case AssetType::TEXTURE: extension = ".dds"; break;
-        case AssetType::MODEL: extension = ".mdl"; break;
-        case AssetType::SOUND: extension = ".wav"; break;
+        case AssetType::TEXTURE: extension = ".dds"; folder = "textures"; break;
+        case AssetType::MODEL: extension = ".mdl"; folder = "models"; break;
+        case AssetType::SOUND: extension = ".wav"; folder = "sounds"; break;
+        case AssetType::SHADER: extension = ".shd"; folder = "shaders"; break;
+        case AssetType::TEXT: extension = ".txt"; folder = "texts"; break;
+        case AssetType::UILAYOUT: extension = ".json"; folder = "ui"; break;
         }
-        std::string fileName = name + extension;
+        std::filesystem::path fileName = folder / (name + extension);
 
         std::fstream stream(fileName, std::fstream::in | std::fstream::binary | std::fstream::ate);
         if(!stream)
-            throw LoaderException("Asset (" + fileName + ") not found");
+            throw LoaderException("Asset (" + fileName.generic_string() + ") not found");
 
         size = stream.tellg();
         stream.seekg(0);

@@ -6,6 +6,8 @@
 #include <vector>
 #include <array>
 
+#include "ArchiveFormat.hpp"
+
 using namespace std::string_literals;
 using std::filesystem::path;
 using std::filesystem::recursive_directory_iterator;
@@ -15,45 +17,7 @@ using std::uint16_t;
 using std::uint32_t;
 using std::uint64_t;
 
-#pragma pack(push, 1)
-struct TOC;
-
-struct Header
-{
-    uint8_t magic[4]; // needs to be MEOW
-    uint8_t version;
-};
-
-struct TOC
-{
-    uint32_t totalItems;
-
-    uint32_t numMetas;
-    uint32_t metaOffset;
-
-    uint32_t numModels;
-    uint32_t modelOffset;
-
-    uint32_t numSounds;
-    uint32_t soundOffset;
-
-    uint32_t numTextures;
-    uint32_t textureOffset;
-
-    uint32_t numTexts;
-    uint32_t textOffset;
-};
-
-struct TableEntry
-{
-    uint8_t name[16];
-    uint32_t dataSize;
-    uint32_t dataOffset;
-};
-#pragma pack(pop)
-
 const uint8_t MAGIC_ID[4] = { 'M', 'E', 'O', 'W' };
-const uint8_t VERSION = 1;
 const std::array<std::string, 4> SUPPORTED_EXTENSIONS = 
 { 
     ".dds"s,
@@ -64,7 +28,7 @@ const std::array<std::string, 4> SUPPORTED_EXTENSIONS =
 
 void PrintHelp(const std::string &progName)
 {
-    std::cout << "Binary ARChiver V" << static_cast<int>(VERSION) << std::endl;
+    std::cout << "Binary ARChiver V" << static_cast<int>(RIS::ARCHIVE_FORMAT_VERSION) << std::endl;
     std::cout << progName << " [OPTIONS] < root asset directory >" << std::endl;
     std::cout << "Options:" << std::endl;
     std::cout << "\t-p              packs the directory into an binary achive"  << std::endl;
@@ -156,8 +120,8 @@ bool Pack(const std::string &rootDir, const std::string &archiveName)
     path root = rootDir;
     path archive = archiveName;
 
-    uint32_t headerSize = sizeof(Header);
-    uint32_t tocSize = sizeof(TOC);
+    uint32_t headerSize = sizeof(RIS::Header);
+    uint32_t tocSize = sizeof(RIS::TOC);
 
     std::fstream archiveFile(archive, std::fstream::out | std::fstream::binary);
     if(!archiveFile)
@@ -166,11 +130,11 @@ bool Pack(const std::string &rootDir, const std::string &archiveName)
         return false;
     }
 
-    Header header = { 0 };
+    RIS::Header header = { 0 };
     std::memcpy(header.magic, MAGIC_ID, sizeof MAGIC_ID);
-    header.version = VERSION;
+    header.version = RIS::ARCHIVE_FORMAT_VERSION;
 
-    TOC toc = { 0 };
+    RIS::TOC toc = { 0 };
     toc.totalItems = CountFiles(root);
 
     toc.numTextures = CountFiles(root / "textures"s, ".dds"s);

@@ -11,6 +11,9 @@ namespace RIS
         TEXTURE,
         MODEL,
         SOUND,
+        SHADER,
+        TEXT,
+        UILAYOUT,
     };
 
     class ILoader

@@ -3,6 +3,7 @@
 #include <exception>
 
 using std::string;
+using namespace std::literals::string_literals;
 
 namespace RIS
 {
@@ -19,9 +20,14 @@ namespace RIS
         window = glfwCreateWindow(800, 600, title.c_str(), nullptr, nullptr);
         if (!window)
         {
+            const char *errorString;
+            int ec = glfwGetError(&errorString);
             glfwTerminate();
-            throw WindowException("Couldn't create window");
+            throw WindowException("Window creation failed (Error code: "s + std::to_string(ec) + "): "s + errorString);
         }
+
+        glfwSetWindowUserPointer(window, this);
+        glfwSetFramebufferSizeCallback(window, GLFWWindow::FramebufferResize);
 
         glfwMakeContextCurrent(window);
     }
@@ -40,5 +46,12 @@ namespace RIS
     void GLFWWindow::Present()
     {
         glfwSwapBuffers(window);
+    }
+
+    void GLFWWindow::FramebufferResize(GLFWwindow *window, int width, int height)
+    {
+        GLFWWindow *wnd = reinterpret_cast<GLFWWindow*>(glfwGetWindowUserPointer(window));
+        IRenderer &renderer = wnd->systems.GetRenderer();
+        renderer.Resize(width, height);
     }
 }

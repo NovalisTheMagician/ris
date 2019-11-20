@@ -25,6 +25,7 @@ namespace RIS
         GLRenderer &operator=(GLRenderer &&) = delete;
 
         void Clear(const glm::vec4 &clearColor) override;
+        void Resize(int width, int height) override;
 
     private:
         const SystemLocator &systems;

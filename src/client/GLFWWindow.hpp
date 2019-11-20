@@ -35,6 +35,9 @@ namespace RIS
         void Present() override;
 
     private:
+        static void FramebufferResize(GLFWwindow *window, int width, int height);
+
+    private:
         const SystemLocator &systems;
         GLFWwindow *window;
 

@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
     }
     catch(const std::exception& e)
     {
-        logger.Error("Failed to init sysyem: "s + e.what());
+        logger.Error("Failed to init system: "s + e.what());
         Logger::Destroy();
         return 1;
     }

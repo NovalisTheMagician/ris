@@ -49,4 +49,9 @@ namespace RIS
         glClearNamedFramebufferfv(0, GL_COLOR, 0, glm::value_ptr(clearColor));
         glClearNamedFramebufferfv(0, GL_DEPTH, 0, &clearDepth);
     }
+
+    void GLRenderer::Resize(int width, int height)
+    {
+        glViewport(0, 0, width, height);
+    }
 }

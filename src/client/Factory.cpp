@@ -25,8 +25,8 @@ namespace RIS
     using IUserinterfacePtr = std::unique_ptr<IUserinterface>;
     using ILoaderPtr = std::unique_ptr<ILoader>;
 
-    SystemFactory::SystemFactory(SystemLocator &locator) 
-        : locator(locator)
+    SystemFactory::SystemFactory(SystemLocator &locator, Config &config) 
+        : locator(locator), config(config)
     {
 
     }
@@ -38,14 +38,14 @@ namespace RIS
 
     IWindowPtr SystemFactory::CreateWindow(const string &title) const
     {
-        auto system = std::make_unique<GLFWWindow>(locator, title);
+        auto system = std::make_unique<GLFWWindow>(locator, config, title);
         locator.Provide(system.get());
         return system;
     }
 
     IRendererPtr SystemFactory::CreateRenderer() const
     {
-        auto system = std::make_unique<GLRenderer>(locator);
+        auto system = std::make_unique<GLRenderer>(locator, config);
         locator.Provide(system.get());
         return system;
     }
@@ -53,9 +53,9 @@ namespace RIS
     INetworkPtr SystemFactory::CreateNetwork() const
     {
 #ifdef _WIN32
-        auto system = std::make_unique<WinNetwork>(locator);
+        auto system = std::make_unique<WinNetwork>(locator, config);
 #elif defined __linux__
-        auto system = std::make_unique<PosixNetwork>(locator);
+        auto system = std::make_unique<PosixNetwork>(locator, config);
 #endif
         locator.Provide(system.get());
         return system;
@@ -63,21 +63,21 @@ namespace RIS
 
     IAudioPtr SystemFactory::CreateAudio() const
     {
-        auto system = std::make_unique<SOLAudio>(locator);
+        auto system = std::make_unique<SOLAudio>(locator, config);
         locator.Provide(system.get());
         return system;
     }
 
     IUserinterfacePtr SystemFactory::CreateUserinterface() const
     {
-        auto system = std::make_unique<SimpleUserinterface>(locator);
+        auto system = std::make_unique<SimpleUserinterface>(locator, config);
         locator.Provide(system.get());
         return system;
     }
 
     ILoaderPtr SystemFactory::CreateLoader(const std::string &debugAssetFolder) const
     {
-        auto system = std::make_unique<BarcLoader>(locator, debugAssetFolder);
+        auto system = std::make_unique<BarcLoader>(locator, config, debugAssetFolder);
         locator.Provide(system.get());
         return system;
     }

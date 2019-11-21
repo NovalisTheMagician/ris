@@ -8,8 +8,8 @@
 
 namespace RIS
 {
-    BarcLoader::BarcLoader(const SystemLocator &systems, const std::string &assetRoot)
-        : systems(systems), assetRoot(assetRoot), archiveOverlays(), assetTable()
+    BarcLoader::BarcLoader(const SystemLocator &systems, Config &config, const std::string &assetRoot)
+        : systems(systems), config(config), assetRoot(assetRoot), archiveOverlays(), assetTable()
     {
         if(!assetRoot.empty())
             if(!std::filesystem::is_directory(assetRoot))

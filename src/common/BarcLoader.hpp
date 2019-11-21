@@ -12,6 +12,9 @@
 #include <unordered_map>
 #include <map>
 
+#include "common/SystemLocator.hpp"
+#include "common/Config.hpp"
+
 namespace RIS
 {
     struct LoaderException : public std::runtime_error
@@ -24,7 +27,7 @@ namespace RIS
     class BarcLoader : public ILoader
     {
     public:
-        BarcLoader(const SystemLocator &systems, const std::string &assetRoot);
+        BarcLoader(const SystemLocator &systems, Config &config, const std::string &assetRoot);
         ~BarcLoader();
 
         void AddOverlay(const std::string &overlayName) override;
@@ -48,6 +51,7 @@ namespace RIS
 
     private:
         const SystemLocator &systems;
+        Config &config;
         const std::string &assetRoot;
 
         std::vector<std::fstream> archiveOverlays;

@@ -4,8 +4,8 @@ using std::string;
 
 namespace RIS
 {
-    SOLAudio::SOLAudio(const SystemLocator &systems)
-        : systems(systems)
+    SOLAudio::SOLAudio(const SystemLocator &systems, Config &config)
+        : systems(systems), config(config)
     {
         SoLoud::result res = soloud.init();
         if(res != 0)

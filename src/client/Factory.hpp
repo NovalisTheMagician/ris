@@ -8,6 +8,7 @@
 #include "common/ILoader.hpp"
 
 #include "common/SystemLocator.hpp"
+#include "common/Config.hpp"
 
 #include <memory>
 #include <string>
@@ -17,7 +18,7 @@ namespace RIS
     class SystemFactory
     {
     public:
-        SystemFactory(SystemLocator &locator);
+        SystemFactory(SystemLocator &locator, Config &config);
         ~SystemFactory();
 
         SystemFactory(const SystemFactory &) = delete;
@@ -35,6 +36,7 @@ namespace RIS
 
     private:
         SystemLocator &locator;
+        Config &config;
 
     };
 }

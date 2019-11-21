@@ -7,8 +7,8 @@ using namespace std::literals::string_literals;
 
 namespace RIS
 {
-    GLFWWindow::GLFWWindow(const SystemLocator &systems, const string &title)
-        : systems(systems)
+    GLFWWindow::GLFWWindow(const SystemLocator &systems, Config &config, const string &title)
+        : systems(systems), config(config)
     {
         if (!glfwInit())
             throw WindowException("GLFW could't initialize");
@@ -16,6 +16,8 @@ namespace RIS
         glfwWindowHint(GLFW_SRGB_CAPABLE, true);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+
+        glfwWindowHint(GLFW_RESIZABLE, false);
 
         window = glfwCreateWindow(800, 600, title.c_str(), nullptr, nullptr);
         if (!window)
@@ -30,6 +32,8 @@ namespace RIS
         glfwSetFramebufferSizeCallback(window, GLFWWindow::FramebufferResize);
 
         glfwMakeContextCurrent(window);
+
+        glfwSwapInterval(1);
     }
 
     GLFWWindow::~GLFWWindow()

@@ -15,6 +15,7 @@
 #include "common/SystemLocator.hpp"
 #include "common/Args.hpp"
 #include "common/Timer.hpp"
+#include "common/Config.hpp"
 
 #include "common/Logger.hpp"
 
@@ -30,10 +31,11 @@ int main(int argc, char *argv[])
 
     Args args(argc, argv);
     Timer timer;
+    Config config("config.txt");
 
     SystemLocator locator;
 
-    SystemFactory factory(locator);
+    SystemFactory factory(locator, config);
 
     unique_ptr<IWindow> window;
     unique_ptr<IRenderer> renderer;

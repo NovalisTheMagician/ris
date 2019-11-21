@@ -18,8 +18,8 @@ using namespace gl46core;
 
 namespace RIS
 {
-    GLRenderer::GLRenderer(const SystemLocator &systems)
-        : systems(systems)
+    GLRenderer::GLRenderer(const SystemLocator &systems, Config &config)
+        : systems(systems), config(config)
     {
         glbinding::initialize(glfwGetProcAddress);
 

@@ -3,6 +3,7 @@
 #include "common/IWindow.hpp"
 
 #include "common/SystemLocator.hpp"
+#include "common/Config.hpp"
 
 #define GLFW_DLL
 #define GLFW_INCLUDE_NONE
@@ -23,7 +24,7 @@ namespace RIS
     class GLFWWindow : public IWindow
     {
     public:
-        GLFWWindow(const SystemLocator &systems, const std::string &title);
+        GLFWWindow(const SystemLocator &systems, Config &config, const std::string &title);
         ~GLFWWindow();
 
         GLFWWindow(const GLFWWindow &) = delete;
@@ -39,6 +40,7 @@ namespace RIS
 
     private:
         const SystemLocator &systems;
+        Config &config;
         GLFWwindow *window;
 
     };

@@ -3,6 +3,7 @@
 #include "common/IRenderer.hpp"
 
 #include "common/SystemLocator.hpp"
+#include "common/Config.hpp"
 
 #include <stdexcept>
 
@@ -16,7 +17,7 @@ namespace RIS
     class GLRenderer : public IRenderer
     {
     public:
-        GLRenderer(const SystemLocator &systems);
+        GLRenderer(const SystemLocator &systems, Config &config);
         ~GLRenderer();
 
         GLRenderer(const GLRenderer &) = delete;
@@ -29,6 +30,7 @@ namespace RIS
 
     private:
         const SystemLocator &systems;
+        Config &config;
 
     };
 }

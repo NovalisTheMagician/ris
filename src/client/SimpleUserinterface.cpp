@@ -2,8 +2,8 @@
 
 namespace RIS
 {
-    SimpleUserinterface::SimpleUserinterface(const SystemLocator &systems)
-        : systems(systems)
+    SimpleUserinterface::SimpleUserinterface(const SystemLocator &systems, Config &config)
+        : systems(systems), config(config)
     {
 
     }

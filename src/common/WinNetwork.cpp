@@ -4,8 +4,8 @@
 
 namespace RIS
 {
-    WinNetwork::WinNetwork(const SystemLocator &systems)
-        : systems(systems)
+    WinNetwork::WinNetwork(const SystemLocator &systems, Config &config)
+        : systems(systems), config(config)
     {
 
     }

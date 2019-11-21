@@ -48,6 +48,9 @@ Depends(client, dyn_copy)
 Depends(client, config_copy)
 Default(client)
 
+Precious(client)
+Precious(server)
+
 cl = Alias('client', client)
 sv = Alias('server', server)
 bc = Alias('barc', barc)

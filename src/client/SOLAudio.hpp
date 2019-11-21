@@ -2,6 +2,7 @@
 
 #include "common/IAudio.hpp"
 #include "common/SystemLocator.hpp"
+#include "common/Config.hpp"
 
 #include <string>
 #include <stdexcept>
@@ -18,7 +19,7 @@ namespace RIS
     class SOLAudio : public IAudio
     {
     public:
-        SOLAudio(const SystemLocator &systems);
+        SOLAudio(const SystemLocator &systems, Config &config);
         ~SOLAudio();
 
         SOLAudio(const SOLAudio &) = delete;
@@ -31,6 +32,7 @@ namespace RIS
 
     private:
         const SystemLocator &systems;
+        Config &config;
         SoLoud::Soloud soloud;
 
     };

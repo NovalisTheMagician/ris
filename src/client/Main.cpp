@@ -19,10 +19,14 @@
 
 #include "common/Logger.hpp"
 
+#include "common/Version.hpp"
+
 using std::unique_ptr;
 using namespace std::literals::string_literals;
 
 using namespace RIS;
+using namespace RIS::Version;
+
 #ifdef _WIN32
 #include <Windows.h>
 #undef CreateWindow
@@ -36,11 +40,17 @@ int main(int argc, char *argv[])
 #endif
 
     Logger &logger = Logger::Instance();
-    logger.Info("Starting game...");
+    logger.Info("Starting " + GAME_NAME + " Version " + std::to_string(MAJOR) + "." + std::to_string(MINOR));
 
     Args args(argc, argv);
     Timer timer;
-    Config config("config.txt");
+
+    std::string configPath = "config.txt";
+    if(args.IsSet("-config"))
+        configPath = args.GetParameter("-config");
+    Config config(configPath);
+
+    logger.Info("Using config " + configPath);
 
     SystemLocator locator;
 
@@ -55,7 +65,7 @@ int main(int argc, char *argv[])
 
     try
     {
-        window = factory.CreateWindow("RIS");
+        window = factory.CreateWindow(GAME_NAME);
         renderer = factory.CreateRenderer();
         network = factory.CreateNetwork();
         audio = factory.CreateAudio();

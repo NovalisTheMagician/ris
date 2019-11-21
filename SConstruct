@@ -41,11 +41,17 @@ barc = Program('bin/tools/barc', barc_objs, LINKFLAGS=lk_flags)
 client = Program('bin/RIS', client_objs + common_objs + rc_obj, LIBS=client_libs, LIBPATH=client_lib_path, LINKFLAGS=lk_flags)
 server = Program('bin/RIS_server', server_objs + common_objs, LIBS=server_libs, LIBPATH=server_lib_path, LINKFLAGS=lk_flags)
 
+Clean(client, 'bin/RIS.ilk')
+Clean(client, 'bin/RIS.pdb')
+
+Clean(server, 'bin/RIS_server.ilk')
+Clean(server, 'bin/RIS_server.pdb')
+
 dyn_copy = Install('bin/', dyn_libs)
-config_copy = Install('bin/', 'src/client/config.txt')
+#config_copy = Install('bin/', 'src/client/config.txt')
 
 Depends(client, dyn_copy)
-Depends(client, config_copy)
+#Depends(client, config_copy)
 Default(client)
 
 Precious(client)

@@ -19,7 +19,27 @@ namespace RIS
 
         glfwWindowHint(GLFW_RESIZABLE, false);
 
-        window = glfwCreateWindow(800, 600, title.c_str(), nullptr, nullptr);
+        int width = config.GetInt("r_width", 800);
+        int height = config.GetInt("r_height", 600);
+        bool fullscreen = config.GetInt("r_fullscreen", 0);
+
+        if(!fullscreen)
+        {
+            window = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
+        }
+        else
+        {
+            GLFWmonitor *monitor = glfwGetPrimaryMonitor();
+            const GLFWvidmode *mode = glfwGetVideoMode(monitor);
+
+            glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+            glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+            glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+            glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+
+            window = glfwCreateWindow(mode->width, mode->height, title.c_str(), monitor, nullptr);
+        }
+        
         if (!window)
         {
             const char *errorString;

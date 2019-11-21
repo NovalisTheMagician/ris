@@ -1,5 +1,6 @@
 #include "Config.hpp"
 #include <fstream>
+#include <filesystem>
 
 #include <exception>
 
@@ -19,7 +20,10 @@ namespace RIS
 	{
 		ifstream inputStream(configPath);
 		if (!inputStream)
-			throw std::exception();
+		{
+			std::ofstream(configPath);
+			return;
+		}
 
 		this->configPath = configPath;
 		string line;

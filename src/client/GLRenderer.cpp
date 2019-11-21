@@ -31,10 +31,7 @@ namespace RIS
         std::string renderer = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
 
         auto &log = Logger::Instance();
-        log.Info("GL_Version: " + version);
-        log.Info("GL_Vendor: " + vendor);
-        log.Info("GL_ShaderVersion: " + shaderVersion);
-        log.Info("GL_Renderer: " + renderer);
+        log.Info("Using OpenGL version " + version + " from " + vendor + " with shaderversion " + shaderVersion + " on " + renderer);
     }
 
     GLRenderer::~GLRenderer()

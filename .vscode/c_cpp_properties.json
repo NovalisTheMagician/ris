@@ -3,12 +3,13 @@
         {
             "name": "Win32",
             "includePath": [
-                "${workspaceFolder}/src/**",
-                "${workspaceFolder}/libs/glfw/include/**",
-                "${workspaceFolder}/libs/glbinding/include/**",
-                "${workspaceFolder}/libs/glm/include/**",
-                "${workspaceFolder}/libs/gli/include/**",
-                "${workspaceFolder}/libs/soloud/include/**"
+                "${workspaceFolder}/src/*",
+                "${workspaceFolder}/libs/glfw/include/*",
+                "${workspaceFolder}/libs/glbinding/include/*",
+                "${workspaceFolder}/libs/glm/include/*",
+                "${workspaceFolder}/libs/gli/include/*",
+                "${workspaceFolder}/libs/soloud/include/*",
+                "${workspaceFolder}/libs/rapidjson/include/*"
             ],
             "defines": [
                 "_DEBUG",

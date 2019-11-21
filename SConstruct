@@ -28,18 +28,24 @@ client_files = Glob('src/client/*.cpp')
 server_files = Glob('src/server/*.cpp')
 common_files = Glob('src/common/*.cpp')
 
+rc_file = 'src/client/resource.rc'
+
 barc_objs = Object(barc_files, CPPPATH=['src'], CXXFLAGS=cl_flags, CPPDEFINES=defines)
 common_objs = Object(common_files, CPPPATH=common_inc_path, CXXFLAGS=cl_flags, CPPDEFINES=defines)
 client_objs = Object(client_files, CPPPATH=client_inc_path, CXXFLAGS=cl_flags, CPPDEFINES=defines)
 server_objs = Object(server_files, CPPPATH=server_inc_path, CXXFLAGS=cl_flags, CPPDEFINES=defines)
 
+rc_obj = RES(rc_file)
+
 barc = Program('bin/tools/barc', barc_objs, LINKFLAGS=lk_flags)
-client = Program('bin/RIS', client_objs + common_objs, LIBS=client_libs, LIBPATH=client_lib_path, LINKFLAGS=lk_flags)
+client = Program('bin/RIS', client_objs + common_objs + rc_obj, LIBS=client_libs, LIBPATH=client_lib_path, LINKFLAGS=lk_flags)
 server = Program('bin/RIS_server', server_objs + common_objs, LIBS=server_libs, LIBPATH=server_lib_path, LINKFLAGS=lk_flags)
 
 dyn_copy = Install('bin/', dyn_libs)
+config_copy = Install('bin/', 'src/client/config.txt')
 
 Depends(client, dyn_copy)
+Depends(client, config_copy)
 Default(client)
 
 cl = Alias('client', client)

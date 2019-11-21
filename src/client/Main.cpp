@@ -23,9 +23,18 @@ using std::unique_ptr;
 using namespace std::literals::string_literals;
 
 using namespace RIS;
-
+#ifdef _WIN32
+#include <Windows.h>
+#undef CreateWindow
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR cmdLine, int show)
+{
+    int argc = __argc;
+    char **argv = __argv;
+#else
 int main(int argc, char *argv[])
 {
+#endif
+
     Logger &logger = Logger::Instance();
     logger.Info("Starting game...");
 
@@ -35,7 +44,7 @@ int main(int argc, char *argv[])
 
     SystemLocator locator;
 
-    SystemFactory factory(locator, config);
+    const SystemFactory factory(locator, config);
 
     unique_ptr<IWindow> window;
     unique_ptr<IRenderer> renderer;

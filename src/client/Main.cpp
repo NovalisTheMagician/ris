@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
         network = factory.CreateNetwork();
         audio = factory.CreateAudio();
         userinterface = factory.CreateUserinterface();
-        loader = factory.CreateLoader("");
+        loader = factory.CreateLoader("assets");
     }
     catch(const std::exception& e)
     {

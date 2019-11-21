@@ -1,0 +1,42 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build client (DEBUG)",
+            "type": "shell",
+            "command": "scons client debug=1",
+            "problemMatcher": "$msCompile",
+            "group": "build"
+        },
+        {
+            "label": "build client (RELEASE)",
+            "type": "shell",
+            "command": "scons client",
+            "problemMatcher": "$msCompile",
+            "group": "build"
+        },
+        {
+            "label": "build server (DEBUG)",
+            "type": "shell",
+            "command": "scons server debug=1",
+            "problemMatcher": "$msCompile",
+            "group": "build"
+        },
+        {
+            "label": "build server (RELEASE)",
+            "type": "shell",
+            "command": "scons server",
+            "problemMatcher": "$msCompile",
+            "group": "build"
+        },
+        {
+            "label": "clean",
+            "type": "shell",
+            "command": "scons all -c",
+            "problemMatcher": [],
+            "group": "build"
+        },
+    ]
+}

@@ -78,4 +78,9 @@ namespace RIS
         IRenderer &renderer = wnd->systems.GetRenderer();
         renderer.Resize(width, height);
     }
+
+    GLFWwindow *GLFWWindow::GetWindow() const
+    {
+        return window;
+    }
 }

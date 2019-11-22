@@ -47,9 +47,7 @@ namespace RIS
 	{
 		if (isDirty)
 		{
-			ofstream outputStream;
-			outputStream.open(configPath);
-
+			ofstream outputStream(configPath);
 			if (outputStream)
 			{
 				for (auto const&[key, val] : configMap)

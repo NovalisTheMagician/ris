@@ -35,6 +35,8 @@ namespace RIS
         bool HandleMessages() override;
         void Present() override;
 
+        GLFWwindow *GetWindow() const;
+
     private:
         static void FramebufferResize(GLFWwindow *window, int width, int height);
 

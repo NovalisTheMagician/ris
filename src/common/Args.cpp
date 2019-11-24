@@ -30,7 +30,7 @@ namespace RIS
 		if (flag[0] != '-')
 			return;
 
-		while (index++ < argc)
+		while (++index < argc)
 		{
 			string parm = argv[index];
 			if (parm.empty())

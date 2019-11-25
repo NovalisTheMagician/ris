@@ -106,7 +106,9 @@ namespace RIS
 
     bool BarcLoader::HasAsset(AssetType type, const std::string &name) const
     {
-        return assetTable.at(type).count(name) > 0;
+        if(assetTable.count(type) > 0 && assetTable.at(type).count(name) > 0)
+            return true;
+        return false;
     }
 
     std::unique_ptr<std::byte[]> BarcLoader::LoadAsset(AssetType type, const std::string &name, std::size_t &size, bool ignoreOverlays)
@@ -143,7 +145,7 @@ namespace RIS
         case AssetType::TEXT: extension = ".txt"; folder = "texts"; break;
         case AssetType::UILAYOUT: extension = ".json"; folder = "ui"; break;
         }
-        std::filesystem::path filePath = folder / (name + extension);
+        std::filesystem::path filePath = assetRoot / folder / (name + extension);
 
         std::fstream stream(filePath, std::fstream::in | std::fstream::binary | std::fstream::ate);
         if(!stream)

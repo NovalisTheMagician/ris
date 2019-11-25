@@ -1,6 +1,11 @@
 #include "GLFWWindow.hpp"
 
+#include "common/Logger.hpp"
+
 #include <exception>
+
+#include <glm/glm.hpp>
+#include <gli/gli.hpp>
 
 using std::string;
 using namespace std::literals::string_literals;
@@ -21,13 +26,13 @@ namespace RIS
 
         int width = config.GetInt("r_width", 800);
         int height = config.GetInt("r_height", 600);
-        bool fullscreen = config.GetInt("r_fullscreen", 0);
+        int fullscreen = config.GetInt("r_fullscreen", 0);
 
-        if(!fullscreen)
+        if(fullscreen == 0) // windowed mode
         {
             window = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
         }
-        else
+        else if(fullscreen == 1) // exclusive fullscreen mode
         {
             GLFWmonitor *monitor = glfwGetPrimaryMonitor();
             const GLFWvidmode *mode = glfwGetVideoMode(monitor);
@@ -37,7 +42,19 @@ namespace RIS
             glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
             glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
 
-            window = glfwCreateWindow(mode->width, mode->height, title.c_str(), monitor, nullptr);
+            window = glfwCreateWindow(width, height, title.c_str(), monitor, nullptr);
+        }
+        else // borderless fullscreen window mode
+        {
+            GLFWmonitor *monitor = glfwGetPrimaryMonitor();
+            const GLFWvidmode *mode = glfwGetVideoMode(monitor);
+
+            glfwWindowHint(GLFW_DECORATED, false);
+
+            window = glfwCreateWindow(mode->width, mode->height, title.c_str(), nullptr, nullptr);
+
+            config.SetValue("r_width", mode->width);
+            config.SetValue("r_height", mode->height);
         }
         
         if (!window)
@@ -59,6 +76,82 @@ namespace RIS
     GLFWWindow::~GLFWWindow()
     {
         glfwTerminate();
+    }
+
+    void  GLFWWindow::SetRelativeMouse(bool setRelative)
+    {
+        if(setRelative)
+        {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            if(glfwRawMouseMotionSupported())
+                glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, true);
+        }
+        else
+        {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        }
+    }
+
+    void GLFWWindow::SetWindowIcon(const std::string &icon)
+    {
+        auto &loader = systems.GetLoader();
+        try
+        {
+            size_t size;
+            auto asset = loader.LoadAsset(AssetType::TEXTURE, icon, size);
+            gli::texture tex = gli::load(reinterpret_cast<const char*>(asset.get()), size);
+            if(tex.empty() || tex.format() != gli::format::FORMAT_RGBA8_UNORM_PACK8)
+            {
+                Logger::Instance().Warning("Window icon (" + icon + ") has an unsupported format"s);
+                return;
+            }
+
+            glm::tvec3<int> extent(tex.extent(0));
+            GLFWimage iconImage = { 0 };
+            iconImage.width = extent.x;
+            iconImage.height = extent.y;
+            iconImage.pixels = reinterpret_cast<unsigned char*>(tex.data(0, 0, 0));
+
+            glfwSetWindowIcon(window, 1, &iconImage);
+        }
+        catch(const std::exception& e)
+        {
+            Logger::Instance().Warning("Window icon couldn't be set: "s + e.what());
+        }
+    }
+
+    void GLFWWindow::SetCursorIcon(const std::string &cursor)
+    {
+        auto &loader = systems.GetLoader();
+        try
+        {
+            size_t size;
+            auto asset = loader.LoadAsset(AssetType::TEXTURE, cursor, size);
+            gli::texture tex = gli::load(reinterpret_cast<const char*>(asset.get()), size);
+            if(tex.empty() || tex.format() != gli::format::FORMAT_RGBA8_UNORM_PACK8)
+            {
+                Logger::Instance().Warning("Window cursor (" + cursor + ") has an unsupported format"s);
+                return;
+            }
+
+            glm::tvec3<int> extent(tex.extent(0));
+            GLFWimage cursorImage = { 0 };
+            cursorImage.width = extent.x;
+            cursorImage.height = extent.y;
+            cursorImage.pixels = reinterpret_cast<unsigned char*>(tex.data(0, 0, 0));
+
+            // maybe cache the cursor object to manually destroy it later
+            // but it might not be needed because glfw will destroy any 
+            // remaining cursors upon termination
+            //
+            // this might need some rethinking
+            GLFWcursor *cursor = glfwCreateCursor(&cursorImage, 0, 0);
+            glfwSetCursor(window, cursor);
+        }
+        catch(const std::exception& e)
+        {
+            Logger::Instance().Warning("Window cursor couldn't be set: "s + e.what());
+        }
     }
 
     bool GLFWWindow::HandleMessages()

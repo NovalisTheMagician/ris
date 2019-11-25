@@ -32,6 +32,11 @@ namespace RIS
         GLFWWindow &operator=(const GLFWWindow &) = delete;
         GLFWWindow &operator=(GLFWWindow &&) = delete;
 
+        void SetRelativeMouse(bool setRelative) override;
+
+        void SetWindowIcon(const std::string &icon) override;
+        void SetCursorIcon(const std::string &cursor) override;
+
         bool HandleMessages() override;
         void Present() override;
 

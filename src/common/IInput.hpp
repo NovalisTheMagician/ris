@@ -13,6 +13,7 @@ namespace RIS
         TURN_VERTICAL,
         JUMP,
         CROUCH,
+        RUN,
         //Itemmanagement
         SWITCH_TO_1,
         SWITCH_TO_2,

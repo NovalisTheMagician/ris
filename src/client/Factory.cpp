@@ -5,6 +5,7 @@
 #include "SOLAudio.hpp"
 #include "SimpleUserinterface.hpp"
 #include "common/BarcLoader.hpp"
+#include "GLFWInput.hpp"
 
 #ifdef _WIN32
 #include "common/WinNetwork.hpp"
@@ -24,6 +25,7 @@ namespace RIS
     using IAudioPtr = std::unique_ptr<IAudio>;
     using IUserinterfacePtr = std::unique_ptr<IUserinterface>;
     using ILoaderPtr = std::unique_ptr<ILoader>;
+    using IInputPtr = std::unique_ptr<IInput>;
 
     SystemFactory::SystemFactory(SystemLocator &locator, Config &config) 
         : locator(locator), config(config)
@@ -78,6 +80,17 @@ namespace RIS
     ILoaderPtr SystemFactory::CreateLoader(const std::string &debugAssetFolder) const
     {
         auto system = std::make_unique<BarcLoader>(locator, config, debugAssetFolder);
+        locator.Provide(system.get());
+        return system;
+    }
+
+    IInputPtr SystemFactory::CreateInput() const
+    {
+        GLFWWindow *window = dynamic_cast<GLFWWindow*>(&locator.GetWindow());
+        if(window == nullptr)
+            throw std::runtime_error("Created window is incompatible with the input module");
+
+        auto system = std::make_unique<GLFWInput>(locator, config, *window);
         locator.Provide(system.get());
         return system;
     }

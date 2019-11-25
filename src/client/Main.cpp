@@ -10,6 +10,7 @@
 #include "common/IAudio.hpp"
 #include "common/IUserinterface.hpp"
 #include "common/ILoader.hpp"
+#include "common/IInput.hpp"
 #include "Factory.hpp"
 
 #include "common/SystemLocator.hpp"
@@ -50,6 +51,10 @@ int main(int argc, char *argv[])
         configPath = args.GetParameter("-config");
     Config config(configPath);
 
+    std::string assetFolder = "";
+    if(args.IsSet("-debug"))
+        assetFolder = "assets";
+
     logger.Info("Using config " + configPath);
 
     SystemLocator locator;
@@ -62,6 +67,7 @@ int main(int argc, char *argv[])
     unique_ptr<IAudio> audio;
     unique_ptr<IUserinterface> userinterface;
     unique_ptr<ILoader> loader;
+    unique_ptr<IInput> input;
 
     try
     {
@@ -70,7 +76,8 @@ int main(int argc, char *argv[])
         network = factory.CreateNetwork();
         audio = factory.CreateAudio();
         userinterface = factory.CreateUserinterface();
-        loader = factory.CreateLoader("assets");
+        loader = factory.CreateLoader(assetFolder);
+        input = factory.CreateInput();
     }
     catch(const std::exception& e)
     {
@@ -78,6 +85,8 @@ int main(int argc, char *argv[])
         Logger::Destroy();
         return 1;
     }
+
+    window->SetWindowIcon("cat_icon");
 
     logger.Info("System init OK");
 

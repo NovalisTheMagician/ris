@@ -11,6 +11,7 @@
 #include "ILoader.hpp"
 #include "IPhysics.hpp"
 #include "IWorld.hpp"
+#include "IInput.hpp"
 
 namespace RIS
 {
@@ -39,6 +40,7 @@ namespace RIS
         void Provide(ILoader *loader);
         void Provide(IPhysics *physics);
         void Provide(IWorld *world);
+        void Provide(IInput *input);
 
         IWindow& GetWindow() const;
         IRenderer& GetRenderer() const;
@@ -48,6 +50,7 @@ namespace RIS
         ILoader& GetLoader() const;
         IPhysics& GetPhysics() const;
         IWorld& GetWorld() const;
+        IInput& GetInput() const;
 
     private:
         IWindow *window;
@@ -58,6 +61,7 @@ namespace RIS
         ILoader *loader;
         IPhysics *physics;
         IWorld *world;
+        IInput *input;
 
     };
 }

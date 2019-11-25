@@ -4,7 +4,7 @@ namespace RIS
 {
     SystemLocator::SystemLocator() 
         : window(nullptr), renderer(nullptr), network(nullptr), audio(nullptr), userinterface(nullptr), loader(nullptr),
-        physics(nullptr), world(nullptr)
+        physics(nullptr), world(nullptr), input(nullptr)
     {
 
     }
@@ -52,6 +52,11 @@ namespace RIS
     void SystemLocator::Provide(IWorld *world)
     {
         this->world = world;
+    }
+
+    void SystemLocator::Provide(IInput *input)
+    {
+        this->input = input;
     }
 
     IWindow& SystemLocator::GetWindow() const
@@ -116,5 +121,13 @@ namespace RIS
             throw SystemNotProvidedException("World");
             
         return *world;
+    }
+
+    IInput& SystemLocator::GetInput() const
+    {
+        if(input == nullptr)
+            throw SystemNotProvidedException("Input");
+            
+        return *input;
     }
 }

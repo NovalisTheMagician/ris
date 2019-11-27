@@ -53,7 +53,12 @@ int main(int argc, char *argv[])
 
     std::string assetFolder = "";
     if(args.IsSet("-debug"))
-        assetFolder = "assets";
+    {
+        if(args.IsSet("-assetpath"))
+            assetFolder = args.GetParameter("-assetpath");
+        else
+            assetFolder = "assets";
+    }
 
     logger.Info("Using config " + configPath);
 

@@ -71,5 +71,6 @@
         "filesystem": "cpp",
         "regex": "cpp"
     },
-    "python.linting.enabled": false
+    "python.linting.enabled": false,
+    "python.pythonPath": "C:\\Users\\frank\\AppData\\Local\\Programs\\Python\\Python37-32\\python.exe"
 }

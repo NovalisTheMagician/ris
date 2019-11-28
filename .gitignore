@@ -3,6 +3,7 @@
 *.pdb
 *.ilk
 *.res
+*.spv
 bin/
 !libs/*/bin/
 powershell.exe

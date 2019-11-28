@@ -1,11 +1,15 @@
 import os
 
-shader_bld = Builder(action = 'glslc -o $TARGET $SOURCE', suffix='.spv', src_suffix='.glsl')
+shader_bld = Builder(action=Action('glslc $SHADERFLAGS -o $TARGET $SOURCE', '$SHADERCOMSTR'), suffix='.spv', src_suffix='.glsl', single_source=1)
 
-env = Environment(ENV=os.environ, BUILDERS={'Shader' : bld})
+env = Environment(ENV=os.environ)
+env.Append(BUILDERS = {'Shader' : shader_bld})
+env['SHDAERFLAGS'] = []
 
-cl_flags = ['/EHsc', '/std:c++17']
+cl_flags = ['/EHsc', '/std:c++17', '/FS']
 lk_flags = ['/nologo']
+
+shader_flags = ['-c', '--target-env=opengl', '-Werror']
 
 dyn_libs = ['libs/glbinding/bin/glbinding.dll', 'libs/glbinding/bin/glbinding-aux.dll', 'libs/glfw/bin/glfw3.dll']
 
@@ -22,12 +26,22 @@ server_libs = ['user32', 'kernel32']
 defines = []
 
 debug = ARGUMENTS.get('debug', 0)
+verbose = ARGUMENTS.get('verbose', 0)
 if int(debug):
     cl_flags.append(['/Zi', '/MTd'])
     lk_flags.append(['/DEBUG'])
     defines.append(['_DEBUG'])
+    shader_flags.append(['-O0', '-g'])
 else:
     cl_flags.append(['/O2', '/MT'])
+    shader_flags.append(['-O'])
+
+if not int(verbose):
+    env['CXXCOMSTR'] = 'Compiling $TARGET'
+    env['LINKCOMSTR'] = 'Linking $TARGET'
+    env['RCCOMSTR'] = 'Resource $TARGET'
+    env['SHADERCOMSTR'] = 'Shader $TARGET'
+    env['INSTALLSTR'] = 'Copying $TARGET'
 
 shader_files = Glob('src/client/shader/*.glsl')
 barc_files = Glob('src/tools/barc/*.cpp')
@@ -37,10 +51,11 @@ common_files = Glob('src/common/*.cpp')
 
 rc_file = 'src/client/resource.rc'
 
-barc_objs = env.Object(barc_files, CPPPATH=['src'], CXXFLAGS=cl_flags, CPPDEFINES=defines)
-common_objs = env.Object(common_files, CPPPATH=common_inc_path, CXXFLAGS=cl_flags, CPPDEFINES=defines)
-client_objs = env.Object(client_files, CPPPATH=client_inc_path, CXXFLAGS=cl_flags, CPPDEFINES=defines)
-server_objs = env.Object(server_files, CPPPATH=server_inc_path, CXXFLAGS=cl_flags, CPPDEFINES=defines)
+shader_objs = env.Shader(shader_files, SHADERFLAGS=shader_flags)
+barc_objs = env.Object(barc_files, CPPPATH=['src'], CPPFLAGS=cl_flags, CPPDEFINES=defines)
+common_objs = env.Object(common_files, CPPPATH=common_inc_path, CPPFLAGS=cl_flags, CPPDEFINES=defines)
+client_objs = env.Object(client_files, CPPPATH=client_inc_path, CPPFLAGS=cl_flags, CPPDEFINES=defines)
+server_objs = env.Object(server_files, CPPPATH=server_inc_path, CPPFLAGS=cl_flags, CPPDEFINES=defines)
 
 rc_obj = env.RES(rc_file)
 
@@ -55,10 +70,10 @@ env.Clean(server, 'bin/RIS_server.ilk')
 env.Clean(server, 'bin/RIS_server.pdb')
 
 dyn_copy = env.Install('bin/', dyn_libs)
-#config_copy = Install('bin/', 'src/client/config.txt')
+shader_copy = env.Install('bin/assets/shader/', shader_objs)
 
+env.Depends(client, shader_copy)
 env.Depends(client, dyn_copy)
-#Depends(client, config_copy)
 env.Default(client)
 
 env.Precious(client)
@@ -67,4 +82,5 @@ env.Precious(server)
 cl = env.Alias('client', client)
 sv = env.Alias('server', server)
 bc = env.Alias('barc', barc)
+sh = env.Alias('shader', shader_copy)
 env.Alias('all', [cl, sv, bc])

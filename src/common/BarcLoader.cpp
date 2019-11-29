@@ -141,7 +141,7 @@ namespace RIS
         case AssetType::TEXTURE: extension = ".dds"; folder = "textures"; break;
         case AssetType::MODEL: extension = ".mdl"; folder = "models"; break;
         case AssetType::SOUND: extension = ".wav"; folder = "sounds"; break;
-        case AssetType::SHADER: extension = ".shd"; folder = "shaders"; break;
+        case AssetType::SHADER: extension = ".spv"; folder = "shaders"; break;
         case AssetType::TEXT: extension = ".txt"; folder = "texts"; break;
         case AssetType::UILAYOUT: extension = ".json"; folder = "ui"; break;
         }

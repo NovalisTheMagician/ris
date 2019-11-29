@@ -15,12 +15,13 @@
 
 #include "common/SystemLocator.hpp"
 #include "common/Args.hpp"
-#include "common/Timer.hpp"
 #include "common/Config.hpp"
 
 #include "common/Logger.hpp"
 
 #include "common/Version.hpp"
+
+#include "GameLoop.hpp"
 
 using std::unique_ptr;
 using namespace std::literals::string_literals;
@@ -44,7 +45,6 @@ int main(int argc, char *argv[])
     logger.Info("Starting " + GAME_NAME + " Version " + std::to_string(MAJOR) + "." + std::to_string(MINOR));
 
     Args args(argc, argv);
-    Timer timer;
 
     std::string configPath = "config.txt";
     if(args.IsSet("-config"))
@@ -95,17 +95,11 @@ int main(int argc, char *argv[])
 
     logger.Info("System init OK");
 
-    glm::vec4 clearColor(0.392f, 0.584f, 0.929f, 1.0f);
-    clearColor = glm::pow(clearColor, glm::vec4(2.2f));
-
-    while (!window->HandleMessages())
-    {
-        renderer->Clear(clearColor);
-        window->Present();
-    }
+    GameLoop loop(locator, config, args);
+    int res = loop.Start();
 
     logger.Info("Exit game");
 
     Logger::Destroy();
-    return 0;
+    return res;
 }

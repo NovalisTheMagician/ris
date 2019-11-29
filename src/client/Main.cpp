@@ -92,6 +92,7 @@ int main(int argc, char *argv[])
     }
 
     window->SetWindowIcon("cat_icon");
+    window->SetCursorIcon("cat_cursor", 1, 4);
 
     logger.Info("System init OK");
 

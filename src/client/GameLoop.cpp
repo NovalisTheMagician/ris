@@ -2,6 +2,8 @@
 
 #include "common/IWindow.hpp"
 #include "common/IRenderer.hpp"
+#include "common/IInput.hpp"
+#include "common/IUserinterface.hpp"
 
 namespace RIS
 {
@@ -22,12 +24,16 @@ namespace RIS
 
         IWindow &window = systems.GetWindow();
         IRenderer &renderer = systems.GetRenderer();
+        IInput &input = systems.GetInput();
+        IUserinterface &interface = systems.GetUserinterface();
 
         glm::vec4 clearColor(0.392f, 0.584f, 0.929f, 1.0f);
         clearColor = glm::pow(clearColor, glm::vec4(2.2f));
 
         while (!window.HandleMessages())
         {
+            input.Update();
+
             renderer.Clear(clearColor);
             window.Present();
         }

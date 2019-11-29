@@ -27,6 +27,7 @@ namespace RIS
         int width = config.GetInt("r_width", 800);
         int height = config.GetInt("r_height", 600);
         int fullscreen = config.GetInt("r_fullscreen", 0);
+        bool vsync = config.GetInt("r_vsync", 0);
 
         if(fullscreen == 0) // windowed mode
         {
@@ -69,6 +70,7 @@ namespace RIS
         glfwSetFramebufferSizeCallback(window, GLFWWindow::FramebufferResize);
 
         glfwMakeContextCurrent(window);
+        glfwSwapInterval(vsync);
 
         glfwSwapInterval(1);
     }
@@ -120,7 +122,7 @@ namespace RIS
         }
     }
 
-    void GLFWWindow::SetCursorIcon(const std::string &cursor)
+    void GLFWWindow::SetCursorIcon(const std::string &cursor, int xHot, int yHot)
     {
         auto &loader = systems.GetLoader();
         try
@@ -145,7 +147,7 @@ namespace RIS
             // remaining cursors upon termination
             //
             // this might need some rethinking
-            GLFWcursor *cursor = glfwCreateCursor(&cursorImage, 0, 0);
+            GLFWcursor *cursor = glfwCreateCursor(&cursorImage, xHot, yHot);
             glfwSetCursor(window, cursor);
         }
         catch(const std::exception& e)

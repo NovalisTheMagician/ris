@@ -16,6 +16,17 @@
 
 using namespace gl46core;
 
+// Windows "hack" to force some laptops to use the Highperformance GPU
+// intel integrated usually doesn't support opengl 4.6
+// I might, in the future, reduce the required opengl version
+#ifdef _WIN32
+extern "C" 
+{
+    __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
+    __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+}
+#endif
+
 namespace RIS
 {
     GLRenderer::GLRenderer(const SystemLocator &systems, Config &config)

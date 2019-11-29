@@ -35,7 +35,7 @@ namespace RIS
         void SetRelativeMouse(bool setRelative) override;
 
         void SetWindowIcon(const std::string &icon) override;
-        void SetCursorIcon(const std::string &cursor) override;
+        void SetCursorIcon(const std::string &cursor, int xHot, int yHot) override;
 
         bool HandleMessages() override;
         void Present() override;

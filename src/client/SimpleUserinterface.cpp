@@ -13,5 +13,13 @@ namespace RIS
 
     }
 
-    
+    void SimpleUserinterface::Draw()
+    {
+
+    }
+
+    void SimpleUserinterface::Update()
+    {
+
+    }
 }

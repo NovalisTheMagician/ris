@@ -15,7 +15,7 @@ dyn_libs = ['libs/glbinding/bin/glbinding.dll', 'libs/glbinding/bin/glbinding-au
 
 client_inc_path = ['src', 'libs/glm/include', 'libs/gli/include', 'libs/glbinding/include', 'libs/glfw/include', 'libs/soloud/include', 'libs/rapidjson/include']
 client_lib_path = ['libs/glbinding/lib', 'libs/glfw/lib', 'libs/soloud/lib']
-client_libs = ['user32', 'kernel32', 'gdi32', 'opengl32', 'glbinding', 'glfw3dll', 'soloud_static']
+client_libs = ['user32', 'kernel32', 'gdi32', 'opengl32', 'glbinding', 'glbinding-aux', 'glfw3dll', 'soloud_static']
 
 common_inc_path = ['src', 'libs/glm/include', 'libs/rapidjson/include']
 
@@ -70,7 +70,7 @@ env.Clean(server, 'bin/RIS_server.ilk')
 env.Clean(server, 'bin/RIS_server.pdb')
 
 dyn_copy = env.Install('bin/', dyn_libs)
-shader_copy = env.Install('bin/assets/shader/', shader_objs)
+shader_copy = env.Install('bin/assets/shaders/', shader_objs)
 
 env.Depends(client, shader_copy)
 env.Depends(client, dyn_copy)

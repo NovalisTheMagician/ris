@@ -83,6 +83,8 @@ int main(int argc, char *argv[])
         userinterface = factory.CreateUserinterface();
         loader = factory.CreateLoader(assetFolder);
         input = factory.CreateInput();
+
+        renderer->LoadRequiredResources();
     }
     catch(const std::exception& e)
     {

@@ -8,6 +8,7 @@
 #include <stdexcept>
 
 #include <glbinding/gl46/gl.h>
+#include <unordered_map>
 
 namespace RIS
 {
@@ -25,14 +26,15 @@ namespace RIS
     {
     public:
         Shader();
-        Shader(const std::byte *shaderBinary, const std::size_t &size, gl::GLenum type);
         ~Shader();
 
         Shader(const Shader &) = delete;
         Shader& operator=(const Shader &) = delete;
 
-        Shader(Shader &&) = default;
-        Shader& operator=(Shader &&) = default;
+        Shader(Shader &&other);
+        Shader& operator=(Shader &&other);
+
+        void Create(const std::byte *shaderBinary, const std::size_t &size, gl::GLenum type);
 
         gl::GLuint GetId() const;
 
@@ -53,6 +55,7 @@ namespace RIS
         ProgramPipeline(ProgramPipeline &&) = default;
         ProgramPipeline& operator=(ProgramPipeline &&) = default;
 
+        void Create();
         void SetShader(const Shader &shader, gl::UseProgramStageMask type);
         void Use();
 
@@ -66,15 +69,15 @@ namespace RIS
     {
     public:
         Texture();
-        Texture(const std::byte *data, const std::size_t &size);
         ~Texture();
 
         Texture(const Texture &) = delete;
         Texture& operator=(const Texture &) = delete;
 
-        Texture(Texture &&) = default;
-        Texture& operator=(Texture &&) = default;
+        Texture(Texture &&other);
+        Texture& operator=(Texture &&other);
 
+        void Create(const std::byte *data, const std::size_t &size);
         void Bind(gl::GLuint textureUnit);
 
         gl::GLuint GetId() const;
@@ -101,12 +104,18 @@ namespace RIS
 
         void LoadRequiredResources() override;
 
+        int LoadTexture(const std::string &name) override;
+        void DestroyTexture(int texId) override;
+
         void Clear(const glm::vec4 &clearColor) override;
         void Resize(int width, int height) override;
 
     private:
         const SystemLocator &systems;
         Config &config;
+
+        int highestUnusedTexId;
+        std::unordered_map<int, Texture> textures;
 
         ProgramPipeline pipeline;
         Shader uiVertex, uiFragment, uiText;

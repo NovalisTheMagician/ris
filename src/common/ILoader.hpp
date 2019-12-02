@@ -14,6 +14,7 @@ namespace RIS
         SHADER,
         TEXT,
         UILAYOUT,
+        FONT,
     };
 
     class ILoader

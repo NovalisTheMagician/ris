@@ -20,6 +20,7 @@
 #include "common/ILoader.hpp"
 
 using namespace gl46core;
+using namespace std::literals;
 
 // Windows "hack" to force some laptops to use the highperformance GPU
 // some intel integrated gpus don't support opengl 4.6
@@ -39,12 +40,31 @@ namespace RIS
     Shader::Shader()
         : programId(0)
     {
-
     }
 
-    Shader::Shader(const std::byte *shaderBinary, const std::size_t &size, GLenum type)
-        : programId(0)
+    Shader::Shader(Shader &&other)
     {
+        programId = other.programId;
+        other.programId = 0;
+    }
+
+    Shader& Shader::operator=(Shader &&other)
+    {
+        programId = other.programId;
+        other.programId = 0;
+        return *this;
+    }
+
+    Shader::~Shader()
+    {
+        glDeleteProgram(programId);
+    }
+
+    void Shader::Create(const std::byte *shaderBinary, const std::size_t &size, gl::GLenum type)
+    {
+        if(programId != 0)
+            glDeleteProgram(programId);
+
         programId = glCreateProgram();
         GLuint shader = glCreateShader(type);
         glShaderBinary(1, &shader, GL_SHADER_BINARY_FORMAT_SPIR_V, shaderBinary, size);
@@ -89,11 +109,6 @@ namespace RIS
         glDeleteShader(shader);
     }
 
-    Shader::~Shader()
-    {
-        glDeleteProgram(programId);
-    }
-
     GLuint Shader::GetId() const
     {
         return programId;
@@ -104,7 +119,6 @@ namespace RIS
     ProgramPipeline::ProgramPipeline()
         : pipelineId(0)
     {
-        
     }
 
     ProgramPipeline::~ProgramPipeline()
@@ -112,17 +126,18 @@ namespace RIS
         glDeleteProgramPipelines(1, &pipelineId);
     }
 
+    void ProgramPipeline::Create()
+    {
+        glGenProgramPipelines(1, &pipelineId);
+    }
+
     void ProgramPipeline::SetShader(const Shader &shader, UseProgramStageMask type)
     {
-        if(pipelineId == 0)
-            glGenProgramPipelines(1, &pipelineId);
         glUseProgramStages(pipelineId, type, shader.GetId());
     }
 
     void ProgramPipeline::Use()
     {
-        if(pipelineId == 0)
-            glGenProgramPipelines(1, &pipelineId);
         glBindProgramPipeline(pipelineId);
     }
 
@@ -136,11 +151,27 @@ namespace RIS
     Texture::Texture()
         : textureId(0)
     {
-
     }
 
-    Texture::Texture(const std::byte *data, const std::size_t &size)
-        : textureId(0)
+    Texture::Texture(Texture &&other)
+    {
+        textureId = other.textureId;
+        other.textureId = 0;
+    }
+
+    Texture& Texture::operator=(Texture &&other)
+    {
+        textureId = other.textureId;
+        other.textureId = 0;
+        return *this;
+    }
+
+    Texture::~Texture()
+    {
+        glDeleteTextures(1, &textureId);
+    }
+
+    void Texture::Create(const std::byte *data, const std::size_t &size)
     {
         gli::texture texture = gli::load(reinterpret_cast<const char*>(data), size);
         if(texture.empty())
@@ -168,11 +199,6 @@ namespace RIS
         }
     }
 
-    Texture::~Texture()
-    {
-        glDeleteTextures(1, &textureId);
-    }
-
     void Texture::Bind(GLuint textureUnit)
     {
         glBindTextureUnit(textureUnit, textureId);
@@ -186,8 +212,10 @@ namespace RIS
 // Renderer
 
     GLRenderer::GLRenderer(const SystemLocator &systems, Config &config)
-        : systems(systems), config(config)
+        : systems(systems), config(config), textures(), highestUnusedTexId(0)
     {
+        auto &log = Logger::Instance();
+
         glbinding::initialize(glfwGetProcAddress);
         glbinding::aux::enableGetErrorCallback();
 
@@ -198,13 +226,12 @@ namespace RIS
         std::string shaderVersion = reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION));
         std::string renderer = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
 
-        auto &log = Logger::Instance();
         log.Info("Using OpenGL version " + version + " from " + vendor + " with shaderversion " + shaderVersion + " on " + renderer);
     }
 
     GLRenderer::~GLRenderer()
     {
-
+        textures.clear();
     }
 
     void GLRenderer::LoadRequiredResources()
@@ -212,13 +239,42 @@ namespace RIS
         ILoader &loader = systems.GetLoader();
         size_t size;
         auto shaderBin = loader.LoadAsset(AssetType::SHADER, "ui_vert", size);
-        uiVertex = std::move(Shader(shaderBin.get(), size, GL_VERTEX_SHADER));
+        uiVertex.Create(shaderBin.get(), size, GL_VERTEX_SHADER);
 
         shaderBin = loader.LoadAsset(AssetType::SHADER, "ui_frag", size);
-        uiFragment = std::move(Shader(shaderBin.get(), size, GL_FRAGMENT_SHADER));
+        uiFragment.Create(shaderBin.get(), size, GL_FRAGMENT_SHADER);
 
         shaderBin = loader.LoadAsset(AssetType::SHADER, "ui_text", size);
-        uiText = std::move(Shader(shaderBin.get(), size, GL_FRAGMENT_SHADER));
+        uiText.Create(shaderBin.get(), size, GL_FRAGMENT_SHADER);
+    }
+
+    int GLRenderer::LoadTexture(const std::string &name)
+    {
+        ILoader &loader = systems.GetLoader();
+        try
+        {
+            std::size_t size;
+            auto data = loader.LoadAsset(AssetType::TEXTURE, name, size);
+
+            Texture texture;
+            texture.Create(data.get(), size);
+            int id = highestUnusedTexId++;
+            textures[id] = std::move(texture);
+            return id;
+        }
+        catch(const std::exception& e)
+        {
+            Logger::Instance().Error("Failed to load texture (" + name + "): "s + e.what());
+            return -1;
+        }
+    }
+
+    void GLRenderer::DestroyTexture(int texId)
+    {
+        if(texId >= 0 && textures.count(texId) > 0)
+        {
+            textures.erase(texId);
+        }
     }
 
     void GLRenderer::Clear(const glm::vec4 &clearColor)

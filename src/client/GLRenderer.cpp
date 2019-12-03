@@ -199,6 +199,14 @@ namespace RIS
         }
     }
 
+    void Texture::Create(gl::GLenum format, int width, int height)
+    {
+        glCreateTextures(GL_TEXTURE_2D, 1, &textureId);
+        glTextureStorage2D(textureId, 1, format, width, height);
+        glTextureParameteri(textureId, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTextureParameteri(textureId, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    }
+
     void Texture::Bind(GLuint textureUnit)
     {
         glBindTextureUnit(textureUnit, textureId);
@@ -209,10 +217,73 @@ namespace RIS
         return textureId;
     }
 
+// Framebuffer
+
+    Framebuffer::Framebuffer()
+        : framebufferId(0)
+    {
+    }
+
+    Framebuffer::~Framebuffer()
+    {
+        glDeleteFramebuffers(1, &framebufferId);
+    }
+
+    Framebuffer::Framebuffer(Framebuffer &&other)
+    {
+        framebufferId = other.framebufferId;
+        other.framebufferId = 0;
+    }
+
+    Framebuffer& Framebuffer::operator=(Framebuffer &&other)
+    {
+        framebufferId = other.framebufferId;
+        other.framebufferId = 0;
+        return *this;
+    }
+
+    void Framebuffer::Create(int width, int height, GLenum colorFormat, bool useDepth)
+    {
+        glCreateFramebuffers(1, &framebufferId);
+        colorTexture.Create(colorFormat, width, height);
+        glNamedFramebufferTexture(framebufferId, GL_COLOR_ATTACHMENT0, colorTexture.GetId(), 0);
+        if(useDepth)
+        {
+            depthTexture.Create(GL_DEPTH_COMPONENT32, width, height);
+            glNamedFramebufferTexture(framebufferId, GL_DEPTH_ATTACHMENT, depthTexture.GetId(), 0);
+        }
+    }
+
+    void Framebuffer::Clear(const glm::vec4 &color, float depth)
+    {
+        glClearNamedFramebufferfv(framebufferId, GL_COLOR, 0, glm::value_ptr(color));
+        glClearNamedFramebufferfv(framebufferId, GL_DEPTH, 0, &depth);
+    }
+
+    void Framebuffer::Bind()
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, framebufferId);
+    }
+
+    GLuint Framebuffer::GetId() const
+    {
+        return framebufferId;
+    }
+
+    const Texture& Framebuffer::GetColorTexture() const
+    {
+        return colorTexture;
+    }
+
+    const Texture& Framebuffer::GetDepthTexture() const
+    {
+        return depthTexture;
+    }
+
 // Renderer
 
     GLRenderer::GLRenderer(const SystemLocator &systems, Config &config)
-        : systems(systems), config(config), textures(), highestUnusedTexId(0)
+        : systems(systems), config(config), textures(), highestUnusedTexId(0), framebuffers(), highestUnusedFrambufId(0)
     {
         auto &log = Logger::Instance();
 
@@ -277,12 +348,44 @@ namespace RIS
         }
     }
 
+    int GLRenderer::CreateFramebuffer(int width, int height, bool useDepth)
+    {
+        int id = highestUnusedFrambufId++;
+
+        int framebufferWidth = width;
+        int framebufferHeight = height;
+        if(width == -1)
+            framebufferWidth = config.GetInt("r_width", 800);
+        if(height == -1)
+            framebufferHeight = config.GetInt("r_height", 600);
+
+        Framebuffer framebuffer;
+        framebuffer.Create(framebufferWidth, framebufferHeight, GL_RGBA, useDepth);
+        framebuffers[id] = std::move(framebuffer);
+
+        return id;
+    }
+
+    void GLRenderer::DestroyFramebuffer(int framebufId)
+    {
+        if(framebufId > 0 && framebuffers.count(framebufId) > 0)
+        {
+            framebuffers.erase(framebufId);
+        }
+    }
+
     void GLRenderer::Clear(const glm::vec4 &clearColor)
     {
         static const float clearDepth = 1.0f;
 
         glClearNamedFramebufferfv(0, GL_COLOR, 0, glm::value_ptr(clearColor));
         glClearNamedFramebufferfv(0, GL_DEPTH, 0, &clearDepth);
+    }
+
+    void GLRenderer::Clear(int framebufferId, const glm::vec4 &clearColor)
+    {
+        Framebuffer &framebuffer = framebuffers.at(framebufferId);
+        framebuffer.Clear(clearColor, 1.0f);
     }
 
     void GLRenderer::Resize(int width, int height)

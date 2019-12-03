@@ -52,8 +52,8 @@ namespace RIS
         ProgramPipeline(const ProgramPipeline &) = delete;
         ProgramPipeline& operator=(const ProgramPipeline &) = delete;
 
-        ProgramPipeline(ProgramPipeline &&) = default;
-        ProgramPipeline& operator=(ProgramPipeline &&) = default;
+        ProgramPipeline(ProgramPipeline &&) = delete;
+        ProgramPipeline& operator=(ProgramPipeline &&) = delete;
 
         void Create();
         void SetShader(const Shader &shader, gl::UseProgramStageMask type);
@@ -78,6 +78,8 @@ namespace RIS
         Texture& operator=(Texture &&other);
 
         void Create(const std::byte *data, const std::size_t &size);
+        void Create(gl::GLenum format, int width, int height);
+
         void Bind(gl::GLuint textureUnit);
 
         gl::GLuint GetId() const;
@@ -88,6 +90,29 @@ namespace RIS
 
     class Framebuffer
     {
+    public:
+        Framebuffer();
+        ~Framebuffer();
+
+        Framebuffer(const Framebuffer &) = delete;
+        Framebuffer& operator=(const Framebuffer &) = delete;
+
+        Framebuffer(Framebuffer &&other);
+        Framebuffer& operator=(Framebuffer &&other);
+
+        void Create(int width, int height, gl::GLenum textureFormat, bool useDepth);
+        void Bind();
+        void Clear(const glm::vec4 &color, float depth);
+
+        gl::GLuint GetId() const;
+
+        const Texture& GetColorTexture() const;
+        const Texture& GetDepthTexture() const;
+
+    private:
+        gl::GLuint framebufferId;
+        Texture colorTexture;
+        Texture depthTexture;
 
     };
 
@@ -107,7 +132,12 @@ namespace RIS
         int LoadTexture(const std::string &name) override;
         void DestroyTexture(int texId) override;
 
+        int CreateFramebuffer(int width = -1, int height = -1, bool useDepth = true) override;
+        void DestroyFramebuffer(int framebufId) override;
+
         void Clear(const glm::vec4 &clearColor) override;
+        void Clear(int framebufferId, const glm::vec4 &clearColor) override;
+
         void Resize(int width, int height) override;
 
     private:
@@ -116,6 +146,9 @@ namespace RIS
 
         int highestUnusedTexId;
         std::unordered_map<int, Texture> textures;
+
+        int highestUnusedFrambufId;
+        std::unordered_map<int, Framebuffer> framebuffers;
 
         ProgramPipeline pipeline;
         Shader uiVertex, uiFragment, uiText;

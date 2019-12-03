@@ -144,6 +144,7 @@ namespace RIS
         case AssetType::SHADER: extension = ".spv"; folder = "shaders"; break;
         case AssetType::TEXT: extension = ".txt"; folder = "texts"; break;
         case AssetType::UILAYOUT: extension = ".json"; folder = "ui"; break;
+        case AssetType::FONT: extension = ".json"; folder = "ui"; break;
         }
         std::filesystem::path filePath = assetRoot / folder / (name + extension);
 

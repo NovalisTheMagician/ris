@@ -13,6 +13,30 @@
 
 namespace RIS
 {
+    struct Glyph
+    {
+        float advanceX;
+        float bboxWidth, bboxHeight;
+        float bearingX, bearingY;
+        char charCode;
+        float s0, s1, t0, t1;
+        std::unordered_map<char, float> kernings;
+    };
+
+    struct Font
+    {
+        float ascender, descender;
+        int bitmapWidth, bitmapHeight;
+        float height;
+        float max_advance;
+        std::string name;
+        int size;
+        float spaceAdvance;
+        std::unordered_map<char, Glyph> glyphs;
+
+        int textureId;
+    };
+
     class Component
     {
     public:
@@ -90,30 +114,6 @@ namespace RIS
 
     };
     using TextBoxPtr = std::shared_ptr<UITextBox>;
-
-    struct Glyph
-    {
-        float advanceX;
-        float bboxWidth, bboxHeight;
-        float bearingX, bearingY;
-        char charCode;
-        float s0, s1, t0, t1;
-        std::unordered_map<char, float> kernings;
-    };
-
-    struct Font
-    {
-        float ascender, descender;
-        int bitmapWidth, bitmapHeight;
-        float height;
-        float max_advance;
-        std::string name;
-        int size;
-        float spaceAdvance;
-        std::unordered_map<char, Glyph> glyphs;
-
-        int textureId;
-    };
 
     class SimpleUserinterface : public IUserinterface
     {

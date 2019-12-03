@@ -51,12 +51,12 @@ namespace RIS
 
     void UIPanel::Update()
     {
-        std::for_each(components.begin(), components.end(), [](auto component){ component.Update(); });
+        std::for_each(components.begin(), components.end(), [](auto component){ component->Update(); });
     }
 
     void UIPanel::Draw(IRenderer &renderer)
     {
-        std::for_each(components.begin(), components.end(), [](auto component){ component.Draw(renderer); });
+        std::for_each(components.begin(), components.end(), [&renderer](auto component){ component->Draw(renderer); });
     }
 
     SimpleUserinterface::SimpleUserinterface(const SystemLocator &systems, Config &config)

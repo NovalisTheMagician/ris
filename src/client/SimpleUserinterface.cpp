@@ -87,7 +87,7 @@ namespace RIS
             auto data = loader.LoadAsset(AssetType::UILAYOUT, layout, size);
 
             rapidjson::Document layoutJson;
-            if(layoutJson.Parse(reinterpret_cast<const char*>(data.get())).HasParseError())
+            if(layoutJson.ParseInsitu(reinterpret_cast<char*>(data.get())).HasParseError())
             {
                 Logger::Instance().Error("Failed to parse layout ("s + layout + "): "s + std::to_string(layoutJson.GetParseError()));
                 return;

@@ -64,6 +64,9 @@ namespace RIS
         UIPanel(const SystemLocator &systems);
         ~UIPanel();
 
+        void SetColor(const glm::vec4 &color);
+        void SetPosition(const glm::vec2 &position);
+
         void Add(ComponentPtr component) override;
         void Remove(ComponentPtr component) override;
         void RemoveAll() override;
@@ -74,6 +77,9 @@ namespace RIS
     private:
         std::vector<ComponentPtr> components;
         const SystemLocator &systems;
+
+        glm::vec4 color;
+        glm::vec2 position;
 
     };
     using PanelPtr = std::shared_ptr<UIPanel>;

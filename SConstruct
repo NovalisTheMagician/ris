@@ -65,9 +65,13 @@ server = env.Program('bin/RIS_server', server_objs + common_objs, LIBS=server_li
 
 env.Clean(client, 'bin/RIS.ilk')
 env.Clean(client, 'bin/RIS.pdb')
+env.Clean(client, 'bin/RIS.exp')
+env.Clean(client, 'bin/RIS.lib')
 
 env.Clean(server, 'bin/RIS_server.ilk')
 env.Clean(server, 'bin/RIS_server.pdb')
+env.Clean(server, 'bin/RIS_server.exp')
+env.Clean(server, 'bin/RIS_server.lib')
 
 dyn_copy = env.Install('bin/', dyn_libs)
 shader_copy = env.Install('bin/assets/shaders/', shader_objs)

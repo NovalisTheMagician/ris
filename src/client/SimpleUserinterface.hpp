@@ -92,13 +92,17 @@ namespace RIS
 
         void SetFont(Font font);
         void SetTextColor(const glm::vec4 &color);
+        void SetVisible(bool visible);
 
         void Update() override;
         void Draw(IRenderer &renderer) override;
 
     private:
         const SystemLocator &systems;
+
         Font font;
+        glm::vec4 fontColor;
+        bool isVisible;
 
     };
     using LabelPtr = std::shared_ptr<UILabel>;
@@ -114,6 +118,24 @@ namespace RIS
 
     };
     using TextBoxPtr = std::shared_ptr<UITextBox>;
+
+    class Console
+    {
+    public:
+        Console();
+        ~Console();
+
+        void Open();
+        void Close();
+
+        void Update();
+        void Draw();
+
+    private:
+        bool isOpen;
+        bool isMoving;
+
+    };
 
     class SimpleUserinterface : public IUserinterface
     {
@@ -138,6 +160,13 @@ namespace RIS
         std::unordered_map<std::string, Font> fonts;
 
         int uiFramebufferId;
+
+        // need to make some friends
+        friend UIPanel;
+        friend UIButton;
+        friend UIImage;
+        friend UILabel;
+        friend UITextBox;
 
     };
 }

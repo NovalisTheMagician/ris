@@ -7,6 +7,9 @@
 #include "common/IAudio.hpp"
 #include "common/INetwork.hpp"
 
+#include "common/Timer.hpp"
+#include "common/Logger.hpp"
+
 #include <thread>
 #include <mutex>
 
@@ -36,8 +39,12 @@ namespace RIS
         glm::vec4 clearColor(0.392f, 0.584f, 0.929f, 1.0f);
         clearColor = glm::pow(clearColor, glm::vec4(2.2f));
 
+        Timer timer;
+
         while (!window.HandleMessages())
         {
+            timer.Update();
+            
             input.Update();
 
             renderer.Clear(clearColor);

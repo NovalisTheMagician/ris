@@ -13,6 +13,8 @@
 
 #include <gli/gli.hpp>
 
+#include <iostream>
+
 #include <string>
 
 #include "common/Logger.hpp"
@@ -207,6 +209,13 @@ namespace RIS
         glTextureParameteri(textureId, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     }
 
+    void Texture::Create(const glm::vec4 color)
+    {
+        glCreateTextures(GL_TEXTURE_2D, 1, &textureId);
+        glTextureStorage2D(textureId, 1, GL_RGBA8, 1, 1);
+        glTextureSubImage2D(textureId, 0, 0, 0, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, glm::value_ptr(color));
+    }
+
     void Texture::Bind(GLuint textureUnit)
     {
         glBindTextureUnit(textureUnit, textureId);
@@ -217,10 +226,70 @@ namespace RIS
         return textureId;
     }
 
+// Sampler
+
+    Sampler::Sampler()
+        : samplerId(0)
+    {
+    }
+
+    Sampler::~Sampler()
+    {
+        glDeleteSamplers(1, &samplerId);
+    }
+
+    Sampler::Sampler(Sampler &&other)
+    {
+        samplerId = other.samplerId;
+        other.samplerId = 0;
+    }
+
+    Sampler& Sampler::operator=(Sampler &&other)
+    {
+        samplerId = other.samplerId;
+        other.samplerId = 0;
+        return *this;
+    }
+
+    void Sampler::Create()
+    {
+        glGenSamplers(1, &samplerId);
+    }
+
+    void Sampler::SetMinFilter(GLenum minFilter)
+    {
+        glSamplerParameteri(samplerId, GL_TEXTURE_MIN_FILTER, minFilter);
+    }
+
+    void Sampler::SetMagFilter(GLenum magFilter)
+    {
+        glSamplerParameteri(samplerId, GL_TEXTURE_MAG_FILTER, magFilter);
+    }
+
+    void Sampler::SetMaxAnisotropy(float maxAniso)
+    {
+        glSamplerParameterfv(samplerId, GL_TEXTURE_MAX_ANISOTROPY, &maxAniso);
+    }
+
+    void Sampler::Bind(int textureUnit)
+    {
+        glBindSampler(textureUnit, samplerId);
+    }
+
+    GLuint Sampler::GetId() const
+    {
+        return samplerId;
+    }
+
 // Framebuffer
 
     Framebuffer::Framebuffer()
         : framebufferId(0)
+    {
+    }
+
+    Framebuffer::Framebuffer(GLuint frambufId)
+        : framebufferId(frambufId)
     {
     }
 
@@ -282,13 +351,71 @@ namespace RIS
 
 // Renderer
 
+    const int GLRenderer::DEFAULT_FRAMBUFFER_ID = 0;
+    const int GLRenderer::DEFAULT_TEXTURE_ID = 1;
+    const int GLRenderer::MISSING_TEXTURE_ID = 0;
+
     GLRenderer::GLRenderer(const SystemLocator &systems, Config &config)
-        : systems(systems), config(config), textures(), highestUnusedTexId(0), framebuffers(), highestUnusedFrambufId(0)
+        : systems(systems), config(config), textures(), highestUnusedTexId(2), framebuffers(), highestUnusedFrambufId(1)
     {
         auto &log = Logger::Instance();
 
         glbinding::initialize(glfwGetProcAddress);
-        glbinding::aux::enableGetErrorCallback();
+        //glbinding::aux::enableGetErrorCallback();
+
+#ifdef _DEBUG
+        glEnable(GL_DEBUG_OUTPUT);
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+
+        auto dbgCallback = [](GLenum source, 
+                            GLenum type, 
+                            GLuint id, 
+                            GLenum severity, 
+                            GLsizei length, 
+                            const GLchar *message, 
+                            const void *userParam) -> void
+            {
+                if(id == 131169 || id == 131185 || id == 131218 || id == 131204) return; 
+
+                std::cout << "---------------" << std::endl;
+                std::cout << "Debug message (" << id << "): " <<  message << std::endl;
+
+                switch (source)
+                {
+                    case GL_DEBUG_SOURCE_API:             std::cout << "Source: API"; break;
+                    case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   std::cout << "Source: Window System"; break;
+                    case GL_DEBUG_SOURCE_SHADER_COMPILER: std::cout << "Source: Shader Compiler"; break;
+                    case GL_DEBUG_SOURCE_THIRD_PARTY:     std::cout << "Source: Third Party"; break;
+                    case GL_DEBUG_SOURCE_APPLICATION:     std::cout << "Source: Application"; break;
+                    case GL_DEBUG_SOURCE_OTHER:           std::cout << "Source: Other"; break;
+                } std::cout << std::endl;
+
+                switch (type)
+                {
+                    case GL_DEBUG_TYPE_ERROR:               std::cout << "Type: Error"; break;
+                    case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: std::cout << "Type: Deprecated Behaviour"; break;
+                    case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  std::cout << "Type: Undefined Behaviour"; break; 
+                    case GL_DEBUG_TYPE_PORTABILITY:         std::cout << "Type: Portability"; break;
+                    case GL_DEBUG_TYPE_PERFORMANCE:         std::cout << "Type: Performance"; break;
+                    case GL_DEBUG_TYPE_MARKER:              std::cout << "Type: Marker"; break;
+                    case GL_DEBUG_TYPE_PUSH_GROUP:          std::cout << "Type: Push Group"; break;
+                    case GL_DEBUG_TYPE_POP_GROUP:           std::cout << "Type: Pop Group"; break;
+                    case GL_DEBUG_TYPE_OTHER:               std::cout << "Type: Other"; break;
+                } std::cout << std::endl;
+                
+                switch (severity)
+                {
+                    case GL_DEBUG_SEVERITY_HIGH:         std::cout << "Severity: high"; break;
+                    case GL_DEBUG_SEVERITY_MEDIUM:       std::cout << "Severity: medium"; break;
+                    case GL_DEBUG_SEVERITY_LOW:          std::cout << "Severity: low"; break;
+                    case GL_DEBUG_SEVERITY_NOTIFICATION: std::cout << "Severity: notification"; break;
+                } std::cout << std::endl;
+                std::cout << std::endl;
+            };
+
+        glDebugMessageCallback(static_cast<GLDEBUGPROC>(dbgCallback), nullptr);
+        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+#endif
 
         glEnable(GL_FRAMEBUFFER_SRGB);
 
@@ -307,6 +434,34 @@ namespace RIS
 
     void GLRenderer::LoadRequiredResources()
     {
+        framebuffers.emplace(DEFAULT_FRAMBUFFER_ID, 0);
+
+        Texture defaultTexture;
+        defaultTexture.Create(glm::vec4(1, 1, 1, 1));
+        Texture missingTexture;
+        missingTexture.Create(glm::vec4(1, 0, 1, 1));
+        textures.insert(std::make_pair(DEFAULT_TEXTURE_ID, std::move(defaultTexture)));
+        textures.insert(std::make_pair(MISSING_TEXTURE_ID, std::move(missingTexture)));
+
+        float maxAniso;
+        glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &maxAniso);
+
+        float aniso = static_cast<float>(config.GetInt("r_anisotropic", 16));
+        if(aniso > maxAniso)
+        {
+            aniso = maxAniso;
+            config.SetValue("r_anisotropic", static_cast<int>(aniso));
+        }
+
+        defaultSampler.Create();
+        defaultSampler.SetMinFilter(GL_LINEAR_MIPMAP_LINEAR);
+        defaultSampler.SetMagFilter(GL_LINEAR);
+        defaultSampler.SetMaxAnisotropy(aniso);
+
+        uiSampler.Create();
+        uiSampler.SetMinFilter(GL_LINEAR);
+        uiSampler.SetMagFilter(GL_LINEAR);
+
         ILoader &loader = systems.GetLoader();
         size_t size;
         auto shaderBin = loader.LoadAsset(AssetType::SHADER, "ui_vert", size);
@@ -336,7 +491,7 @@ namespace RIS
         catch(const std::exception& e)
         {
             Logger::Instance().Error("Failed to load texture (" + name + "): "s + e.what());
-            return -1;
+            return MISSING_TEXTURE_ID;
         }
     }
 
@@ -374,12 +529,30 @@ namespace RIS
         }
     }
 
-    void GLRenderer::Clear(const glm::vec4 &clearColor)
+    void GLRenderer::SetFramebuffer(int framebufferId)
     {
-        static const float clearDepth = 1.0f;
+        if(framebufferId >= 0 && framebuffers.count(framebufferId) > 0)
+        {
+            Framebuffer &framebuffer = framebuffers.at(framebufferId);
+            framebuffer.Bind();
+        }
+    }
 
-        glClearNamedFramebufferfv(0, GL_COLOR, 0, glm::value_ptr(clearColor));
-        glClearNamedFramebufferfv(0, GL_DEPTH, 0, &clearDepth);
+    void GLRenderer::Begin(ProjectionType type)
+    {
+        if(type == ProjectionType::ORTHOGRAPHIC)
+        {
+            pipeline.SetShader(uiVertex, GL_VERTEX_SHADER_BIT);
+        }
+        else if(type == ProjectionType::PERSPECTIVE)
+        {
+
+        }
+    }
+
+    void GLRenderer::End()
+    {
+
     }
 
     void GLRenderer::Clear(int framebufferId, const glm::vec4 &clearColor)

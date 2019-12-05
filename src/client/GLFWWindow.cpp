@@ -22,6 +22,10 @@ namespace RIS
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 
+#ifdef _DEBUG
+        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true); 
+#endif
+
         glfwWindowHint(GLFW_RESIZABLE, false);
 
         int width = config.GetInt("r_width", 800);

@@ -15,13 +15,23 @@ using namespace std::literals;
 namespace RIS
 {
     UIPanel::UIPanel(const SystemLocator &systems)
-        : systems(systems), components()
+        : systems(systems), components(), color(0, 0, 0, 0), position(0, 0)
     {
     }
 
     UIPanel::~UIPanel()
     {
         components.clear();
+    }
+
+    void UIPanel::SetColor(const glm::vec4 &color)
+    {
+        this->color = color;
+    }
+
+    void UIPanel::SetPosition(const glm::vec2 &position)
+    {
+        this->position = position;
     }
 
     void UIPanel::Add(ComponentPtr component)
@@ -58,6 +68,46 @@ namespace RIS
     {
         std::for_each(components.begin(), components.end(), [&renderer](auto component){ component->Draw(renderer); });
     }
+
+// UILabel
+
+    UILabel::UILabel(const SystemLocator &systems)
+        : systems(systems), fontColor(1, 1, 1, 1), isVisible(true)
+    {
+
+    }
+
+    UILabel::~UILabel()
+    {
+
+    }
+
+    void UILabel::SetFont(Font font)
+    {
+        this->font = font;
+    }
+
+    void UILabel::SetTextColor(const glm::vec4 &color)
+    {
+        fontColor = color;
+    }
+
+    void UILabel::SetVisible(bool visible)
+    {
+        isVisible = visible;
+    }
+
+    void UILabel::Update()
+    {
+
+    }
+
+    void UILabel::Draw(IRenderer &renderer)
+    {
+        
+    }
+
+// Simpleuserinterface
 
     SimpleUserinterface::SimpleUserinterface(const SystemLocator &systems, Config &config)
         : systems(systems), config(config), uiFramebufferId(-1)

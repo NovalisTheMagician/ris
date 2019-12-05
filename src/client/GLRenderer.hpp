@@ -79,6 +79,7 @@ namespace RIS
 
         void Create(const std::byte *data, const std::size_t &size);
         void Create(gl::GLenum format, int width, int height);
+        void Create(const glm::vec4 color);
 
         void Bind(gl::GLuint textureUnit);
 
@@ -92,6 +93,7 @@ namespace RIS
     {
     public:
         Framebuffer();
+        Framebuffer(gl::GLuint frambufId);
         ~Framebuffer();
 
         Framebuffer(const Framebuffer &) = delete;
@@ -116,6 +118,48 @@ namespace RIS
 
     };
 
+    class Sampler
+    {
+    public:
+        Sampler();
+        ~Sampler();
+
+        Sampler(const Sampler &) = delete;
+        Sampler& operator=(const Sampler &) = delete;
+
+        Sampler(Sampler &&other);
+        Sampler& operator=(Sampler &&other);
+
+        void Create();
+
+        void SetMinFilter(gl::GLenum minFilter);
+        void SetMagFilter(gl::GLenum magFilter);
+        void SetMaxAnisotropy(float maxAniso);
+
+        void Bind(int textureUnit);
+
+        gl::GLuint GetId() const;
+
+    private:
+        gl::GLuint samplerId;
+
+    };
+
+    class Camera
+    {
+    public:
+        Camera();
+        ~Camera();
+
+    private:
+        glm::mat4 projection;
+        glm::mat4 view;
+
+        glm::vec3 position;
+        float yaw, pitch;
+
+    };
+
     class GLRenderer : public IRenderer
     {
     public:
@@ -135,10 +179,19 @@ namespace RIS
         int CreateFramebuffer(int width = -1, int height = -1, bool useDepth = true) override;
         void DestroyFramebuffer(int framebufId) override;
 
-        void Clear(const glm::vec4 &clearColor) override;
+        void SetFramebuffer(int framebufferId) override;
+
+        void Begin(ProjectionType type) override;
+        void End() override;
+
         void Clear(int framebufferId, const glm::vec4 &clearColor) override;
 
         void Resize(int width, int height) override;
+
+    public:
+        static const int DEFAULT_FRAMBUFFER_ID;
+        static const int DEFAULT_TEXTURE_ID;
+        static const int MISSING_TEXTURE_ID;
 
     private:
         const SystemLocator &systems;
@@ -150,8 +203,12 @@ namespace RIS
         int highestUnusedFrambufId;
         std::unordered_map<int, Framebuffer> framebuffers;
 
+        Sampler defaultSampler, uiSampler;
+
         ProgramPipeline pipeline;
         Shader uiVertex, uiFragment, uiText;
+
+        glm::mat4 projection;
 
     };
 }

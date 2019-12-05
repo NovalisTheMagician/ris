@@ -47,7 +47,7 @@ namespace RIS
             
             input.Update();
 
-            renderer.Clear(clearColor);
+            renderer.Clear(0, clearColor);
             window.Present();
         }
 

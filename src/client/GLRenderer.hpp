@@ -9,6 +9,7 @@
 
 #include <glbinding/gl46/gl.h>
 #include <unordered_map>
+#include <vector>
 
 namespace RIS
 {
@@ -103,6 +104,7 @@ namespace RIS
         Framebuffer& operator=(Framebuffer &&other);
 
         void Create(int width, int height, gl::GLenum textureFormat, bool useDepth);
+        void Resize(int width, int height);
         void Bind();
         void Clear(const glm::vec4 &color, float depth);
 
@@ -145,6 +147,91 @@ namespace RIS
 
     };
 
+    class Buffer
+    {
+    public:
+        Buffer();
+        ~Buffer();
+
+        Buffer(const Buffer &) = delete;
+        Buffer& operator=(const Buffer &) = delete;
+
+        Buffer(Buffer &&other);
+        Buffer& operator=(Buffer &&other);
+
+        template<typename T>
+        void Create(gl::GLenum type, gl::BufferStorageMask usage, const std::vector<T> &data, bool immutable = false);
+
+        template<typename T>
+        void UpdateData(const std::vector<T> &data);
+
+        void Bind(int bindBase);
+
+        std::size_t GetElementSize() const;
+        gl::GLuint GetId() const;
+
+    private:
+        gl::GLuint bufferId;
+        bool isImmutable;
+        std::size_t elementSize;
+
+    };
+
+    template<typename T>
+    void Buffer::Create(gl::GLenum type, gl::BufferStorageMask usage, const std::vector<T> &data, bool immutable)
+    {
+        using namespace gl46core;
+        glCreateBuffers(1, &bufferId);
+        isImmutable = immutable;
+        elementSize = sizeof(T);
+        std::size_t size = data.size * elementSize;
+        if(isImmutable)
+        {
+            glNamedBufferStorage(bufferId, size, data.data(), usage);
+        }
+        else
+        {
+            glNamedBufferData(bufferId, size, data.data(), usage);
+        }
+    }
+
+    template<typename T>
+    void Buffer::UpdateData(const std::vector<T> &data)
+    {
+        if(isImmutable)
+            return; // maybe throw an exception here
+
+        elementSize = sizeof(T);
+        std::size_t = data.size * elementSize;
+        glNamedBufferSubData(bufferId, 0, size, data.data());
+    }
+
+    class VertexArray
+    {
+    public:
+        VertexArray();
+        ~VertexArray();
+
+        VertexArray(const VertexArray &) = delete;
+        VertexArray& operator=(const VertexArray &) = delete;
+
+        VertexArray(VertexArray &&other);
+        VertexArray& operator=(VertexArray &&other);
+
+        void Create();
+        void SetVertexBuffer(const Buffer &buffer);
+        void SetIndexBuffer(const Buffer &buffer);
+        void SetAttribFormat(int attrib, int numComponents, gl::GLenum type, std::size_t offset);
+
+        void Bind();
+
+        gl::GLuint GetId() const;
+
+    private:
+        gl::GLuint vertexArrayId;
+
+    };
+
     class Camera
     {
     public:
@@ -181,12 +268,11 @@ namespace RIS
 
         void SetFramebuffer(int framebufferId) override;
 
-        void Begin(ProjectionType type) override;
-        void End() override;
-
         void Clear(int framebufferId, const glm::vec4 &clearColor) override;
 
         void Resize(int width, int height) override;
+
+        I2DRenderer& Get2DRenderer() const override;
 
     public:
         static const int DEFAULT_FRAMBUFFER_ID;

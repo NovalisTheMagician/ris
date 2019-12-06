@@ -5,10 +5,21 @@
 
 namespace RIS
 {
-    enum class ProjectionType
+    class I2DRenderer
     {
-        PERSPECTIVE,
-        ORTHOGRAPHIC
+    public:
+        virtual ~I2DRenderer();
+
+        virtual void SetViewsize(int width, int height) = 0;
+        virtual void SetPosition(const glm::vec2 &positino) = 0;
+
+        virtual void SetTexture(int textureId, int textureUnit) = 0;
+
+        virtual void Begin() = 0;
+        virtual void End() = 0; // ??? really needed?
+
+        virtual void DrawText(const std::string &text) = 0;
+        virtual void DrawQuad(int width, int height) = 0;
     };
 
     class IRenderer
@@ -26,11 +37,10 @@ namespace RIS
 
         virtual void SetFramebuffer(int framebufferId) = 0;
 
-        virtual void Begin(ProjectionType type) = 0;
-        virtual void End() = 0;
-
         virtual void Clear(int framebufferId, const glm::vec4 &clearColor) = 0;
 
         virtual void Resize(int width, int height) = 0;
+
+        virtual I2DRenderer& Get2DRenderer() const = 0;
     };
 }

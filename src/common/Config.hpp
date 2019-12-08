@@ -1,6 +1,6 @@
 #pragma once
 
-#include <map>
+#include <unordered_map>
 #include <string>
 #include <sstream>
 
@@ -23,7 +23,7 @@ namespace RIS
 		void SetValue(const std::string &key, const T &value);
 
 	private:
-		std::map<std::string, std::string> configMap;
+		std::unordered_map<std::string, std::string> configMap;
 		std::string configPath;
 
 		bool isDirty;

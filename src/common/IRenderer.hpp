@@ -14,6 +14,7 @@ namespace RIS
         virtual void SetPosition(const glm::vec2 &positino) = 0;
 
         virtual void SetTexture(int textureId, int textureUnit) = 0;
+        virtual void SetColor(const glm::vec4 &color) = 0;
 
         virtual void Begin() = 0;
         virtual void End() = 0; // ??? really needed?

@@ -59,8 +59,6 @@ namespace RIS
                             const GLchar *message, 
                             const void *userParam) -> void
             {
-                if(id == 131169 || id == 131185 || id == 131218 || id == 131204) return; 
-
                 auto const src_str = [source]() {
                     switch (source)
                     {
@@ -98,7 +96,7 @@ namespace RIS
                     }
                 }();
 
-                std::cout << src_str << ", " << type_str << ", " << severity_str << ", " << id << ": " << message << '\n';
+                std::cout << src_str << ", " << type_str << ", " << severity_str << ", " << id << ": " << message << std::endl;
             };
 
         glDebugMessageCallback(static_cast<GLDEBUGPROC>(dbgCallback), nullptr);
@@ -226,10 +224,10 @@ namespace RIS
         }
     }
 
-    void GLRenderer::Clear(int framebufferId, const glm::vec4 &clearColor)
+    void GLRenderer::Clear(int framebufferId, const glm::vec4 &clearColor, float depth)
     {
         Framebuffer &framebuffer = framebuffers.at(framebufferId);
-        framebuffer.Clear(clearColor, 1.0f);
+        framebuffer.Clear(clearColor, depth);
     }
 
     void GLRenderer::Resize(int width, int height)

@@ -38,7 +38,7 @@ namespace RIS
 
         virtual void SetFramebuffer(int framebufferId) = 0;
 
-        virtual void Clear(int framebufferId, const glm::vec4 &clearColor) = 0;
+        virtual void Clear(int framebufferId, const glm::vec4 &clearColor = glm::vec4(0, 0, 0, 1), float depth = 1.0f) = 0;
 
         virtual void Resize(int width, int height) = 0;
 

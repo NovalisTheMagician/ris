@@ -219,9 +219,9 @@ namespace RIS
         VertexArray& operator=(VertexArray &&other);
 
         void Create();
-        void SetVertexBuffer(const Buffer &buffer);
+        void SetVertexBuffer(const Buffer &buffer, int bindingPoint);
         void SetIndexBuffer(const Buffer &buffer);
-        void SetAttribFormat(int attrib, int numComponents, gl::GLenum type, std::size_t offset);
+        void SetAttribFormat(int attrib, int numComponents, gl::GLenum type, std::size_t offset, int bindingPoint = 0);
 
         void Bind();
 
@@ -244,6 +244,33 @@ namespace RIS
 
         glm::vec3 position;
         float yaw, pitch;
+
+    };
+
+    class GLRenderer;
+
+    class GL2DRenderer : public I2DRenderer
+    {
+    public:
+        GL2DRenderer(GLRenderer &renderer);
+        ~GL2DRenderer();
+
+        void SetViewsize(int width, int height) override;
+        void SetPosition(const glm::vec2 &positino) override;
+
+        void SetTexture(int textureId, int textureUnit) override;
+        void SetColor(const glm::vec4 &color) override;
+
+        void Begin() override;
+        void End() override; // ??? really needed?
+
+        void DrawText(const std::string &text) override;
+        void DrawQuad(int width, int height) override;
+
+    private:
+        GLRenderer &renderer;
+
+        glm::mat4 projection;
 
     };
 
@@ -272,7 +299,7 @@ namespace RIS
 
         void Resize(int width, int height) override;
 
-        I2DRenderer& Get2DRenderer() const override;
+        I2DRenderer& Get2DRenderer() override;
 
     public:
         static const int DEFAULT_FRAMBUFFER_ID;
@@ -294,7 +321,8 @@ namespace RIS
         ProgramPipeline pipeline;
         Shader uiVertex, uiFragment, uiText;
 
-        glm::mat4 projection;
+        GL2DRenderer renderer2d;
+        Camera camera;
 
     };
 }

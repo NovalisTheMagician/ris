@@ -2,7 +2,6 @@
 
 #include <glbinding/gl46core/gl.h>
 #include <glbinding/glbinding.h>
-#include <glbinding-aux/debug.h>
 
 #define GLFW_DLL
 #define GLFW_INCLUDE_NONE
@@ -42,12 +41,11 @@ namespace RIS
     const int GLRenderer::MISSING_TEXTURE_ID = 0;
 
     GLRenderer::GLRenderer(const SystemLocator &systems, Config &config)
-        : systems(systems), config(config), textures(), highestUnusedTexId(2), framebuffers(), highestUnusedFrambufId(1)
+        : systems(systems), config(config), textures(), highestUnusedTexId(2), framebuffers(), highestUnusedFrambufId(1), renderer2d(*this)
     {
         auto &log = Logger::Instance();
 
         glbinding::initialize(glfwGetProcAddress);
-        //glbinding::aux::enableGetErrorCallback();
 
 #ifdef _DEBUG
         glEnable(GL_DEBUG_OUTPUT);
@@ -72,6 +70,7 @@ namespace RIS
                     case GL_DEBUG_SOURCE_THIRD_PARTY: return "THIRD PARTY";
                     case GL_DEBUG_SOURCE_APPLICATION: return "APPLICATION";
                     case GL_DEBUG_SOURCE_OTHER: return "OTHER";
+                    default: return "";
                     }
                 }();
 
@@ -85,6 +84,7 @@ namespace RIS
                     case GL_DEBUG_TYPE_PERFORMANCE: return "PERFORMANCE";
                     case GL_DEBUG_TYPE_MARKER: return "MARKER";
                     case GL_DEBUG_TYPE_OTHER: return "OTHER";
+                    default: return "";
                     }
                 }();
 
@@ -94,6 +94,7 @@ namespace RIS
                     case GL_DEBUG_SEVERITY_LOW: return "LOW";
                     case GL_DEBUG_SEVERITY_MEDIUM: return "MEDIUM";
                     case GL_DEBUG_SEVERITY_HIGH: return "HIGH";
+                    default: return "";
                     }
                 }();
 
@@ -133,7 +134,7 @@ namespace RIS
         float maxAniso;
         glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &maxAniso);
 
-        float aniso = static_cast<float>(config.GetInt("r_anisotropic", 16));
+        float aniso = static_cast<float>(config.GetInt("r_anisotropic", static_cast<int>(maxAniso)));
         if(aniso > maxAniso)
         {
             aniso = maxAniso;
@@ -234,5 +235,10 @@ namespace RIS
     void GLRenderer::Resize(int width, int height)
     {
         glViewport(0, 0, width, height);
+    }
+
+    I2DRenderer& GLRenderer::Get2DRenderer()
+    {
+        return renderer2d;
     }
 }

@@ -5,8 +5,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <gli/gli.hpp>
-
 using namespace gl46core;
 
 namespace RIS

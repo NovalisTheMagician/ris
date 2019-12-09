@@ -8,7 +8,7 @@ namespace RIS
     class I2DRenderer
     {
     public:
-        virtual ~I2DRenderer();
+        virtual ~I2DRenderer() = default;
 
         virtual void SetViewsize(int width, int height) = 0;
         virtual void SetPosition(const glm::vec2 &positino) = 0;
@@ -42,6 +42,6 @@ namespace RIS
 
         virtual void Resize(int width, int height) = 0;
 
-        virtual I2DRenderer& Get2DRenderer() const = 0;
+        virtual I2DRenderer& Get2DRenderer() = 0;
     };
 }

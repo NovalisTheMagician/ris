@@ -85,6 +85,7 @@ int main(int argc, char *argv[])
         input = factory.CreateInput();
 
         renderer->LoadRequiredResources();
+        userinterface->InitializeRootElements();
     }
     catch(const std::exception& e)
     {

@@ -66,6 +66,8 @@ namespace RIS
         gl::GLuint pipelineId;
     };
 
+    class Buffer;
+
     class Texture
     {
     public:
@@ -81,6 +83,9 @@ namespace RIS
         void Create(const std::byte *data, const std::size_t &size);
         void Create(gl::GLenum format, int width, int height);
         void Create(const glm::vec4 color);
+        void CreateTexBuffer();
+
+        void SetBuffer(const Buffer &buffer);
 
         void Bind(gl::GLuint textureUnit);
 
@@ -159,11 +164,22 @@ namespace RIS
         Buffer(Buffer &&other);
         Buffer& operator=(Buffer &&other);
 
-        template<typename T>
-        void Create(gl::GLenum type, gl::BufferStorageMask usage, const std::vector<T> &data, bool immutable = false);
+        void Create();
+
+        void Reserve(gl::GLenum usage, std::size_t size);
 
         template<typename T>
-        void UpdateData(const std::vector<T> &data);
+        void SetImmutableData(gl::BufferStorageMask usage, const std::vector<T> &data);
+        template<typename T>
+        void SetImmutableData(gl::BufferStorageMask usage, const T &data);
+        template<typename T>
+        void SetData(gl::GLenum usage, const std::vector<T> &data);
+        template<typename T>
+        void SetData(gl::GLenum usage, const T &data);
+        template<typename T>
+        void UpdateData(const std::vector<T> &data, std::size_t offset = 0);
+        template<typename T>
+        void UpdateData(const T &data, std::size_t offset = 0);
 
         void Bind(int bindBase);
 
@@ -178,32 +194,54 @@ namespace RIS
     };
 
     template<typename T>
-    void Buffer::Create(gl::GLenum type, gl::BufferStorageMask usage, const std::vector<T> &data, bool immutable)
+    void Buffer::SetImmutableData(gl::BufferStorageMask usage, const std::vector<T> &data)
     {
-        using namespace gl46core;
-        glCreateBuffers(1, &bufferId);
-        isImmutable = immutable;
+        isImmutable = true;
         elementSize = sizeof(T);
-        std::size_t size = data.size * elementSize;
-        if(isImmutable)
-        {
-            glNamedBufferStorage(bufferId, size, data.data(), usage);
-        }
-        else
-        {
-            glNamedBufferData(bufferId, size, data.data(), usage);
-        }
+        std::size_t size = data.size() * elementSize;
+        glNamedBufferStorage(bufferId, size, data.data(), usage);
     }
 
     template<typename T>
-    void Buffer::UpdateData(const std::vector<T> &data)
+    void Buffer::SetImmutableData(gl::BufferStorageMask usage, const T &data)
+    {
+        isImmutable = true;
+        elementSize = sizeof(T);
+        glNamedBufferStorage(bufferId, elementSize, reinterpret_cast<const T*>(&data), usage);
+    }
+
+    template<typename T>
+    void Buffer::SetData(gl::GLenum usage, const std::vector<T> &data)
+    {
+        isImmutable = false;
+        elementSize = sizeof(T);
+        std::size_t size = data.size() * elementSize;
+        glNamedBufferData(bufferId, size, data.data(), usage);
+    }
+
+    template<typename T>
+    void Buffer::SetData(gl::GLenum usage, const T &data)
+    {
+        isImmutable = false;
+        elementSize = sizeof(T);
+        glNamedBufferData(bufferId, elementSize, reinterpret_cast<const T*>(&data), usage);
+    }
+
+    template<typename T>
+    void Buffer::UpdateData(const std::vector<T> &data, std::size_t offset)
     {
         if(isImmutable)
             return; // maybe throw an exception here
+        std::size_t size = data.size() * elementSize;
+        glNamedBufferSubData(bufferId, offset, size, data.data());
+    }
 
-        elementSize = sizeof(T);
-        std::size_t = data.size * elementSize;
-        glNamedBufferSubData(bufferId, 0, size, data.data());
+    template<typename T>
+    void Buffer::UpdateData(const T &data, std::size_t offset)
+    {
+        if(isImmutable)
+            return; // maybe throw an exception here
+        glNamedBufferSubData(bufferId, offset, elementSize, reinterpret_cast<const T*>(&data));
     }
 
     class VertexArray
@@ -255,6 +293,8 @@ namespace RIS
         GL2DRenderer(GLRenderer &renderer);
         ~GL2DRenderer();
 
+        void Setup();
+
         void SetViewsize(int width, int height) override;
         void SetPosition(const glm::vec2 &positino) override;
 
@@ -268,9 +308,30 @@ namespace RIS
         void DrawQuad(int width, int height) override;
 
     private:
+        static const int MAX_CHARS;
+
+    private:
+        struct PerFrameBuffer
+        {
+            glm::mat4 projection;
+        };
+
+        struct PerObjectBuffer
+        {
+            glm::mat4 world;
+            glm::vec4 color;
+        };
+
+    private:
         GLRenderer &renderer;
 
-        glm::mat4 projection;
+        PerFrameBuffer perFrame;
+        PerObjectBuffer perObject;
+
+        Buffer perFrameBuffer, perObjectBuffer;
+
+        Buffer textBuffer, uiBuffer;
+        VertexArray uiLayout;
 
     };
 
@@ -323,6 +384,8 @@ namespace RIS
 
         GL2DRenderer renderer2d;
         Camera camera;
+
+        friend GL2DRenderer;
 
     };
 }

@@ -53,7 +53,10 @@ namespace RIS
         for(std::size_t level = 0; level < texture.levels(); ++level)
         {
             extent = glm::tvec3<GLsizei>(texture.extent(level));
-            glCompressedTextureSubImage2D(textureId, static_cast<GLint>(level), 0, 0, extent.x, extent.y, static_cast<GLenum>(format.Internal), static_cast<GLsizei>(texture.size(level)), texture.data(0, 0, level));
+            if(gli::is_compressed(texture.format()))
+                glCompressedTextureSubImage2D(textureId, static_cast<GLint>(level), 0, 0, extent.x, extent.y, static_cast<GLenum>(format.Internal), static_cast<GLsizei>(texture.size(level)), texture.data(0, 0, level));
+            else
+                glTextureSubImage2D(textureId, static_cast<GLint>(level), 0, 0, extent.x, extent.y, static_cast<GLenum>(format.External), static_cast<GLenum>(format.Type), texture.data(0, 0, level));
         }
         
         if(texture.levels() == 1)
@@ -75,6 +78,16 @@ namespace RIS
         glCreateTextures(GL_TEXTURE_2D, 1, &textureId);
         glTextureStorage2D(textureId, 1, GL_RGBA8, 1, 1);
         glTextureSubImage2D(textureId, 0, 0, 0, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, glm::value_ptr(color));
+    }
+
+    void Texture::CreateTexBuffer()
+    {
+        glCreateTextures(GL_TEXTURE_BUFFER, 1, &textureId);
+    }
+
+    void Texture::SetBuffer(const Buffer &buffer)
+    {
+        glTextureBuffer(textureId, GL_TEXTURE_BUFFER, buffer.GetId());
     }
 
     void Texture::Bind(GLuint textureUnit)

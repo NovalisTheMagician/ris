@@ -44,10 +44,12 @@ namespace RIS
         while (!window.HandleMessages())
         {
             timer.Update();
-            
             input.Update();
 
+            interface.Update();
+
             renderer.Clear(0, clearColor);
+            interface.Draw();
             window.Present();
         }
 

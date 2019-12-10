@@ -32,6 +32,16 @@ namespace RIS
         return *this;
     }
 
+    void Buffer::Create()
+    {
+        glCreateBuffers(1, &bufferId);
+    }
+
+    void Buffer::Reserve(gl::GLenum usage, std::size_t size)
+    {
+        glNamedBufferData(bufferId, size, nullptr, usage);
+    }
+
     void Buffer::Bind(int bindBase)
     {
         glBindBufferBase(GL_UNIFORM_BUFFER, bindBase, bufferId);

@@ -111,6 +111,8 @@ namespace RIS
         std::string renderer = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
 
         log.Info("Using OpenGL version " + version + " from " + vendor + " with shaderversion " + shaderVersion + " on " + renderer);
+
+        renderer2d.Setup();
     }
 
     GLRenderer::~GLRenderer()
@@ -120,6 +122,10 @@ namespace RIS
 
     void GLRenderer::LoadRequiredResources()
     {
+        int width = config.GetInt("r_width", 800);
+        int height = config.GetInt("r_height", 600);
+        renderer2d.SetViewsize(width, height);
+
         framebuffers.emplace(DEFAULT_FRAMBUFFER_ID, 0);
 
         Texture defaultTexture;
@@ -201,7 +207,7 @@ namespace RIS
             framebufferHeight = config.GetInt("r_height", 600);
 
         Framebuffer framebuffer;
-        framebuffer.Create(framebufferWidth, framebufferHeight, GL_RGBA, useDepth);
+        framebuffer.Create(framebufferWidth, framebufferHeight, GL_RGBA8, useDepth);
         framebuffers[id] = std::move(framebuffer);
 
         return id;

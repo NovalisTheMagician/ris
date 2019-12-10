@@ -123,6 +123,8 @@ namespace RIS
     void SimpleUserinterface::InitializeRootElements()
     {
         IRenderer &renderer = systems.GetRenderer();
+        uiWidth = config.GetInt("r_width", 800);
+        uiHeight = config.GetInt("r_height", 600);
         uiFramebufferId = renderer.CreateFramebuffer(uiWidth, uiHeight, false);
     }
 
@@ -157,14 +159,20 @@ namespace RIS
     void SimpleUserinterface::Draw()
     {
         IRenderer &renderer = systems.GetRenderer();
+        I2DRenderer &renderer2D = renderer.Get2DRenderer();
         renderer.Clear(uiFramebufferId, glm::vec4(0, 0, 0, 0));
+        renderer.SetFramebuffer(uiFramebufferId);
 
-        //begin 2d rendering
-        //bind specific framebuffer
+        renderer2D.Begin();
 
         rootContainer->Draw(renderer);
 
-        //end 2d rendering
+        renderer2D.SetTexture(1, 0);
+        renderer2D.SetColor(glm::vec4(0, 1, 0, 1));
+        renderer2D.SetPosition(glm::vec2(100, 100));
+        renderer2D.DrawQuad(100, 100);
+
+        renderer2D.End();
 
     }
 

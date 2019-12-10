@@ -1,4 +1,4 @@
-#version 450 core
+#version 450core
 #pragma shader_stage(vertex)
 
 #include "common2d.glsli"
@@ -11,8 +11,6 @@ layout(location=2) out vec2 texCoords;
 out gl_PerVertex
 {
     vec4 gl_Position;
-    float gl_PointSize;
-    float gl_ClipDistance[];
 };
 
 void main()

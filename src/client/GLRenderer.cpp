@@ -20,6 +20,8 @@
 
 #include "common/ILoader.hpp"
 
+#include "VertexTypes.hpp"
+
 using namespace gl46core;
 using namespace std::literals;
 
@@ -113,15 +115,7 @@ namespace RIS
         log.Info("Using OpenGL version " + version + " from " + vendor + " with shaderversion " + shaderVersion + " on " + renderer);
 
         renderer2d.Setup();
-    }
 
-    GLRenderer::~GLRenderer()
-    {
-        textures.clear();
-    }
-
-    void GLRenderer::LoadRequiredResources()
-    {
         int width = config.GetInt("r_width", 800);
         int height = config.GetInt("r_height", 600);
         renderer2d.SetViewsize(width, height);
@@ -154,6 +148,43 @@ namespace RIS
         uiSampler.SetMinFilter(GL_LINEAR);
         uiSampler.SetMagFilter(GL_LINEAR);
 
+        pipeline.Create();
+
+        /*
+        { xpos,     ypos + h,   0.0, 0.0 },            
+        { xpos,     ypos,       0.0, 1.0 },
+        { xpos + w, ypos,       1.0, 1.0 },
+
+        { xpos,     ypos + h,   0.0, 0.0 },
+        { xpos + w, ypos,       1.0, 1.0 },
+        { xpos + w, ypos + h,   1.0, 0.0 }    
+        */
+
+        std::vector<VertexType::UIVertex> vertices(6);
+        vertices[0] = {{-1, 1}, {0, 0}};
+        vertices[1] = {{-1, -1}, {0, 1}};
+        vertices[2] = {{1, -1}, {1, 1}};
+
+        vertices[3] = {{-1, 1}, {0, 0}};
+        vertices[4] = {{1, -1}, {1, 1}};
+        vertices[5] = {{1, 1}, {1, 0}};
+
+        fullscreenQuad.Create();
+        fullscreenQuad.SetImmutableData(GL_DYNAMIC_STORAGE_BIT, vertices);
+
+        postprocessVAO.Create();
+        postprocessVAO.SetAttribFormat(0, 2, GL_FLOAT, offsetof(VertexType::UIVertex, position));
+        postprocessVAO.SetAttribFormat(1, 2, GL_FLOAT, offsetof(VertexType::UIVertex, texCoords));
+        postprocessVAO.SetVertexBuffer(fullscreenQuad, 0);
+    }
+
+    GLRenderer::~GLRenderer()
+    {
+        textures.clear();
+    }
+
+    void GLRenderer::LoadRequiredResources()
+    {
         ILoader &loader = systems.GetLoader();
         size_t size;
         auto shaderBin = loader.LoadAsset(AssetType::SHADER, "ui_vert", size);
@@ -164,6 +195,12 @@ namespace RIS
 
         shaderBin = loader.LoadAsset(AssetType::SHADER, "ui_text", size);
         uiText.Create(shaderBin.get(), size, GL_FRAGMENT_SHADER);
+
+        shaderBin = loader.LoadAsset(AssetType::SHADER, "ppVert", size);
+        ppVertex.Create(shaderBin.get(), size, GL_VERTEX_SHADER);
+
+        shaderBin = loader.LoadAsset(AssetType::SHADER, "ppCopy", size);
+        ppCopy.Create(shaderBin.get(), size, GL_FRAGMENT_SHADER);
     }
 
     int GLRenderer::LoadTexture(const std::string &name)
@@ -234,6 +271,26 @@ namespace RIS
     {
         Framebuffer &framebuffer = framebuffers.at(framebufferId);
         framebuffer.Clear(clearColor, depth);
+    }
+
+    void GLRenderer::Draw(int framebufferId)
+    {
+        if(framebuffers.count(framebufferId) != 1)
+            return;
+        
+        auto &framebuffer = framebuffers.at(framebufferId);
+        framebuffer.GetColorTexture().Bind(0);
+        uiSampler.Bind(0);
+
+        postprocessVAO.Bind();
+
+        pipeline.SetShader(ppVertex, GL_VERTEX_SHADER_BIT);
+        pipeline.SetShader(ppCopy, GL_FRAGMENT_SHADER_BIT);
+        pipeline.Use();
+
+        SetFramebuffer(DEFAULT_FRAMBUFFER_ID);
+
+        glDrawArrays(GL_TRIANGLES, 0, 6);
     }
 
     void GLRenderer::Resize(int width, int height)

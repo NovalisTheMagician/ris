@@ -27,6 +27,8 @@ namespace RIS
     Framebuffer::Framebuffer(Framebuffer &&other)
     {
         framebufferId = other.framebufferId;
+        colorTexture = std::move(other.colorTexture);
+        depthTexture = std::move(other.depthTexture);
         other.framebufferId = 0;
     }
 
@@ -34,6 +36,8 @@ namespace RIS
     {
         framebufferId = other.framebufferId;
         other.framebufferId = 0;
+        colorTexture = std::move(other.colorTexture);
+        depthTexture = std::move(other.depthTexture);
         return *this;
     }
 
@@ -65,12 +69,12 @@ namespace RIS
         return framebufferId;
     }
 
-    const Texture& Framebuffer::GetColorTexture() const
+    Texture& Framebuffer::GetColorTexture()
     {
         return colorTexture;
     }
 
-    const Texture& Framebuffer::GetDepthTexture() const
+    Texture& Framebuffer::GetDepthTexture()
     {
         return depthTexture;
     }

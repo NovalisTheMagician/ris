@@ -90,6 +90,7 @@ namespace RIS
     {
         perObjectBuffer.UpdateData(perObject);
         renderer.pipeline.SetShader(renderer.uiText, GL_FRAGMENT_SHADER_BIT);
+        renderer.pipeline.Use();
         uiLayout.SetVertexBuffer(textBuffer, 0);
     }
 
@@ -97,6 +98,7 @@ namespace RIS
     {
         perObjectBuffer.UpdateData(perObject);
         renderer.pipeline.SetShader(renderer.uiFragment, GL_FRAGMENT_SHADER_BIT);
+        renderer.pipeline.Use();
         uiLayout.SetVertexBuffer(uiBuffer, 0);
 
         /*

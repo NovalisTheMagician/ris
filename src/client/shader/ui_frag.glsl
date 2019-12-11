@@ -1,4 +1,4 @@
-#version 450 core
+#version 450
 #pragma shader_stage(fragment)
 
 #include "common2d.glsli"

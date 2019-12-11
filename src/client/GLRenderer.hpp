@@ -115,8 +115,8 @@ namespace RIS
 
         gl::GLuint GetId() const;
 
-        const Texture& GetColorTexture() const;
-        const Texture& GetDepthTexture() const;
+        Texture& GetColorTexture();
+        Texture& GetDepthTexture();
 
     private:
         gl::GLuint framebufferId;
@@ -358,6 +358,8 @@ namespace RIS
 
         void Clear(int framebufferId, const glm::vec4 &clearColor = glm::vec4(0, 0, 0, 1), float depth = 1.0f) override;
 
+        void Draw(int framebufferId) override;
+
         void Resize(int width, int height) override;
 
         I2DRenderer& Get2DRenderer() override;
@@ -376,6 +378,10 @@ namespace RIS
 
         int highestUnusedFrambufId;
         std::unordered_map<int, Framebuffer> framebuffers;
+
+        Buffer fullscreenQuad;
+        VertexArray postprocessVAO;
+        Shader ppVertex, ppCopy;
 
         Sampler defaultSampler, uiSampler;
 

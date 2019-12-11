@@ -40,6 +40,8 @@ namespace RIS
 
         virtual void Clear(int framebufferId, const glm::vec4 &clearColor = glm::vec4(0, 0, 0, 1), float depth = 1.0f) = 0;
 
+        virtual void Draw(int framebufferId) = 0;
+
         virtual void Resize(int width, int height) = 0;
 
         virtual I2DRenderer& Get2DRenderer() = 0;

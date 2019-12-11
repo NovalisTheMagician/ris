@@ -1,4 +1,4 @@
-#version 450core
+#version 450
 #pragma shader_stage(vertex)
 
 #include "common2d.glsli"

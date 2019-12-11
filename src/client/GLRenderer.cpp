@@ -153,6 +153,13 @@ namespace RIS
         postprocessVAO.SetAttribFormat(0, 2, GL_FLOAT, offsetof(VertexType::UIVertex, position));
         postprocessVAO.SetAttribFormat(1, 2, GL_FLOAT, offsetof(VertexType::UIVertex, texCoords));
         postprocessVAO.SetVertexBuffer(fullscreenQuad, 0);
+
+        GLenum enc;
+        glGetNamedFramebufferAttachmentParameteriv(0, GL_FRONT_LEFT, GL_FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING, &enc);
+        if(enc != GL_SRGB)
+        {
+            Logger::Instance().Warning("Window is not sRGB capable!");
+        }
     }
 
     GLRenderer::~GLRenderer()
@@ -218,6 +225,9 @@ namespace RIS
             framebufferWidth = config.GetInt("r_width", 800);
         if(height == -1)
             framebufferHeight = config.GetInt("r_height", 600);
+
+        //GL_SRGB8_ALPHA8
+        //GL_RGBA8
 
         Framebuffer framebuffer = Framebuffer::Create(framebufferWidth, framebufferHeight, GL_RGBA8, useDepth);
         framebuffers[id] = std::move(framebuffer);

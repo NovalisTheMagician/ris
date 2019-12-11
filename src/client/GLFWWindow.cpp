@@ -33,6 +33,11 @@ namespace RIS
         int fullscreen = config.GetInt("r_fullscreen", 0);
         bool vsync = config.GetInt("r_vsync", 0);
 
+        glfwWindowHint(GLFW_RED_BITS, 8);
+        glfwWindowHint(GLFW_GREEN_BITS, 8);
+        glfwWindowHint(GLFW_BLUE_BITS, 8);
+        glfwWindowHint(GLFW_ALPHA_BITS, 8);
+
         if(fullscreen == 0) // windowed mode
         {
             window = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
@@ -76,7 +81,7 @@ namespace RIS
         glfwMakeContextCurrent(window);
         glfwSwapInterval(vsync);
 
-        glfwSwapInterval(1);
+        //glfwSwapInterval(1);
     }
 
     GLFWWindow::~GLFWWindow()

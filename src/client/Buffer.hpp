@@ -15,14 +15,14 @@ namespace RIS
     {
     private:
         Buffer(const T &data, gl::GLenum usage)
-            : isImmutable(false), elementSize(sizeof(T))
+            : elementSize(sizeof(T))
         {
             gl::glCreateBuffers(1, &id);
             gl::glNamedBufferData(id, elementSize, reinterpret_cast<const T*>(&data), usage);
         };
 
         Buffer(const std::vector<T> &data, gl::GLenum usage)
-            : isImmutable(false), elementSize(sizeof(T))
+            : elementSize(sizeof(T))
         {
             gl::glCreateBuffers(1, &id);
             std::size_t size = data.size() * elementSize;
@@ -30,25 +30,32 @@ namespace RIS
         };
 
         Buffer(std::size_t numElements, gl::GLenum usage)
-            : isImmutable(false), elementSize(sizeof(T))
+            : elementSize(sizeof(T))
         {
             gl::glCreateBuffers(1, &id);
             gl::glNamedBufferData(id, numElements * elementSize, nullptr, usage);
         };
 
         Buffer(const T &data, gl::BufferStorageMask usage)
-            : isImmutable(true), elementSize(sizeof(T))
+            : elementSize(sizeof(T))
         {
             gl::glCreateBuffers(1, &id);
             gl::glNamedBufferStorage(id, elementSize, reinterpret_cast<const T*>(&data), usage);
         };
 
         Buffer(const std::vector<T> &data, gl::BufferStorageMask usage)
-            : isImmutable(true), elementSize(sizeof(T))
+            : elementSize(sizeof(T))
         {
             gl::glCreateBuffers(1, &id);
             std::size_t size = data.size() * elementSize;
             gl::glNamedBufferStorage(id, size, data.data(), usage);
+        };
+
+        Buffer(std::size_t numElements, gl::BufferStorageMask usage)
+            : elementSize(sizeof(T))
+        {
+            gl::glCreateBuffers(1, &id);
+            gl::glNamedBufferData(id, numElements * elementSize, nullptr, usage);
         };
 
     public:
@@ -63,7 +70,6 @@ namespace RIS
             id = other.id;
             other.id = 0;
             elementSize = other.elementSize;
-            isImmutable = other.isImmutable;
         };
 
         Buffer& operator=(Buffer &&other)
@@ -71,7 +77,6 @@ namespace RIS
             id = other.id;
             other.id = 0;
             elementSize = other.elementSize;
-            isImmutable = other.isImmutable;
             return *this;
         };
 
@@ -93,13 +98,13 @@ namespace RIS
     public:
         static Buffer<T> Create(const T &data, gl::GLenum usage) { return Buffer<T>(data, usage); };
         static Buffer<T> Create(const std::vector<T> &data, gl::GLenum usage) { return Buffer<T>(data, usage); };
-        static Buffer<T> Create(std::size_t size, gl::GLenum usage) { return Buffer<T>(size, usage); };
+        static Buffer<T> Create(std::size_t numElements, gl::GLenum usage) { return Buffer<T>(numElements, usage); };
 
         static Buffer<T> CreateImmutable(const T &data, gl::BufferStorageMask usage) { return Buffer<T>(data, usage); };
         static Buffer<T> CreateImmutable(const std::vector<T> &data, gl::BufferStorageMask usage) { return Buffer<T>(data, usage); };
+        static Buffer<T> CreateImmutable(std::size_t numElements, gl::BufferStorageMask usage) { return Buffer<T>(numElements, usage); };
 
     private:
-        bool isImmutable;
         std::size_t elementSize;
 
     };

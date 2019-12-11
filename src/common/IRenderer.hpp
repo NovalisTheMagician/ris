@@ -11,16 +11,14 @@ namespace RIS
         virtual ~I2DRenderer() = default;
 
         virtual void SetViewsize(int width, int height) = 0;
-        virtual void SetPosition(const glm::vec2 &positino) = 0;
 
         virtual void SetTexture(int textureId, int textureUnit) = 0;
-        virtual void SetColor(const glm::vec4 &color) = 0;
 
         virtual void Begin() = 0;
         virtual void End() = 0; // ??? really needed?
 
         virtual void DrawText(const std::string &text) = 0;
-        virtual void DrawQuad(int width, int height) = 0;
+        virtual void DrawQuad(const glm::vec2 &position, const glm::vec2 &size, const glm::vec4 &color) = 0;
     };
 
     class IRenderer

@@ -1,7 +1,7 @@
 #version 450
 #pragma shader_stage(vertex)
 
-#include "common2d.glsli"
+#include "uiCommon.glsli"
 
 layout(location=0) in vec2 attribPos;
 layout(location=1) in vec2 attribTexCoords;
@@ -15,7 +15,9 @@ out gl_PerVertex
 
 void main()
 {
-    //gl_Position = perFrame.projection * perObject.world * vec4(attribPos, 0, 1);
-    gl_Position = vec4(attribPos, 0, 1);
+    vec2 pos = attribPos * perObject.size + perObject.position;
+    pos = ((pos / perFrame.viewSize) * vec2(2)) - vec2(1);
+
+    gl_Position = vec4(pos, 0, 1);
     texCoords = attribTexCoords;
 }

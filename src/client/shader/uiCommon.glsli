@@ -1,10 +1,11 @@
 layout(std140, binding=0) uniform perFrameMatrices 
 {
-    mat4 projection;
+    vec2 viewSize;
 } perFrame;
 
 layout(std140, binding=1) uniform perObjectMatrices
 {
-    mat4 world;
     vec4 color;
+    vec2 position;
+    vec2 size;
 } perObject;

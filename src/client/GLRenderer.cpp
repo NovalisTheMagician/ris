@@ -13,7 +13,7 @@
 #include <gli/gli.hpp>
 
 #include <iostream>
-
+#include <vector>
 #include <string>
 
 #include "common/Logger.hpp"
@@ -118,7 +118,7 @@ namespace RIS
 
         int width = config.GetInt("r_width", 800);
         int height = config.GetInt("r_height", 600);
-        renderer2d.SetViewsize(width, height);
+        Resize(width, height);
 
         framebuffers.emplace(DEFAULT_FRAMBUFFER_ID, 0);
 
@@ -140,25 +140,13 @@ namespace RIS
 
         pipeline = ProgramPipeline::Create();
 
-        /*
-        { xpos,     ypos + h,   0.0, 0.0 },            
-        { xpos,     ypos,       0.0, 1.0 },
-        { xpos + w, ypos,       1.0, 1.0 },
-
-        { xpos,     ypos + h,   0.0, 0.0 },
-        { xpos + w, ypos,       1.0, 1.0 },
-        { xpos + w, ypos + h,   1.0, 0.0 }    
-        */
-
         std::vector<VertexType::UIVertex> vertices(6);
-        vertices[0] = {{-1, 1}, {0, 0}};
-        vertices[1] = {{-1, -1}, {0, 1}};
-        vertices[2] = {{1, -1}, {1, 1}};
-
-        vertices[3] = {{-1, 1}, {0, 0}};
-        vertices[4] = {{1, -1}, {1, 1}};
-        vertices[5] = {{1, 1}, {1, 0}};
-
+        vertices[0] = {{-1, -1}, {0, 0}};
+        vertices[1] = {{-1, 1}, {0, 1}};
+        vertices[2] = {{1, 1}, {1, 1}};
+        vertices[3] = {{-1, -1}, {0, 0}};
+        vertices[4] = {{1, 1}, {1, 1}};
+        vertices[5] = {{1, -1}, {1, 0}};
         fullscreenQuad = Buffer<VertexType::UIVertex>::CreateImmutable(vertices, GL_DYNAMIC_STORAGE_BIT);
 
         postprocessVAO = VertexArray::Create();
@@ -262,8 +250,11 @@ namespace RIS
 
     void GLRenderer::Draw(int framebufferId)
     {
-        if(framebuffers.count(framebufferId) != 1)
+        if(framebufferId == DEFAULT_FRAMBUFFER_ID || framebuffers.count(framebufferId) != 1)
             return;
+
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         
         auto &framebuffer = framebuffers.at(framebufferId);
         framebuffer.GetColorTexture().Bind(0);
@@ -283,6 +274,7 @@ namespace RIS
     void GLRenderer::Resize(int width, int height)
     {
         glViewport(0, 0, width, height);
+        renderer2d.SetViewsize(width, height);
     }
 
     I2DRenderer& GLRenderer::Get2DRenderer()

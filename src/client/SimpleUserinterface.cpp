@@ -120,12 +120,16 @@ namespace RIS
 
     }
 
+    int meow;
+
     void SimpleUserinterface::InitializeRootElements()
     {
         IRenderer &renderer = systems.GetRenderer();
         uiWidth = config.GetInt("r_width", 800);
         uiHeight = config.GetInt("r_height", 600);
-        uiFramebufferId = renderer.CreateFramebuffer(uiWidth, uiHeight, false);
+        uiFramebufferId = renderer.CreateFramebuffer(uiWidth, uiHeight, true);
+
+        meow = renderer.LoadTexture("meow");
     }
 
     void SimpleUserinterface::LoadLayout(const std::string &layout)
@@ -167,15 +171,12 @@ namespace RIS
 
         rootContainer->Draw(renderer);
 
-        renderer2D.SetTexture(1, 0);
-        renderer2D.SetColor(glm::vec4(0, 1, 0, 1));
-        renderer2D.SetPosition(glm::vec2(100, 100));
-        renderer2D.DrawQuad(100, 100);
+        renderer2D.SetTexture(meow, 0);
+        renderer2D.DrawQuad({0, 0}, {512, 512}, {1, 1, 1, 1});
 
         renderer2D.End();
 
         renderer.Draw(uiFramebufferId);
-
     }
 
     void SimpleUserinterface::Update()

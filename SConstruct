@@ -76,6 +76,8 @@ env.Clean(server, 'bin/RIS_server.lib')
 dyn_copy = env.Install('bin/', dyn_libs)
 shader_copy = env.Install('bin/assets/shaders/', shader_objs)
 
+env.Depends(shader_copy, shader_objs)
+
 env.Depends(client, shader_copy)
 env.Depends(client, dyn_copy)
 env.Default(client)

@@ -1,7 +1,7 @@
 #version 450
 #pragma shader_stage(fragment)
 
-#include "common2d.glsli"
+#include "uiCommon.glsli"
 
 layout(binding=0) uniform sampler2D tex;
 
@@ -12,6 +12,6 @@ layout(location=0) out vec4 fragColor;
 void main()
 {
     vec4 texColor = texture(tex, texCoords);
-    //fragColor = texColor * perObject.color;
-    fragColor = perObject.color;
+    fragColor = texColor * perObject.color;
+    //fragColor = perObject.color;
 }

@@ -37,19 +37,23 @@ namespace RIS
         uiLayout.SetAttribFormat(0, 2, GL_FLOAT, offsetof(UIVertex, position));
         uiLayout.SetAttribFormat(1, 2, GL_FLOAT, offsetof(UIVertex, texCoords));
 
-        uiBuffer = Buffer<UIVertex>::Create(6, GL_DYNAMIC_DRAW);
+        std::vector<UIVertex> vertices;
+        vertices.push_back({ {0, 1}, {0, 0} });
+        vertices.push_back({ {0, 0}, {0, 1} });
+        vertices.push_back({ {1, 0}, {1, 1} });
+
+        vertices.push_back({ {0, 1}, {0, 0} });
+        vertices.push_back({ {1, 0}, {1, 1} });
+        vertices.push_back({ {1, 1}, {1, 0} });
+
+        uiBuffer = Buffer<UIVertex>::CreateImmutable(vertices, GL_DYNAMIC_STORAGE_BIT);
         textBuffer = Buffer<UIVertex>::Create(MAX_CHARS*6, GL_DYNAMIC_DRAW);
     }
 
     void GL2DRenderer::SetViewsize(int width, int height)
     {
-        perFrame.projection = glm::ortho(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height));
+        perFrame.viewSize = glm::vec2(static_cast<float>(width), static_cast<float>(height));
         perFrameBuffer.UpdateData(perFrame);
-    }
-
-    void GL2DRenderer::SetPosition(const glm::vec2 &position)
-    {
-        perObject.world = glm::translate(glm::mat4(), glm::vec3(position, 0));
     }
 
     void GL2DRenderer::SetTexture(int textureId, int textureUnit)
@@ -58,11 +62,6 @@ namespace RIS
             return;
         auto &texture = renderer.textures.at(textureId);
         texture.Bind(textureUnit);
-    }
-
-    void GL2DRenderer::SetColor(const glm::vec4 &color)
-    {
-        perObject.color = color;
     }
 
     void GL2DRenderer::Begin()
@@ -92,23 +91,15 @@ namespace RIS
         uiLayout.SetVertexBuffer(textBuffer, 0);
     }
 
-    void GL2DRenderer::DrawQuad(int width, int height)
+    void GL2DRenderer::DrawQuad(const glm::vec2 &position, const glm::vec2 &size, const glm::vec4 &color)
     {
-        std::vector<UIVertex> vertices;
-        vertices.push_back({ {0, 0.5f},   {0, 0} });
-        vertices.push_back({ {0, 0},        {0, 1} });
-        vertices.push_back({ {0.5f, 0},    {1, 1} });
-
-        vertices.push_back({ {0, 0.5f},   {0, 0} });
-        vertices.push_back({ {0.5f, 0},    {1, 1} });
-        vertices.push_back({ {0.5f, 0.5f}, {1, 0} });
-
-        uiBuffer.UpdateData(vertices);
-
+        perObject.position = position;
+        perObject.color = color;
+        perObject.size = size;
         perObjectBuffer.UpdateData(perObject);
+        uiLayout.SetVertexBuffer(uiBuffer, 0);
         renderer.pipeline.SetShader(renderer.uiFragment);
         renderer.pipeline.Use();
-        uiLayout.SetVertexBuffer(uiBuffer, 0);
 
         glDrawArrays(GL_TRIANGLES, 0, 6);
     }

@@ -77,16 +77,12 @@ namespace RIS
 
         void UpdateData(const std::vector<T> &data, std::size_t offset = 0)
         {
-            if(isImmutable)
-                return; // maybe throw an exception here
             std::size_t size = data.size() * elementSize;
             glNamedBufferSubData(id, offset, size, data.data());
         };
 
         void UpdateData(const T &data, std::size_t offset = 0)
         {
-            if(isImmutable)
-                return; // maybe throw an exception here
             glNamedBufferSubData(id, offset, elementSize, reinterpret_cast<const T*>(&data));
         };
 

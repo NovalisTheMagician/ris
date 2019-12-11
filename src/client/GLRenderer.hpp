@@ -56,16 +56,14 @@ namespace RIS
         void Setup();
 
         void SetViewsize(int width, int height) override;
-        void SetPosition(const glm::vec2 &position) override;
 
         void SetTexture(int textureId, int textureUnit) override;
-        void SetColor(const glm::vec4 &color) override;
 
         void Begin() override;
         void End() override; // ??? really needed?
 
         void DrawText(const std::string &text) override;
-        void DrawQuad(int width, int height) override;
+        void DrawQuad(const glm::vec2 &position, const glm::vec2 &size, const glm::vec4 &color) override;
 
     private:
         static const int MAX_CHARS;
@@ -73,13 +71,14 @@ namespace RIS
     private:
         struct PerFrameBuffer
         {
-            glm::mat4 projection;
+            glm::vec2 viewSize;
         };
 
         struct PerObjectBuffer
         {
-            glm::mat4 world;
             glm::vec4 color;
+            glm::vec2 position;
+            glm::vec2 size;
         };
 
     private:

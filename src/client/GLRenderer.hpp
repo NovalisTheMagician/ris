@@ -8,8 +8,20 @@
 #include <stdexcept>
 
 #include <glbinding/gl46/gl.h>
+#include <glm/glm.hpp>
+
 #include <unordered_map>
 #include <vector>
+
+#include "VertexTypes.hpp"
+
+#include "Buffer.hpp"
+#include "Texture.hpp"
+#include "Framebuffer.hpp"
+#include "Sampler.hpp"
+#include "VertexArray.hpp"
+#include "Shader.hpp"
+#include "ProgramPipeline.hpp"
 
 namespace RIS
 {
@@ -17,258 +29,6 @@ namespace RIS
 	{
 		RendererException(std::string reason) : std::runtime_error(reason.c_str()) {}
 	};
-
-    struct ShaderException : public std::runtime_error
-    {
-        ShaderException(std::string reason) : std::runtime_error(reason.c_str()) {}
-    };
-
-    class Shader
-    {
-    public:
-        Shader();
-        ~Shader();
-
-        Shader(const Shader &) = delete;
-        Shader& operator=(const Shader &) = delete;
-
-        Shader(Shader &&other);
-        Shader& operator=(Shader &&other);
-
-        void Create(const std::byte *shaderBinary, const std::size_t &size, gl::GLenum type);
-
-        gl::GLuint GetId() const;
-
-    private:
-        gl::GLuint programId;
-
-    };
-
-    class ProgramPipeline
-    {
-    public:
-        ProgramPipeline();
-        ~ProgramPipeline();
-
-        ProgramPipeline(const ProgramPipeline &) = delete;
-        ProgramPipeline& operator=(const ProgramPipeline &) = delete;
-
-        ProgramPipeline(ProgramPipeline &&) = delete;
-        ProgramPipeline& operator=(ProgramPipeline &&) = delete;
-
-        void Create();
-        void SetShader(const Shader &shader, gl::UseProgramStageMask type);
-        void Use();
-
-        gl::GLuint GetId() const;
-
-    private:
-        gl::GLuint pipelineId;
-    };
-
-    class Buffer;
-
-    class Texture
-    {
-    public:
-        Texture();
-        ~Texture();
-
-        Texture(const Texture &) = delete;
-        Texture& operator=(const Texture &) = delete;
-
-        Texture(Texture &&other);
-        Texture& operator=(Texture &&other);
-
-        void Create(const std::byte *data, const std::size_t &size);
-        void Create(gl::GLenum format, int width, int height);
-        void Create(const glm::vec4 color);
-        void CreateTexBuffer();
-
-        void SetBuffer(const Buffer &buffer);
-
-        void Bind(gl::GLuint textureUnit);
-
-        gl::GLuint GetId() const;
-
-    private:
-        gl::GLuint textureId;
-    };
-
-    class Framebuffer
-    {
-    public:
-        Framebuffer();
-        Framebuffer(gl::GLuint frambufId);
-        ~Framebuffer();
-
-        Framebuffer(const Framebuffer &) = delete;
-        Framebuffer& operator=(const Framebuffer &) = delete;
-
-        Framebuffer(Framebuffer &&other);
-        Framebuffer& operator=(Framebuffer &&other);
-
-        void Create(int width, int height, gl::GLenum textureFormat, bool useDepth);
-        void Resize(int width, int height);
-        void Bind();
-        void Clear(const glm::vec4 &color, float depth);
-
-        gl::GLuint GetId() const;
-
-        Texture& GetColorTexture();
-        Texture& GetDepthTexture();
-
-    private:
-        gl::GLuint framebufferId;
-        Texture colorTexture;
-        Texture depthTexture;
-
-    };
-
-    class Sampler
-    {
-    public:
-        Sampler();
-        ~Sampler();
-
-        Sampler(const Sampler &) = delete;
-        Sampler& operator=(const Sampler &) = delete;
-
-        Sampler(Sampler &&other);
-        Sampler& operator=(Sampler &&other);
-
-        void Create();
-
-        void SetMinFilter(gl::GLenum minFilter);
-        void SetMagFilter(gl::GLenum magFilter);
-        void SetMaxAnisotropy(float maxAniso);
-
-        void Bind(int textureUnit);
-
-        gl::GLuint GetId() const;
-
-    private:
-        gl::GLuint samplerId;
-
-    };
-
-    class Buffer
-    {
-    public:
-        Buffer();
-        ~Buffer();
-
-        Buffer(const Buffer &) = delete;
-        Buffer& operator=(const Buffer &) = delete;
-
-        Buffer(Buffer &&other);
-        Buffer& operator=(Buffer &&other);
-
-        void Create();
-
-        void Reserve(gl::GLenum usage, std::size_t size);
-
-        template<typename T>
-        void SetImmutableData(gl::BufferStorageMask usage, const std::vector<T> &data);
-        template<typename T>
-        void SetImmutableData(gl::BufferStorageMask usage, const T &data);
-        template<typename T>
-        void SetData(gl::GLenum usage, const std::vector<T> &data);
-        template<typename T>
-        void SetData(gl::GLenum usage, const T &data);
-        template<typename T>
-        void UpdateData(const std::vector<T> &data, std::size_t offset = 0);
-        template<typename T>
-        void UpdateData(const T &data, std::size_t offset = 0);
-
-        void Bind(int bindBase);
-
-        std::size_t GetElementSize() const;
-        gl::GLuint GetId() const;
-
-    private:
-        gl::GLuint bufferId;
-        bool isImmutable;
-        std::size_t elementSize;
-
-    };
-
-    template<typename T>
-    void Buffer::SetImmutableData(gl::BufferStorageMask usage, const std::vector<T> &data)
-    {
-        isImmutable = true;
-        elementSize = sizeof(T);
-        std::size_t size = data.size() * elementSize;
-        glNamedBufferStorage(bufferId, size, data.data(), usage);
-    }
-
-    template<typename T>
-    void Buffer::SetImmutableData(gl::BufferStorageMask usage, const T &data)
-    {
-        isImmutable = true;
-        elementSize = sizeof(T);
-        glNamedBufferStorage(bufferId, elementSize, reinterpret_cast<const T*>(&data), usage);
-    }
-
-    template<typename T>
-    void Buffer::SetData(gl::GLenum usage, const std::vector<T> &data)
-    {
-        isImmutable = false;
-        elementSize = sizeof(T);
-        std::size_t size = data.size() * elementSize;
-        glNamedBufferData(bufferId, size, data.data(), usage);
-    }
-
-    template<typename T>
-    void Buffer::SetData(gl::GLenum usage, const T &data)
-    {
-        isImmutable = false;
-        elementSize = sizeof(T);
-        glNamedBufferData(bufferId, elementSize, reinterpret_cast<const T*>(&data), usage);
-    }
-
-    template<typename T>
-    void Buffer::UpdateData(const std::vector<T> &data, std::size_t offset)
-    {
-        if(isImmutable)
-            return; // maybe throw an exception here
-        std::size_t size = data.size() * elementSize;
-        glNamedBufferSubData(bufferId, offset, size, data.data());
-    }
-
-    template<typename T>
-    void Buffer::UpdateData(const T &data, std::size_t offset)
-    {
-        if(isImmutable)
-            return; // maybe throw an exception here
-        glNamedBufferSubData(bufferId, offset, elementSize, reinterpret_cast<const T*>(&data));
-    }
-
-    class VertexArray
-    {
-    public:
-        VertexArray();
-        ~VertexArray();
-
-        VertexArray(const VertexArray &) = delete;
-        VertexArray& operator=(const VertexArray &) = delete;
-
-        VertexArray(VertexArray &&other);
-        VertexArray& operator=(VertexArray &&other);
-
-        void Create();
-        void SetVertexBuffer(const Buffer &buffer, int bindingPoint);
-        void SetIndexBuffer(const Buffer &buffer);
-        void SetAttribFormat(int attrib, int numComponents, gl::GLenum type, std::size_t offset, int bindingPoint = 0);
-
-        void Bind();
-
-        gl::GLuint GetId() const;
-
-    private:
-        gl::GLuint vertexArrayId;
-
-    };
 
     class Camera
     {
@@ -296,7 +56,7 @@ namespace RIS
         void Setup();
 
         void SetViewsize(int width, int height) override;
-        void SetPosition(const glm::vec2 &positino) override;
+        void SetPosition(const glm::vec2 &position) override;
 
         void SetTexture(int textureId, int textureUnit) override;
         void SetColor(const glm::vec4 &color) override;
@@ -328,9 +88,10 @@ namespace RIS
         PerFrameBuffer perFrame;
         PerObjectBuffer perObject;
 
-        Buffer perFrameBuffer, perObjectBuffer;
+        Buffer<PerFrameBuffer> perFrameBuffer;
+        Buffer<PerObjectBuffer> perObjectBuffer;
 
-        Buffer textBuffer, uiBuffer;
+        Buffer<VertexType::UIVertex> textBuffer, uiBuffer;
         VertexArray uiLayout;
 
     };
@@ -379,7 +140,7 @@ namespace RIS
         int highestUnusedFrambufId;
         std::unordered_map<int, Framebuffer> framebuffers;
 
-        Buffer fullscreenQuad;
+        Buffer<VertexType::UIVertex> fullscreenQuad;
         VertexArray postprocessVAO;
         Shader ppVertex, ppCopy;
 

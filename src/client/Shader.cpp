@@ -1,4 +1,4 @@
-#include "GLRenderer.hpp"
+#include "Shader.hpp"
 
 #include <glbinding/gl46core/gl.h>
 
@@ -10,34 +10,13 @@ using namespace gl46core;
 namespace RIS
 {
     Shader::Shader()
-        : programId(0)
+        : GLObject(0)
     {
     }
 
-    Shader::Shader(Shader &&other)
+    Shader::Shader(const std::byte *shaderBinary, const std::size_t &size, gl::GLenum type)
     {
-        programId = other.programId;
-        other.programId = 0;
-    }
-
-    Shader& Shader::operator=(Shader &&other)
-    {
-        programId = other.programId;
-        other.programId = 0;
-        return *this;
-    }
-
-    Shader::~Shader()
-    {
-        glDeleteProgram(programId);
-    }
-
-    void Shader::Create(const std::byte *shaderBinary, const std::size_t &size, gl::GLenum type)
-    {
-        if(programId != 0)
-            glDeleteProgram(programId);
-
-        programId = glCreateProgram();
+        id = glCreateProgram();
         GLuint shader = glCreateShader(type);
         glShaderBinary(1, &shader, GL_SHADER_BINARY_FORMAT_SPIR_V, shaderBinary, size);
         glSpecializeShader(shader, "main", 0, nullptr, nullptr);
@@ -58,31 +37,66 @@ namespace RIS
             throw ShaderException("Failed to load shader");
         }
 
-        glProgramParameteri(programId, GL_PROGRAM_SEPARABLE, GL_TRUE);
-        glAttachShader(programId, shader);
-        glLinkProgram(programId);
+        glProgramParameteri(id, GL_PROGRAM_SEPARABLE, GL_TRUE);
+        glAttachShader(id, shader);
+        glLinkProgram(id);
 
-        glGetProgramiv(programId, GL_LINK_STATUS, &status);
+        glGetProgramiv(id, GL_LINK_STATUS, &status);
         if(!static_cast<bool>(status))
         {
             GLenum loglen;
-            glGetProgramiv(programId, GL_INFO_LOG_LENGTH, &loglen);
+            glGetProgramiv(id, GL_INFO_LOG_LENGTH, &loglen);
             if(loglen != 0)
             {
                 std::string errorLog(static_cast<int>(loglen), '#');
-                glGetProgramInfoLog(shader, static_cast<GLsizei>(loglen), 0, &errorLog[0]);
+                glGetProgramInfoLog(id, static_cast<GLsizei>(loglen), 0, &errorLog[0]);
                 throw ShaderException("Failed to link shader: " + errorLog);
             }
 
             throw ShaderException("Failed to link shader");
         }
 
-        glDetachShader(programId, shader);
+        glDetachShader(id, shader);
         glDeleteShader(shader);
+
+        switch(type)
+        {
+            case GL_VERTEX_SHADER: this->type = GL_VERTEX_SHADER_BIT; break;
+            case GL_FRAGMENT_SHADER: this->type = GL_FRAGMENT_SHADER_BIT; break;
+            case GL_GEOMETRY_SHADER: this->type = GL_GEOMETRY_SHADER_BIT; break;
+            case GL_TESS_CONTROL_SHADER: this->type = GL_TESS_CONTROL_SHADER_BIT; break;
+            case GL_TESS_EVALUATION_SHADER: this->type = GL_TESS_EVALUATION_SHADER_BIT; break;
+            case GL_COMPUTE_SHADER: this->type = GL_COMPUTE_SHADER_BIT; break;
+        }
     }
 
-    GLuint Shader::GetId() const
+    Shader::Shader(Shader &&other)
     {
-        return programId;
+        id = other.id;
+        type = other.type;
+        other.id = 0;
+    }
+
+    Shader& Shader::operator=(Shader &&other)
+    {
+        id = other.id;
+        type = other.type;
+        other.id = 0;
+        return *this;
+    }
+
+    Shader::~Shader()
+    {
+        glDeleteProgram(id);
+    }
+
+    Shader Shader::Create(const std::byte *shaderBinary, const std::size_t &size, gl::GLenum type)
+    {
+        return Shader(shaderBinary, size, type);
+    }
+
+    gl::UseProgramStageMask Shader::GetType() const
+    {
+        return type;
     }
 }

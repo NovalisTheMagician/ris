@@ -1,4 +1,4 @@
-#include "GLRenderer.hpp"
+#include "VertexArray.hpp"
 
 #include <glbinding/gl46core/gl.h>
 
@@ -10,57 +10,49 @@ using namespace gl46core;
 namespace RIS
 {
     VertexArray::VertexArray()
-        : vertexArrayId(0)
+        : GLObject(0)
+    {
+    }
+
+    VertexArray::VertexArray(GLuint id)
+        : GLObject(id)
     {
     }
 
     VertexArray::~VertexArray()
     {
-        glDeleteVertexArrays(1, &vertexArrayId);
+        glDeleteVertexArrays(1, &id);
     }
 
     VertexArray::VertexArray(VertexArray &&other)
     {
-        vertexArrayId = other.vertexArrayId;
-        other.vertexArrayId = 0;
+        id = other.id;
+        other.id = 0;
     }
 
     VertexArray& VertexArray::operator=(VertexArray &&other)
     {
-        vertexArrayId = other.vertexArrayId;
-        other.vertexArrayId = 0;
+        id = other.id;
+        other.id = 0;
         return *this;
     }
 
-    void VertexArray::Create()
+    VertexArray VertexArray::Create()
     {
-        glCreateVertexArrays(1, &vertexArrayId);
-    }
-
-    void VertexArray::SetVertexBuffer(const Buffer &buffer, int bindingPoint)
-    {
-        glVertexArrayVertexBuffer(vertexArrayId, bindingPoint, buffer.GetId(), 0, buffer.GetElementSize());
-    }
-
-    void VertexArray::SetIndexBuffer(const Buffer &buffer)
-    {
-        glVertexArrayElementBuffer(vertexArrayId, buffer.GetId());
+        GLuint id;
+        glCreateVertexArrays(1, &id);
+        return VertexArray(id);
     }
 
     void VertexArray::SetAttribFormat(int attrib, int numComponents, gl::GLenum type, std::size_t offset, int bindingPoint)
     {
-        glEnableVertexArrayAttrib(vertexArrayId, attrib);
-        glVertexArrayAttribFormat(vertexArrayId, attrib, numComponents, type, GL_FALSE, offset);
-        glVertexArrayAttribBinding(vertexArrayId, attrib, bindingPoint);
+        glEnableVertexArrayAttrib(id, attrib);
+        glVertexArrayAttribFormat(id, attrib, numComponents, type, GL_FALSE, offset);
+        glVertexArrayAttribBinding(id, attrib, bindingPoint);
     }
 
     void VertexArray::Bind()
     {
-        glBindVertexArray(vertexArrayId);
-    }
-
-    GLuint VertexArray::GetId() const
-    {
-        return vertexArrayId;
+        glBindVertexArray(id);
     }
 }

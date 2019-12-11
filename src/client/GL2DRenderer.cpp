@@ -7,6 +7,9 @@
 
 #include "VertexTypes.hpp"
 
+#include "Buffer.hpp"
+#include "VertexArray.hpp"
+
 using namespace gl46core;
 using namespace RIS::VertexType;
 
@@ -26,26 +29,21 @@ namespace RIS
 
     void GL2DRenderer::Setup()
     {
-        perFrameBuffer.Create();
-        perFrameBuffer.SetData(GL_DYNAMIC_DRAW, perFrame);
+        perFrameBuffer = Buffer<PerFrameBuffer>::Create(perFrame, GL_DYNAMIC_DRAW);
 
-        perObjectBuffer.Create();
-        perObjectBuffer.SetData(GL_DYNAMIC_DRAW, perObject);
+        perObjectBuffer = Buffer<PerObjectBuffer>::Create(perObject, GL_DYNAMIC_DRAW);
 
-        uiLayout.Create();
+        uiLayout = VertexArray::Create();
         uiLayout.SetAttribFormat(0, 2, GL_FLOAT, offsetof(UIVertex, position));
         uiLayout.SetAttribFormat(1, 2, GL_FLOAT, offsetof(UIVertex, texCoords));
 
-        uiBuffer.Create();
-        uiBuffer.Reserve(GL_DYNAMIC_DRAW, 6*sizeof(UIVertex));
-
-        textBuffer.Create();
-        textBuffer.Reserve(GL_DYNAMIC_DRAW, MAX_CHARS*6*sizeof(UIVertex));
+        uiBuffer = Buffer<UIVertex>::Create(6, GL_DYNAMIC_DRAW);
+        textBuffer = Buffer<UIVertex>::Create(MAX_CHARS*6, GL_DYNAMIC_DRAW);
     }
 
     void GL2DRenderer::SetViewsize(int width, int height)
     {
-        perFrame.projection = glm::ortho(0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f);
+        perFrame.projection = glm::ortho(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height));
         perFrameBuffer.UpdateData(perFrame);
     }
 
@@ -72,12 +70,12 @@ namespace RIS
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        perFrameBuffer.Bind(0);
-        perObjectBuffer.Bind(1);
+        perFrameBuffer.Bind(GL_UNIFORM_BUFFER, 0);
+        perObjectBuffer.Bind(GL_UNIFORM_BUFFER, 1);
 
         renderer.uiSampler.Bind(0);
 
-        renderer.pipeline.SetShader(renderer.uiVertex, GL_VERTEX_SHADER_BIT);
+        renderer.pipeline.SetShader(renderer.uiVertex);
         uiLayout.Bind();
     }
 
@@ -89,38 +87,28 @@ namespace RIS
     void GL2DRenderer::DrawText(const std::string &text)
     {
         perObjectBuffer.UpdateData(perObject);
-        renderer.pipeline.SetShader(renderer.uiText, GL_FRAGMENT_SHADER_BIT);
+        renderer.pipeline.SetShader(renderer.uiText);
         renderer.pipeline.Use();
         uiLayout.SetVertexBuffer(textBuffer, 0);
     }
 
     void GL2DRenderer::DrawQuad(int width, int height)
     {
-        perObjectBuffer.UpdateData(perObject);
-        renderer.pipeline.SetShader(renderer.uiFragment, GL_FRAGMENT_SHADER_BIT);
-        renderer.pipeline.Use();
-        uiLayout.SetVertexBuffer(uiBuffer, 0);
-
-        /*
-        { xpos,     ypos + h,   0.0, 0.0 },            
-        { xpos,     ypos,       0.0, 1.0 },
-        { xpos + w, ypos,       1.0, 1.0 },
-
-        { xpos,     ypos + h,   0.0, 0.0 },
-        { xpos + w, ypos,       1.0, 1.0 },
-        { xpos + w, ypos + h,   1.0, 0.0 }    
-        */
-
         std::vector<UIVertex> vertices;
-        vertices.push_back({ {0, height},   {0, 0} });
+        vertices.push_back({ {0, 0.5f},   {0, 0} });
         vertices.push_back({ {0, 0},        {0, 1} });
-        vertices.push_back({ {width, 0},    {1, 1} });
+        vertices.push_back({ {0.5f, 0},    {1, 1} });
 
-        vertices.push_back({ {0, height},   {0, 0} });
-        vertices.push_back({ {width, 0},    {1, 1} });
-        vertices.push_back({ {width, height},{1, 0} });
+        vertices.push_back({ {0, 0.5f},   {0, 0} });
+        vertices.push_back({ {0.5f, 0},    {1, 1} });
+        vertices.push_back({ {0.5f, 0.5f}, {1, 0} });
 
         uiBuffer.UpdateData(vertices);
+
+        perObjectBuffer.UpdateData(perObject);
+        renderer.pipeline.SetShader(renderer.uiFragment);
+        renderer.pipeline.Use();
+        uiLayout.SetVertexBuffer(uiBuffer, 0);
 
         glDrawArrays(GL_TRIANGLES, 0, 6);
     }

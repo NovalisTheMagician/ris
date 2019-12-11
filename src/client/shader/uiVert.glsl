@@ -15,6 +15,7 @@ out gl_PerVertex
 
 void main()
 {
-    gl_Position = perFrame.projection * perObject.world * vec4(attribPos, 0, 1);
+    //gl_Position = perFrame.projection * perObject.world * vec4(attribPos, 0, 1);
+    gl_Position = vec4(attribPos, 0, 1);
     texCoords = attribTexCoords;
 }

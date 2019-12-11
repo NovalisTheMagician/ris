@@ -122,12 +122,8 @@ namespace RIS
 
         framebuffers.emplace(DEFAULT_FRAMBUFFER_ID, 0);
 
-        Texture defaultTexture;
-        defaultTexture.Create(glm::vec4(1, 1, 1, 1));
-        Texture missingTexture;
-        missingTexture.Create(glm::vec4(1, 0, 1, 1));
-        textures.insert(std::make_pair(DEFAULT_TEXTURE_ID, std::move(defaultTexture)));
-        textures.insert(std::make_pair(MISSING_TEXTURE_ID, std::move(missingTexture)));
+        textures.insert(std::make_pair(DEFAULT_TEXTURE_ID, Texture::Create(glm::vec4(1, 1, 1, 1))));
+        textures.insert(std::make_pair(MISSING_TEXTURE_ID, Texture::Create(glm::vec4(1, 0, 1, 1))));
 
         float maxAniso;
         glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &maxAniso);
@@ -139,16 +135,10 @@ namespace RIS
             config.SetValue("r_anisotropic", static_cast<int>(aniso));
         }
 
-        defaultSampler.Create();
-        defaultSampler.SetMinFilter(GL_LINEAR_MIPMAP_LINEAR);
-        defaultSampler.SetMagFilter(GL_LINEAR);
-        defaultSampler.SetMaxAnisotropy(aniso);
+        defaultSampler = Sampler::Create(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, aniso);
+        uiSampler = Sampler::Create(GL_LINEAR, GL_LINEAR, 1.0f);
 
-        uiSampler.Create();
-        uiSampler.SetMinFilter(GL_LINEAR);
-        uiSampler.SetMagFilter(GL_LINEAR);
-
-        pipeline.Create();
+        pipeline = ProgramPipeline::Create();
 
         /*
         { xpos,     ypos + h,   0.0, 0.0 },            
@@ -169,10 +159,9 @@ namespace RIS
         vertices[4] = {{1, -1}, {1, 1}};
         vertices[5] = {{1, 1}, {1, 0}};
 
-        fullscreenQuad.Create();
-        fullscreenQuad.SetImmutableData(GL_DYNAMIC_STORAGE_BIT, vertices);
+        fullscreenQuad = Buffer<VertexType::UIVertex>::CreateImmutable(vertices, GL_DYNAMIC_STORAGE_BIT);
 
-        postprocessVAO.Create();
+        postprocessVAO = VertexArray::Create();
         postprocessVAO.SetAttribFormat(0, 2, GL_FLOAT, offsetof(VertexType::UIVertex, position));
         postprocessVAO.SetAttribFormat(1, 2, GL_FLOAT, offsetof(VertexType::UIVertex, texCoords));
         postprocessVAO.SetVertexBuffer(fullscreenQuad, 0);
@@ -187,20 +176,20 @@ namespace RIS
     {
         ILoader &loader = systems.GetLoader();
         size_t size;
-        auto shaderBin = loader.LoadAsset(AssetType::SHADER, "ui_vert", size);
-        uiVertex.Create(shaderBin.get(), size, GL_VERTEX_SHADER);
+        auto shaderBin = loader.LoadAsset(AssetType::SHADER, "uiVert", size);
+        uiVertex = Shader::Create(shaderBin.get(), size, GL_VERTEX_SHADER);
 
-        shaderBin = loader.LoadAsset(AssetType::SHADER, "ui_frag", size);
-        uiFragment.Create(shaderBin.get(), size, GL_FRAGMENT_SHADER);
+        shaderBin = loader.LoadAsset(AssetType::SHADER, "uiFrag", size);
+        uiFragment = Shader::Create(shaderBin.get(), size, GL_FRAGMENT_SHADER);
 
-        shaderBin = loader.LoadAsset(AssetType::SHADER, "ui_text", size);
-        uiText.Create(shaderBin.get(), size, GL_FRAGMENT_SHADER);
+        shaderBin = loader.LoadAsset(AssetType::SHADER, "uiText", size);
+        uiText = Shader::Create(shaderBin.get(), size, GL_FRAGMENT_SHADER);
 
         shaderBin = loader.LoadAsset(AssetType::SHADER, "ppVert", size);
-        ppVertex.Create(shaderBin.get(), size, GL_VERTEX_SHADER);
+        ppVertex = Shader::Create(shaderBin.get(), size, GL_VERTEX_SHADER);
 
         shaderBin = loader.LoadAsset(AssetType::SHADER, "ppCopy", size);
-        ppCopy.Create(shaderBin.get(), size, GL_FRAGMENT_SHADER);
+        ppCopy = Shader::Create(shaderBin.get(), size, GL_FRAGMENT_SHADER);
     }
 
     int GLRenderer::LoadTexture(const std::string &name)
@@ -211,8 +200,7 @@ namespace RIS
             std::size_t size;
             auto data = loader.LoadAsset(AssetType::TEXTURE, name, size);
 
-            Texture texture;
-            texture.Create(data.get(), size);
+            Texture texture = Texture::Create(data.get(), size);
             int id = highestUnusedTexId++;
             textures[id] = std::move(texture);
             return id;
@@ -243,8 +231,7 @@ namespace RIS
         if(height == -1)
             framebufferHeight = config.GetInt("r_height", 600);
 
-        Framebuffer framebuffer;
-        framebuffer.Create(framebufferWidth, framebufferHeight, GL_RGBA8, useDepth);
+        Framebuffer framebuffer = Framebuffer::Create(framebufferWidth, framebufferHeight, GL_RGBA8, useDepth);
         framebuffers[id] = std::move(framebuffer);
 
         return id;
@@ -284,8 +271,8 @@ namespace RIS
 
         postprocessVAO.Bind();
 
-        pipeline.SetShader(ppVertex, GL_VERTEX_SHADER_BIT);
-        pipeline.SetShader(ppCopy, GL_FRAGMENT_SHADER_BIT);
+        pipeline.SetShader(ppVertex);
+        pipeline.SetShader(ppCopy);
         pipeline.Use();
 
         SetFramebuffer(DEFAULT_FRAMBUFFER_ID);

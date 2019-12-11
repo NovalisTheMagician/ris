@@ -1,4 +1,4 @@
-#include "GLRenderer.hpp"
+#include "ProgramPipeline.hpp"
 
 #include <glbinding/gl46core/gl.h>
 
@@ -7,32 +7,47 @@ using namespace gl46core;
 namespace RIS
 {
     ProgramPipeline::ProgramPipeline()
-        : pipelineId(0)
+        : GLObject(0)
+    {
+    }
+
+    ProgramPipeline::ProgramPipeline(GLuint id)
+        : GLObject(id)
     {
     }
 
     ProgramPipeline::~ProgramPipeline()
     {
-        glDeleteProgramPipelines(1, &pipelineId);
+        glDeleteProgramPipelines(1, &id);
     }
 
-    void ProgramPipeline::Create()
+    ProgramPipeline::ProgramPipeline(ProgramPipeline &&other)
     {
-        glGenProgramPipelines(1, &pipelineId);
+        id = other.id;
+        other.id = 0;
     }
 
-    void ProgramPipeline::SetShader(const Shader &shader, UseProgramStageMask type)
+    ProgramPipeline& ProgramPipeline::operator=(ProgramPipeline &&other)
     {
-        glUseProgramStages(pipelineId, type, shader.GetId());
+        id = other.id;
+        other.id = 0;
+        return *this;
+    }
+
+    ProgramPipeline ProgramPipeline::Create()
+    {
+        GLuint id;
+        glGenProgramPipelines(1, &id);
+        return ProgramPipeline(id);
+    }
+
+    void ProgramPipeline::SetShader(const Shader &shader)
+    {
+        glUseProgramStages(id, shader.GetType(), shader.GetId());
     }
 
     void ProgramPipeline::Use()
     {
-        glBindProgramPipeline(pipelineId);
-    }
-
-    GLuint ProgramPipeline::GetId() const
-    {
-        return pipelineId;
+        glBindProgramPipeline(id);
     }
 }

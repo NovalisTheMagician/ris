@@ -55,7 +55,7 @@ namespace RIS
             : elementSize(sizeof(T))
         {
             gl::glCreateBuffers(1, &id);
-            gl::glNamedBufferData(id, numElements * elementSize, nullptr, usage);
+            gl::glNamedBufferStorage(id, numElements * elementSize, nullptr, usage);
         };
 
     public:

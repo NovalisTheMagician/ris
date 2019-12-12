@@ -164,7 +164,7 @@ namespace RIS
     {
         IRenderer &renderer = systems.GetRenderer();
         I2DRenderer &renderer2D = renderer.Get2DRenderer();
-        renderer.Clear(uiFramebufferId, glm::vec4(0, 1, 0, 1));
+        renderer.Clear(uiFramebufferId, glm::vec4(0, 0, 0, 0));
         renderer.SetFramebuffer(uiFramebufferId);
 
         renderer2D.Begin();

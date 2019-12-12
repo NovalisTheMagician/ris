@@ -17,6 +17,8 @@ namespace RIS
     Shader::Shader(const std::byte *shaderBinary, const std::size_t &size, gl::GLenum type)
     {
         id = glCreateProgram();
+        glProgramParameteri(id, GL_PROGRAM_SEPARABLE, GL_TRUE);
+        
         GLuint shader = glCreateShader(type);
         glShaderBinary(1, &shader, GL_SHADER_BINARY_FORMAT_SPIR_V, shaderBinary, size);
         glSpecializeShader(shader, "main", 0, nullptr, nullptr);
@@ -37,7 +39,6 @@ namespace RIS
             throw ShaderException("Failed to load shader");
         }
 
-        glProgramParameteri(id, GL_PROGRAM_SEPARABLE, GL_TRUE);
         glAttachShader(id, shader);
         glLinkProgram(id);
 

@@ -13,5 +13,4 @@ void main()
 {
     vec4 texColor = texture(tex, texCoords);
     fragColor = texColor * perObject.color;
-    //fragColor = perObject.color;
 }

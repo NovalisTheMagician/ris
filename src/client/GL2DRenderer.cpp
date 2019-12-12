@@ -29,25 +29,25 @@ namespace RIS
 
     void GL2DRenderer::Setup()
     {
-        perFrameBuffer = Buffer<PerFrameBuffer>::Create(perFrame, GL_DYNAMIC_DRAW);
+        perFrameBuffer = Buffer<PerFrameBuffer>::CreateImmutable(perFrame, GL_DYNAMIC_STORAGE_BIT);
 
-        perObjectBuffer = Buffer<PerObjectBuffer>::Create(perObject, GL_DYNAMIC_DRAW);
+        perObjectBuffer = Buffer<PerObjectBuffer>::CreateImmutable(perObject, GL_DYNAMIC_STORAGE_BIT);
 
         uiLayout = VertexArray::Create();
         uiLayout.SetAttribFormat(0, 2, GL_FLOAT, offsetof(UIVertex, position));
         uiLayout.SetAttribFormat(1, 2, GL_FLOAT, offsetof(UIVertex, texCoords));
 
-        std::vector<UIVertex> vertices;
-        vertices.push_back({ {0, 1}, {0, 0} });
-        vertices.push_back({ {0, 0}, {0, 1} });
-        vertices.push_back({ {1, 0}, {1, 1} });
+        std::vector<UIVertex> vertices(6);
+        vertices[0] = { {0, 1}, {0, 0} };
+        vertices[1] = { {0, 0}, {0, 1} };
+        vertices[2] = { {1, 0}, {1, 1} };
 
-        vertices.push_back({ {0, 1}, {0, 0} });
-        vertices.push_back({ {1, 0}, {1, 1} });
-        vertices.push_back({ {1, 1}, {1, 0} });
+        vertices[3] = { {0, 1}, {0, 0} };
+        vertices[4] = { {1, 0}, {1, 1} };
+        vertices[5] = { {1, 1}, {1, 0} };
 
         uiBuffer = Buffer<UIVertex>::CreateImmutable(vertices, GL_DYNAMIC_STORAGE_BIT);
-        textBuffer = Buffer<UIVertex>::Create(MAX_CHARS*6, GL_DYNAMIC_DRAW);
+        textBuffer = Buffer<UIVertex>::CreateImmutable(MAX_CHARS*6, GL_DYNAMIC_STORAGE_BIT);
     }
 
     void GL2DRenderer::SetViewsize(int width, int height)

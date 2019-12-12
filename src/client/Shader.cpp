@@ -73,16 +73,14 @@ namespace RIS
 
     Shader::Shader(Shader &&other)
     {
-        id = other.id;
+        std::swap(id, other.id);
         type = other.type;
-        other.id = 0;
     }
 
     Shader& Shader::operator=(Shader &&other)
     {
-        id = other.id;
+        std::swap(id, other.id);
         type = other.type;
-        other.id = 0;
         return *this;
     }
 

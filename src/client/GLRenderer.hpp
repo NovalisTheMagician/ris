@@ -115,6 +115,7 @@ namespace RIS
         void DestroyFramebuffer(int framebufId) override;
 
         void SetFramebuffer(int framebufferId) override;
+        void FramebufferResize(int framebufferId, int width, int height) override;
 
         void Clear(int framebufferId, const glm::vec4 &clearColor = glm::vec4(0, 0, 0, 1), float depth = 1.0f) override;
 

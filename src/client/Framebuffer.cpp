@@ -15,21 +15,15 @@ namespace RIS
     }
 
     Framebuffer::Framebuffer(GLuint frambufId)
-        : GLObject(frambufId)
+        : GLObject(frambufId), colorFormat(GL_SRGB8_ALPHA8)
     {
     }
 
     Framebuffer::Framebuffer(int width, int height, GLenum colorFormat, bool useDepth)
-        : useDepth(useDepth)
+        : useDepth(useDepth), colorFormat(colorFormat)
     {
         glCreateFramebuffers(1, &id);
-        colorTexture = Texture::Create(colorFormat, width, height);
-        glNamedFramebufferTexture(id, GL_COLOR_ATTACHMENT0, colorTexture.GetId(), 0);
-        if(useDepth)
-        {
-            depthTexture = Texture::Create(GL_DEPTH_COMPONENT32, width, height);
-            glNamedFramebufferTexture(id, GL_DEPTH_ATTACHMENT, depthTexture.GetId(), 0);
-        }
+        Resize(width, height);
     }
 
     Framebuffer::~Framebuffer()
@@ -43,16 +37,17 @@ namespace RIS
         colorTexture = std::move(other.colorTexture);
         depthTexture = std::move(other.depthTexture);
         useDepth = other.useDepth;
+        colorFormat = other.colorFormat;
         other.id = 0;
     }
 
     Framebuffer& Framebuffer::operator=(Framebuffer &&other)
     {
-        id = other.id;
+        std::swap(id, other.id);
         colorTexture = std::move(other.colorTexture);
         depthTexture = std::move(other.depthTexture);
         useDepth = other.useDepth;
-        other.id = 0;
+        colorFormat = other.colorFormat;
         return *this;
     }
 
@@ -69,7 +64,13 @@ namespace RIS
 
     void Framebuffer::Resize(int width, int height)
     {
-        // TODO
+        colorTexture = Texture::Create(colorFormat, width, height);
+        glNamedFramebufferTexture(id, GL_COLOR_ATTACHMENT0, colorTexture.GetId(), 0);
+        if(useDepth)
+        {
+            depthTexture = Texture::Create(GL_DEPTH_COMPONENT32, width, height);
+            glNamedFramebufferTexture(id, GL_DEPTH_ATTACHMENT, depthTexture.GetId(), 0);
+        }
     }
 
     void Framebuffer::Bind()

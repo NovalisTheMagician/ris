@@ -26,14 +26,12 @@ namespace RIS
 
     VertexArray::VertexArray(VertexArray &&other)
     {
-        id = other.id;
-        other.id = 0;
+        std::swap(id, other.id);
     }
 
     VertexArray& VertexArray::operator=(VertexArray &&other)
     {
-        id = other.id;
-        other.id = 0;
+        std::swap(id, other.id);
         return *this;
     }
 

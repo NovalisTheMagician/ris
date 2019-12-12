@@ -26,14 +26,12 @@ namespace RIS
 
     Sampler::Sampler(Sampler &&other)
     {
-        id = other.id;
-        other.id = 0;
+        std::swap(id, other.id);
     }
 
     Sampler& Sampler::operator=(Sampler &&other)
     {
-        id = other.id;
-        other.id = 0;
+        std::swap(id, other.id);
         return *this;
     }
 

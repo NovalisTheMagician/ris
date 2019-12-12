@@ -23,14 +23,12 @@ namespace RIS
 
     ProgramPipeline::ProgramPipeline(ProgramPipeline &&other)
     {
-        id = other.id;
-        other.id = 0;
+        std::swap(id, other.id);
     }
 
     ProgramPipeline& ProgramPipeline::operator=(ProgramPipeline &&other)
     {
-        id = other.id;
-        other.id = 0;
+        std::swap(id, other.id);
         return *this;
     }
 

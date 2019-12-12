@@ -40,6 +40,7 @@ namespace RIS
         Texture colorTexture;
         Texture depthTexture;
         bool useDepth;
+        gl::GLenum colorFormat;
 
     };
 }

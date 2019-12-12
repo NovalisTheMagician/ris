@@ -195,9 +195,8 @@ namespace RIS
             std::size_t size;
             auto data = loader.LoadAsset(AssetType::TEXTURE, name, size);
 
-            Texture texture = Texture::Create(data.get(), size);
             int id = highestUnusedTexId++;
-            textures[id] = std::move(texture);
+            textures[id] = Texture::Create(data.get(), size);
             return id;
         }
         catch(const std::exception& e)
@@ -229,8 +228,7 @@ namespace RIS
         //GL_SRGB8_ALPHA8
         //GL_RGBA8
 
-        Framebuffer framebuffer = Framebuffer::Create(framebufferWidth, framebufferHeight, GL_RGBA8, useDepth);
-        framebuffers[id] = std::move(framebuffer);
+        framebuffers[id] = Framebuffer::Create(framebufferWidth, framebufferHeight, GL_RGBA8, useDepth);
 
         return id;
     }
@@ -249,6 +247,15 @@ namespace RIS
         {
             Framebuffer &framebuffer = framebuffers.at(framebufferId);
             framebuffer.Bind();
+        }
+    }
+
+    void GLRenderer::FramebufferResize(int framebufferId, int width, int height)
+    {
+        if(framebufferId > 0 && framebuffers.count(framebufferId) > 0)
+        {
+            Framebuffer &framebuffer = framebuffers.at(framebufferId);
+            framebuffer.Resize(width, height);
         }
     }
 

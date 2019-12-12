@@ -69,14 +69,12 @@ namespace RIS
 
     Texture::Texture(Texture &&other)
     {
-        id = other.id;
-        other.id = 0;
+        std::swap(id, other.id);
     }
 
     Texture& Texture::operator=(Texture &&other)
     {
-        id = other.id;
-        other.id = 0;
+        std::swap(id, other.id);
         return *this;
     }
 

@@ -67,15 +67,13 @@ namespace RIS
 
         Buffer(Buffer &&other) 
         {
-            id = other.id;
-            other.id = 0;
+            std::swap(id, other.id);
             elementSize = other.elementSize;
         };
 
         Buffer& operator=(Buffer &&other)
         {
-            id = other.id;
-            other.id = 0;
+            std::swap(id, other.id);
             elementSize = other.elementSize;
             return *this;
         };

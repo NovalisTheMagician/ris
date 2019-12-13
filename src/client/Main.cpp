@@ -91,6 +91,11 @@ int main(int argc, char *argv[])
     {
         logger.Error("Failed to init system: "s + e.what());
         Logger::Destroy();
+
+#ifdef WIN32
+        MessageBoxA(nullptr, "Failed to launch game", e.what(), MB_OK);
+#endif
+
         return 1;
     }
 

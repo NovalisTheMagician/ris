@@ -106,6 +106,8 @@ namespace RIS
 #endif
 
         glEnable(GL_FRAMEBUFFER_SRGB);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
 
         std::string version = reinterpret_cast<const char*>(glGetString(GL_VERSION));
         std::string vendor = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
@@ -141,12 +143,12 @@ namespace RIS
         pipeline = ProgramPipeline::Create();
 
         std::vector<VertexType::UIVertex> vertices(6);
-        vertices[0] = {{-1, -1}, {0, 0}};
+        vertices[0] = {{1, 1}, {1, 1}};
         vertices[1] = {{-1, 1}, {0, 1}};
-        vertices[2] = {{1, 1}, {1, 1}};
-        vertices[3] = {{-1, -1}, {0, 0}};
+        vertices[2] = {{-1, -1}, {0, 0}};
+        vertices[3] = {{1, -1}, {1, 0}};
         vertices[4] = {{1, 1}, {1, 1}};
-        vertices[5] = {{1, -1}, {1, 0}};
+        vertices[5] = {{-1, -1}, {0, 0}};
         fullscreenQuad = Buffer<VertexType::UIVertex>::CreateImmutable(vertices, GL_DYNAMIC_STORAGE_BIT);
 
         postprocessVAO = VertexArray::Create();
@@ -187,7 +189,7 @@ namespace RIS
         ppCopy = Shader::Create(shaderBin.get(), size, GL_FRAGMENT_SHADER);
     }
 
-    int GLRenderer::LoadTexture(const std::string &name)
+    int GLRenderer::LoadTexture(const std::string &name, bool flip)
     {
         ILoader &loader = systems.GetLoader();
         try
@@ -196,7 +198,7 @@ namespace RIS
             auto data = loader.LoadAsset(AssetType::TEXTURE, name, size);
 
             int id = highestUnusedTexId++;
-            textures[id] = Texture::Create(data.get(), size);
+            textures[id] = Texture::Create(data.get(), size, flip);
             return id;
         }
         catch(const std::exception& e)

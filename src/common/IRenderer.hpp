@@ -12,12 +12,15 @@ namespace RIS
 
         virtual void SetViewsize(int width, int height) = 0;
 
+        virtual int LoadFont(const std::string &fontName) = 0;
+        virtual void DestroyFont(int fontId) = 0;
+
         virtual void SetTexture(int textureId, int textureUnit) = 0;
 
         virtual void Begin() = 0;
         virtual void End() = 0; // ??? really needed?
 
-        virtual void DrawText(const std::string &text) = 0;
+        virtual void DrawText(const std::string &text, int fontId, const glm::vec2 &position, float size, const glm::vec4 &color) = 0;
         virtual void DrawQuad(const glm::vec2 &position, const glm::vec2 &size, const glm::vec4 &color) = 0;
     };
 
@@ -28,7 +31,7 @@ namespace RIS
 
         virtual void LoadRequiredResources() = 0;
 
-        virtual int LoadTexture(const std::string &name) = 0;
+        virtual int LoadTexture(const std::string &name, bool flip = true) = 0;
         virtual void DestroyTexture(int texId) = 0;
 
         virtual int CreateFramebuffer(int width = -1, int height = -1, bool useDepth = true) = 0;

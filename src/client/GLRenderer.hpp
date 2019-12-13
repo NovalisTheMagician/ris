@@ -45,6 +45,30 @@ namespace RIS
 
     };
 
+    struct Glyph
+    {
+        float advanceX;
+        float bboxWidth, bboxHeight;
+        float bearingX, bearingY;
+        char charCode;
+        float s0, s1, t0, t1;
+        std::unordered_map<char, float> kernings;
+    };
+
+    struct Font
+    {
+        float ascender, descender;
+        int bitmapWidth, bitmapHeight;
+        float height;
+        float maxAdvance;
+        std::string name;
+        float size;
+        float spaceAdvance;
+        std::unordered_map<char, Glyph> glyphs;
+
+        int textureId;
+    };
+
     class GLRenderer;
 
     class GL2DRenderer : public I2DRenderer
@@ -55,6 +79,9 @@ namespace RIS
 
         void Setup();
 
+        int LoadFont(const std::string &fontName) override;
+        void DestroyFont(int fontId) override;
+
         void SetViewsize(int width, int height) override;
 
         void SetTexture(int textureId, int textureUnit) override;
@@ -62,7 +89,7 @@ namespace RIS
         void Begin() override;
         void End() override; // ??? really needed?
 
-        void DrawText(const std::string &text) override;
+        void DrawText(const std::string &text, int fontId, const glm::vec2 &position, float size, const glm::vec4 &color) override;
         void DrawQuad(const glm::vec2 &position, const glm::vec2 &size, const glm::vec4 &color) override;
 
     private:
@@ -93,6 +120,9 @@ namespace RIS
         Buffer<VertexType::UIVertex> textBuffer, uiBuffer;
         VertexArray uiLayout;
 
+        int highestUnusedFontId;
+        std::unordered_map<int, Font> fonts;
+
     };
 
     class GLRenderer : public IRenderer
@@ -108,7 +138,7 @@ namespace RIS
 
         void LoadRequiredResources() override;
 
-        int LoadTexture(const std::string &name) override;
+        int LoadTexture(const std::string &name, bool flip = true) override;
         void DestroyTexture(int texId) override;
 
         int CreateFramebuffer(int width = -1, int height = -1, bool useDepth = true) override;

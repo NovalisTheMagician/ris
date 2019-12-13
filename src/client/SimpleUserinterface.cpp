@@ -6,11 +6,14 @@
 
 #include "common/Logger.hpp"
 
+#include <rapidjson/rapidjson.h>
+#include <rapidjson/error/en.h>
 #include <rapidjson/document.h>
 
 #include <algorithm>
 
 using namespace std::literals;
+using std::string;
 
 namespace RIS
 {
@@ -82,7 +85,7 @@ namespace RIS
 
     }
 
-    void UILabel::SetFont(Font font)
+    void UILabel::SetFont(int font)
     {
         this->font = font;
     }
@@ -121,6 +124,7 @@ namespace RIS
     }
 
     int meow;
+    int immortalFont;
 
     void SimpleUserinterface::InitializeRootElements()
     {
@@ -130,6 +134,7 @@ namespace RIS
         uiFramebufferId = renderer.CreateFramebuffer(uiWidth, uiHeight, true);
 
         meow = renderer.LoadTexture("meow");
+        immortalFont = renderer.Get2DRenderer().LoadFont("IMMORTAL");
     }
 
     void SimpleUserinterface::LoadLayout(const std::string &layout)
@@ -164,6 +169,8 @@ namespace RIS
     {
         IRenderer &renderer = systems.GetRenderer();
         I2DRenderer &renderer2D = renderer.Get2DRenderer();
+
+        // for intel gpus: bind the framebuffer first before clearing it
         renderer.SetFramebuffer(uiFramebufferId);
         renderer.Clear(uiFramebufferId, glm::vec4(0, 0, 0, 0));
 
@@ -172,7 +179,9 @@ namespace RIS
         rootContainer->Draw(renderer);
 
         renderer2D.SetTexture(meow, 0);
-        renderer2D.DrawQuad({0, 0}, {512, 512}, {1, 1, 1, 1});
+        renderer2D.DrawQuad({50, 50}, {512, 512}, {1, 1, 1, 1});
+
+        renderer2D.DrawText("Hello World", immortalFont, {0, 0}, 50, {0, 0, 0, 1});
 
         renderer2D.End();
 

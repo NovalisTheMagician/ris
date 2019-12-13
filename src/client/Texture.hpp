@@ -13,7 +13,7 @@ namespace RIS
     class Texture : public GLObject
     {
     private:
-        Texture(const std::byte *data, const std::size_t &size);
+        Texture(const std::byte *data, const std::size_t &size, bool flip = true);
         Texture(gl::GLenum format, int width, int height);
         Texture(const glm::vec4 color);
         Texture(gl::GLenum type);
@@ -34,7 +34,7 @@ namespace RIS
         void Bind(gl::GLuint textureUnit);
 
     public:
-        static Texture Create(const std::byte *data, const std::size_t &size);
+        static Texture Create(const std::byte *data, const std::size_t &size, bool flip = true);
         static Texture Create(gl::GLenum format, int width, int height);
         static Texture Create(const glm::vec4 color);
         static Texture Create();

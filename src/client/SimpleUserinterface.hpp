@@ -13,30 +13,6 @@
 
 namespace RIS
 {
-    struct Glyph
-    {
-        float advanceX;
-        float bboxWidth, bboxHeight;
-        float bearingX, bearingY;
-        char charCode;
-        float s0, s1, t0, t1;
-        std::unordered_map<char, float> kernings;
-    };
-
-    struct Font
-    {
-        float ascender, descender;
-        int bitmapWidth, bitmapHeight;
-        float height;
-        float max_advance;
-        std::string name;
-        int size;
-        float spaceAdvance;
-        std::unordered_map<char, Glyph> glyphs;
-
-        int textureId;
-    };
-
     class Component
     {
     public:
@@ -96,7 +72,7 @@ namespace RIS
         UILabel(const SystemLocator &systems);
         ~UILabel();
 
-        void SetFont(Font font);
+        void SetFont(int font);
         void SetTextColor(const glm::vec4 &color);
         void SetVisible(bool visible);
 
@@ -106,7 +82,7 @@ namespace RIS
     private:
         const SystemLocator &systems;
 
-        Font font;
+        int font;
         glm::vec4 fontColor;
         bool isVisible;
 
@@ -162,8 +138,6 @@ namespace RIS
 
         int uiWidth, uiHeight;
         ContainerPtr rootContainer;
-
-        std::unordered_map<std::string, Font> fonts;
 
         int uiFramebufferId;
 

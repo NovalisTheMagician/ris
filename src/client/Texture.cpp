@@ -16,29 +16,49 @@ namespace RIS
     {
     }
 
-    Texture::Texture(const std::byte *data, const std::size_t &size)
+    Texture::Texture(const std::byte *data, const std::size_t &size, bool flip)
     {
         gli::texture texture = gli::load(reinterpret_cast<const char*>(data), size);
         if(texture.empty())
             return;
+        
+        if(flip)
+            texture = gli::flip(texture);
 
         gli::gl gl(gli::gl::PROFILE_GL33);
         gli::gl::format const format = gl.translate(texture.format(), texture.swizzles());
         glm::tvec3<GLsizei> extent(texture.extent(0));
         GLenum target = static_cast<GLenum>(gl.translate(texture.target()));
 
+        GLsizei const faceTotal = static_cast<GLsizei>(texture.layers() * texture.faces());
+
         glCreateTextures(target, 1, &id);
         glTextureParameteri(id, GL_TEXTURE_BASE_LEVEL, 0);
         glTextureParameteri(id, GL_TEXTURE_MAX_LEVEL, static_cast<GLint>(texture.levels() - 1));
         glTextureParameteriv(id, GL_TEXTURE_SWIZZLE_RGBA, &format.Swizzles[0]);
-        glTextureStorage2D(id, static_cast<GLint>(texture.levels()), static_cast<GLenum>(format.Internal), extent.x, extent.y);
+
+        bool isCube = texture.target() == gli::TARGET_CUBE;
+
+        switch(texture.target())
+        {
+            case gli::TARGET_2D: 
+            case gli::TARGET_CUBE:
+                glTextureStorage2D(id, static_cast<GLint>(texture.levels()), static_cast<GLenum>(format.Internal), extent.x, isCube ? faceTotal : extent.y);
+                break;
+            default:
+                return;
+        }
+
+        for(std::size_t face = 0; face < texture.faces(); ++face)
         for(std::size_t level = 0; level < texture.levels(); ++level)
         {
             extent = glm::tvec3<GLsizei>(texture.extent(level));
+            target = gli::is_target_cube(texture.target()) ? static_cast<GLenum>(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face) : target;
+
             if(gli::is_compressed(texture.format()))
-                glCompressedTextureSubImage2D(id, static_cast<GLint>(level), 0, 0, extent.x, extent.y, static_cast<GLenum>(format.Internal), static_cast<GLsizei>(texture.size(level)), texture.data(0, 0, level));
+                glCompressedTextureSubImage2D(id, static_cast<GLint>(level), 0, 0, extent.x, extent.y, static_cast<GLenum>(format.Internal), static_cast<GLsizei>(texture.size(level)), texture.data(0, face, level));
             else
-                glTextureSubImage2D(id, static_cast<GLint>(level), 0, 0, extent.x, extent.y, static_cast<GLenum>(format.External), static_cast<GLenum>(format.Type), texture.data(0, 0, level));
+                glTextureSubImage2D(id, static_cast<GLint>(level), 0, 0, extent.x, extent.y, static_cast<GLenum>(format.External), static_cast<GLenum>(format.Type), texture.data(0, face, level));
         }
         
         if(texture.levels() == 1)
@@ -83,9 +103,9 @@ namespace RIS
         glDeleteTextures(1, &id);
     }
 
-    Texture Texture::Create(const std::byte *data, const std::size_t &size)
+    Texture Texture::Create(const std::byte *data, const std::size_t &size, bool flip)
     {
-        return Texture(data, size);
+        return Texture(data, size, flip);
     }
 
     Texture Texture::Create(gl::GLenum format, int width, int height)

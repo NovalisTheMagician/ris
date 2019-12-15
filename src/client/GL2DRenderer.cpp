@@ -252,6 +252,7 @@ namespace RIS
         perObject.color = color;
         perObject.size = size;
         perObjectBuffer.UpdateData(perObject);
+        perObjectBuffer.Bind(GL_UNIFORM_BUFFER, 1);
         uiLayout.SetVertexBuffer(uiBuffer, 0);
         renderer.pipeline.SetShader(renderer.uiFragment);
         renderer.pipeline.Use();

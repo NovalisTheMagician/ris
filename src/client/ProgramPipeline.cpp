@@ -35,7 +35,7 @@ namespace RIS
     ProgramPipeline ProgramPipeline::Create()
     {
         GLuint id;
-        glGenProgramPipelines(1, &id);
+        glCreateProgramPipelines(1, &id);
         return ProgramPipeline(id);
     }
 

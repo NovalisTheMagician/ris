@@ -1,9 +1,11 @@
 import os
 
 shader_bld = Builder(action=Action('glslc $SHADERFLAGS -o $TARGET $SOURCE', '$SHADERCOMSTR'), suffix='.spv', src_suffix='.glsl', single_source=1)
+shadersrc_bld = Builder(action=Action('glslc -E $SHADERFLAGS -Os -o $TARGET $SOURCE', '$SHADERCOMSTR'), suffix='.amd.src', src_suffix='.glsl', single_source=1)
 
 env = Environment(ENV=os.environ)
 env.Append(BUILDERS = {'Shader' : shader_bld})
+env.Append(BUILDERS = {'ShaderSrc' : shadersrc_bld})
 env['SHDAERFLAGS'] = []
 
 cl_flags = ['/EHsc', '/std:c++17', '/FS']
@@ -31,7 +33,7 @@ if int(debug):
     cl_flags.append(['/Zi', '/MTd'])
     lk_flags.append(['/DEBUG'])
     defines.append(['_DEBUG'])
-    shader_flags.append(['-O0', '-g'])
+    shader_flags.append(['-Os'])
 else:
     cl_flags.append(['/O2', '/MT'])
     shader_flags.append(['-O'])
@@ -49,19 +51,26 @@ client_files = Glob('src/client/*.cpp')
 server_files = Glob('src/server/*.cpp')
 common_files = Glob('src/common/*.cpp')
 
+test_files = Glob('src/test/*.cpp')
+
 rc_file = 'src/client/resource.rc'
 
 shader_objs = env.Shader(shader_files, SHADERFLAGS=shader_flags)
+shadersrc_objs = env.ShaderSrc(shader_files, SHADERFLAGS=shader_flags)
 barc_objs = env.Object(barc_files, CPPPATH=['src'], CPPFLAGS=cl_flags, CPPDEFINES=defines)
 common_objs = env.Object(common_files, CPPPATH=common_inc_path, CPPFLAGS=cl_flags, CPPDEFINES=defines)
 client_objs = env.Object(client_files, CPPPATH=client_inc_path, CPPFLAGS=cl_flags, CPPDEFINES=defines)
 server_objs = env.Object(server_files, CPPPATH=server_inc_path, CPPFLAGS=cl_flags, CPPDEFINES=defines)
+
+test_objs = env.Object(test_files, CPPPATH=client_inc_path, CPPFLAGS=cl_flags, CPPDEFINES=defines)
 
 rc_obj = env.RES(rc_file)
 
 barc = env.Program('bin/tools/barc', barc_objs, LINKFLAGS=lk_flags)
 client = env.Program('bin/RIS', client_objs + common_objs + rc_obj, LIBS=client_libs, LIBPATH=client_lib_path, LINKFLAGS=lk_flags)
 server = env.Program('bin/RIS_server', server_objs + common_objs, LIBS=server_libs, LIBPATH=server_lib_path, LINKFLAGS=lk_flags)
+
+test = env.Program('bin/amd_test', test_objs, LIBS=client_libs, LIBPATH=client_lib_path, LINKFLAGS=lk_flags + ['/SUBSYSTEM:WINDOWS'])
 
 env.Clean(client, 'bin/RIS.ilk')
 env.Clean(client, 'bin/RIS.pdb')
@@ -75,10 +84,13 @@ env.Clean(server, 'bin/RIS_server.lib')
 
 dyn_copy = env.Install('bin/', dyn_libs)
 shader_copy = env.Install('bin/assets/shaders/', shader_objs)
+shadersrc_copy = env.Install('bin/assets/shaders/', shadersrc_objs)
 
-env.Depends(shader_copy, shader_objs)
+#env.Depends(shader_copy, shader_objs)
+#env.Depends(shadersrc_copy, shadersrc_objs)
 
 env.Depends(client, shader_copy)
+env.Depends(client, shadersrc_copy)
 env.Depends(client, dyn_copy)
 env.Default(client)
 
@@ -89,4 +101,8 @@ cl = env.Alias('client', client)
 sv = env.Alias('server', server)
 bc = env.Alias('barc', barc)
 sh = env.Alias('shader', shader_copy)
+
+env.Depends(sh, shadersrc_copy)
+
+tst = env.Alias('amd_test', test)
 env.Alias('all', [cl, sv, bc])

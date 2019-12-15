@@ -7,7 +7,7 @@
 
 #include <stdexcept>
 
-#include <glbinding/gl46/gl.h>
+#include <glbinding/gl46core/gl.h>
 #include <glm/glm.hpp>
 
 #include <unordered_map>
@@ -181,6 +181,8 @@ namespace RIS
 
         GL2DRenderer renderer2d;
         Camera camera;
+
+        bool useAmdFix;
 
         friend GL2DRenderer;
 

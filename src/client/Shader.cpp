@@ -9,30 +9,68 @@ using namespace gl46core;
 
 namespace RIS
 {
+    void CleanShader(std::string &source)
+    {
+        std::size_t nFPos;
+        while((nFPos = source.find("#extension GL_GOOGLE_include_directive : enable")) != source.npos)
+        {
+            std::size_t secondNL = source.find('\n', nFPos);
+            std::size_t firstNL = source.rfind('\n', nFPos);
+            source.erase(firstNL, secondNL - firstNL);
+        }
+
+        while((nFPos = source.find("#line")) != source.npos)
+        {
+            std::size_t secondNL = source.find('\n', nFPos);
+            std::size_t firstNL = source.rfind('\n', nFPos);
+            source.erase(firstNL, secondNL - firstNL);
+        }
+
+        while((nFPos = source.find("#pragma")) != source.npos)
+        {
+            std::size_t secondNL = source.find('\n', nFPos);
+            std::size_t firstNL = source.rfind('\n', nFPos);
+            source.erase(firstNL, secondNL - firstNL);
+        }
+    }
+
     Shader::Shader()
         : GLObject(0)
     {
     }
 
-    Shader::Shader(const std::byte *shaderBinary, const std::size_t &size, gl::GLenum type)
+    Shader::Shader(const std::byte *shaderBinary, const std::size_t &size, gl::GLenum type, bool isSrc)
     {
         id = glCreateProgram();
         glProgramParameteri(id, GL_PROGRAM_SEPARABLE, GL_TRUE);
         
         GLuint shader = glCreateShader(type);
-        glShaderBinary(1, &shader, GL_SHADER_BINARY_FORMAT_SPIR_V, shaderBinary, size);
-        glSpecializeShader(shader, "main", 0, nullptr, nullptr);
-
-        GLenum status;
-        glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
-        if(!static_cast<bool>(status))
+        if(isSrc)
         {
-            GLenum loglen;
+            std::string shaderSrc(reinterpret_cast<const char*>(shaderBinary), size);
+            CleanShader(shaderSrc);            
+
+            auto str = shaderSrc.c_str();
+
+            glShaderSource(shader, 1, &str, nullptr);
+            glCompileShader(shader);
+        }
+        else
+        {
+            glShaderBinary(1, &shader, GL_SHADER_BINARY_FORMAT_SPIR_V, shaderBinary, size);
+            glSpecializeShader(shader, "main", 0, nullptr, nullptr);
+        }
+
+        GLboolean status;
+        glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
+        if(!status)
+        {
+            GLsizei loglen;
             glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &loglen);
             if(loglen != 0)
             {
-                std::string errorLog(static_cast<int>(loglen), '#');
-                glGetShaderInfoLog(shader, static_cast<GLsizei>(loglen), 0, &errorLog[0]);
+                std::string errorLog(loglen, '#');
+                glGetShaderInfoLog(shader, loglen, 0, &errorLog[0]);
                 throw ShaderException("Failed to load shader: " + errorLog);
             }
 
@@ -42,15 +80,22 @@ namespace RIS
         glAttachShader(id, shader);
         glLinkProgram(id);
 
-        glGetProgramiv(id, GL_LINK_STATUS, &status);
-        if(!static_cast<bool>(status))
+        GLboolean isSeperable = GL_TRUE;
+        glGetProgramiv(id, GL_PROGRAM_SEPARABLE, &isSeperable);
+        if(!isSeperable)
         {
-            GLenum loglen;
+            throw ShaderException("Seperate Shader Objects not supported!!!");
+        }
+
+        glGetProgramiv(id, GL_LINK_STATUS, &status);
+        if(!status)
+        {
+            GLsizei loglen;
             glGetProgramiv(id, GL_INFO_LOG_LENGTH, &loglen);
             if(loglen != 0)
             {
-                std::string errorLog(static_cast<int>(loglen), '#');
-                glGetProgramInfoLog(id, static_cast<GLsizei>(loglen), 0, &errorLog[0]);
+                std::string errorLog(loglen, '#');
+                glGetProgramInfoLog(id, loglen, 0, &errorLog[0]);
                 throw ShaderException("Failed to link shader: " + errorLog);
             }
 
@@ -89,9 +134,9 @@ namespace RIS
         glDeleteProgram(id);
     }
 
-    Shader Shader::Create(const std::byte *shaderBinary, const std::size_t &size, gl::GLenum type)
+    Shader Shader::Create(const std::byte *shaderBinary, const std::size_t &size, gl::GLenum type, bool isSrc)
     {
-        return Shader(shaderBinary, size, type);
+        return Shader(shaderBinary, size, type, isSrc);
     }
 
     gl::UseProgramStageMask Shader::GetType() const

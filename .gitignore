@@ -4,6 +4,7 @@
 *.ilk
 *.res
 *.spv
+*.amd.src
 bin/
 !libs/*/bin/
 powershell.exe

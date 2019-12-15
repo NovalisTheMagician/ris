@@ -21,6 +21,7 @@ namespace RIS
         glfwWindowHint(GLFW_SRGB_CAPABLE, true);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 #ifdef _DEBUG
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true); 
@@ -152,7 +153,7 @@ namespace RIS
             cursorImage.pixels = reinterpret_cast<unsigned char*>(tex.data(0, 0, 0));
 
             // maybe cache the cursor object to manually destroy it later
-            // but it might not be needed because glfw will destroy any 
+            // but it is not needed because glfw will destroy any 
             // remaining cursors upon termination
             //
             // this might need some rethinking

@@ -1,4 +1,4 @@
-#version 450
+#version 460 core
 #pragma shader_stage(fragment)
 
 #include "uiCommon.glsli"

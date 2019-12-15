@@ -16,7 +16,7 @@ namespace RIS
     class Shader : public GLObject
     {
     private:
-        Shader(const std::byte *shaderBinary, const std::size_t &size, gl::GLenum type);
+        Shader(const std::byte *shaderBinary, const std::size_t &size, gl::GLenum type, bool isSrc = false);
 
     public:
         Shader();
@@ -31,7 +31,7 @@ namespace RIS
         gl::UseProgramStageMask GetType() const;
 
     public:
-        static Shader Create(const std::byte *shaderBinary, const std::size_t &size, gl::GLenum type);
+        static Shader Create(const std::byte *shaderBinary, const std::size_t &size, gl::GLenum type, bool isSrc = false);
 
     private:
         gl::UseProgramStageMask type;

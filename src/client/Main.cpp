@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
         Logger::Destroy();
 
 #ifdef WIN32
-        MessageBoxA(nullptr, "Failed to launch game", e.what(), MB_OK);
+        MessageBoxA(nullptr, e.what(), "Failed to launch game", MB_OK | MB_ICONERROR);
 #endif
 
         return 1;

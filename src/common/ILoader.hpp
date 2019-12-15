@@ -12,6 +12,7 @@ namespace RIS
         MODEL,
         SOUND,
         SHADER,
+        SHADERSRC,
         TEXT,
         UILAYOUT,
         FONT,

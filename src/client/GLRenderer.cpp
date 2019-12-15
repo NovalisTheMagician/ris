@@ -43,7 +43,7 @@ namespace RIS
     const int GLRenderer::MISSING_TEXTURE_ID = 0;
 
     GLRenderer::GLRenderer(const SystemLocator &systems, Config &config)
-        : systems(systems), config(config), textures(), highestUnusedTexId(2), framebuffers(), highestUnusedFrambufId(1), renderer2d(*this)
+        : systems(systems), config(config), textures(), highestUnusedTexId(2), framebuffers(), highestUnusedFrambufId(1), renderer2d(*this), useAmdFix(false)
     {
         auto &log = Logger::Instance();
 
@@ -114,6 +114,9 @@ namespace RIS
         std::string shaderVersion = reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION));
         std::string renderer = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
 
+        if(vendor.find("AMD") || vendor.find("amd"))
+            useAmdFix = true;
+
         log.Info("Using OpenGL version " + version + " from " + vendor + " with shaderversion " + shaderVersion + " on " + renderer);
 
         renderer2d.Setup();
@@ -173,20 +176,23 @@ namespace RIS
     {
         ILoader &loader = systems.GetLoader();
         size_t size;
-        auto shaderBin = loader.LoadAsset(AssetType::SHADER, "uiVert", size);
-        uiVertex = Shader::Create(shaderBin.get(), size, GL_VERTEX_SHADER);
 
-        shaderBin = loader.LoadAsset(AssetType::SHADER, "uiFrag", size);
-        uiFragment = Shader::Create(shaderBin.get(), size, GL_FRAGMENT_SHADER);
+        AssetType shaderLoadType = useAmdFix ? AssetType::SHADERSRC : AssetType::SHADER;
 
-        shaderBin = loader.LoadAsset(AssetType::SHADER, "uiText", size);
-        uiText = Shader::Create(shaderBin.get(), size, GL_FRAGMENT_SHADER);
+        auto shaderBin = loader.LoadAsset(shaderLoadType, "uiVert", size);
+        uiVertex = Shader::Create(shaderBin.get(), size, GL_VERTEX_SHADER, useAmdFix);
 
-        shaderBin = loader.LoadAsset(AssetType::SHADER, "ppVert", size);
-        ppVertex = Shader::Create(shaderBin.get(), size, GL_VERTEX_SHADER);
+        shaderBin = loader.LoadAsset(shaderLoadType, "uiFrag", size);
+        uiFragment = Shader::Create(shaderBin.get(), size, GL_FRAGMENT_SHADER, useAmdFix);
 
-        shaderBin = loader.LoadAsset(AssetType::SHADER, "ppCopy", size);
-        ppCopy = Shader::Create(shaderBin.get(), size, GL_FRAGMENT_SHADER);
+        shaderBin = loader.LoadAsset(shaderLoadType, "uiText", size);
+        uiText = Shader::Create(shaderBin.get(), size, GL_FRAGMENT_SHADER, useAmdFix);
+
+        shaderBin = loader.LoadAsset(shaderLoadType, "ppVert", size);
+        ppVertex = Shader::Create(shaderBin.get(), size, GL_VERTEX_SHADER, useAmdFix);
+
+        shaderBin = loader.LoadAsset(shaderLoadType, "ppCopy", size);
+        ppCopy = Shader::Create(shaderBin.get(), size, GL_FRAGMENT_SHADER, useAmdFix);
     }
 
     int GLRenderer::LoadTexture(const std::string &name, bool flip)

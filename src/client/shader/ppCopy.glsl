@@ -1,7 +1,7 @@
 #version 460 core
 #pragma shader_stage(fragment)
 
-//#include "ppCommon.glsli"
+#include "ppCommon.glsli"
 
 layout(binding=0) uniform sampler2D tex;
 

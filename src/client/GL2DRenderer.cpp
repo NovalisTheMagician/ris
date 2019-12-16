@@ -202,33 +202,34 @@ namespace RIS
                     if(glyph.kernings.count(kernChar) > 0)
                     {
                         float kernVal = glyph.kernings.at(kernChar);
-                        penX += kernVal * size;
+                        penX += kernVal * fontSize;
                     }
                 }
 
-                float glyphWidth = glyph.bboxWidth * size;
-                float glyphHeight = glyph.bboxHeight * size;
-                float glyphBearingX = glyph.bearingX * size;
-                float glyphBearingY = glyph.bearingY * size;
-                float glyphAdvanceX = glyph.advanceX * size;
+                float glyphWidth = glyph.bboxWidth * fontSize;
+                float glyphHeight = glyph.bboxHeight * fontSize;
+                float glyphBearingX = glyph.bearingX * fontSize;
+                float glyphBearingY = glyph.bearingY * fontSize;
+                float glyphAdvanceX = glyph.advanceX * fontSize;
 
                 float x = penX + glyphBearingX;
                 float y = penY + glyphBearingY;
                 float w = glyphWidth;
                 float h = glyphHeight;
 
+                //flip the t due to opengl having y go up
                 float s0 = glyph.s0;
-                float t0 = glyph.t0;
+                float t0 = glyph.t1;
                 float s1 = glyph.s1;
-                float t1 = glyph.t1;
+                float t1 = glyph.t0;
 
-                vertices.push_back({ {x, y+h}, {s0, s0} });
-                vertices.push_back({ {x, y}, {s0, s1} });
-                vertices.push_back({ {x+w, y}, {s1, s1} });
+                vertices.push_back({ {x, y+h}, {s0, t1} });
+                vertices.push_back({ {x, y}, {s0, t0} });
+                vertices.push_back({ {x+w, y}, {s1, t0} });
 
-                vertices.push_back({ {x, y+h}, {s0, s0} });
-                vertices.push_back({ {x+w, y}, {s1, s1} });
-                vertices.push_back({ {x+w, y+h}, {s1, s0} });
+                vertices.push_back({ {x, y+h}, {s0, t1} });
+                vertices.push_back({ {x+w, y}, {s1, t0} });
+                vertices.push_back({ {x+w, y+h}, {s1, t1} });
 
                 penX += glyphAdvanceX;
             }
@@ -238,9 +239,7 @@ namespace RIS
             }
         }
         textBuffer.UpdateData(vertices);
-
         renderer.textures.at(font.textureId).Bind(0);
-
         uiLayout.SetVertexBuffer(textBuffer, 0);
 
         glDrawArrays(GL_TRIANGLES, 0, numVertices);

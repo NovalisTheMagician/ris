@@ -149,6 +149,7 @@ namespace RIS
 
     void GL2DRenderer::Begin()
     {
+        glDisable(GL_CULL_FACE);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -164,6 +165,7 @@ namespace RIS
     void GL2DRenderer::End()
     {
         glDisable(GL_BLEND);
+        glEnable(GL_CULL_FACE);
     }
 
     void GL2DRenderer::DrawText(const std::string &text, int fontId, const glm::vec2 &position, float size, const glm::vec4 &color)
@@ -219,17 +221,17 @@ namespace RIS
 
                 //flip the t due to opengl having y go up
                 float s0 = glyph.s0;
-                float t0 = glyph.t1;
+                float t0 = glyph.t0;
                 float s1 = glyph.s1;
-                float t1 = glyph.t0;
+                float t1 = glyph.t1;
 
-                vertices.push_back({ {x, y+h}, {s0, t1} });
+                vertices.push_back({ {x, y-h}, {s0, t1} });
                 vertices.push_back({ {x, y}, {s0, t0} });
                 vertices.push_back({ {x+w, y}, {s1, t0} });
 
-                vertices.push_back({ {x, y+h}, {s0, t1} });
+                vertices.push_back({ {x, y-h}, {s0, t1} });
                 vertices.push_back({ {x+w, y}, {s1, t0} });
-                vertices.push_back({ {x+w, y+h}, {s1, t1} });
+                vertices.push_back({ {x+w, y-h}, {s1, t1} });
 
                 penX += glyphAdvanceX;
             }

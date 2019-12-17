@@ -15,4 +15,5 @@ void main()
     float delta = 0.1;
     float alpha = smoothstep(0.5 - delta, 0.5 + delta, sdfSample);
     fragColor = vec4(perObject.color.rgb, alpha);
+    //fragColor = vec4(0, 1, 0, 1);
 }

@@ -106,7 +106,7 @@ namespace RIS
 #endif
 
         glEnable(GL_FRAMEBUFFER_SRGB);
-        glEnable(GL_CULL_FACE);
+        //glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
 
         std::string version = reinterpret_cast<const char*>(glGetString(GL_VERSION));

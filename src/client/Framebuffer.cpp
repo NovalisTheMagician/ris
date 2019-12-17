@@ -33,7 +33,7 @@ namespace RIS
 
     Framebuffer::Framebuffer(Framebuffer &&other)
     {
-        id = other.id;
+        std::swap(id, other.id);
         colorTexture = std::move(other.colorTexture);
         depthTexture = std::move(other.depthTexture);
         useDepth = other.useDepth;

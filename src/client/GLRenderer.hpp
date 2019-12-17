@@ -87,10 +87,12 @@ namespace RIS
         void SetTexture(int textureId, int textureUnit) override;
 
         void Begin() override;
-        void End() override; // ??? really needed?
+        void End() override;
 
         void DrawText(const std::string &text, int fontId, const glm::vec2 &position, float size, const glm::vec4 &color) override;
         void DrawQuad(const glm::vec2 &position, const glm::vec2 &size, const glm::vec4 &color) override;
+
+        TextMetrics MeasureText(const std::string &text, int fontId, float size) override;
 
     private:
         static const int MAX_CHARS;
@@ -122,6 +124,7 @@ namespace RIS
 
         int highestUnusedFontId;
         std::unordered_map<int, Font> fonts;
+        std::unordered_map<std::string, int> loadedFonts;
 
     };
 
@@ -166,6 +169,7 @@ namespace RIS
 
         int highestUnusedTexId;
         std::unordered_map<int, Texture> textures;
+        std::unordered_map<std::string, int> loadedTextures;
 
         int highestUnusedFrambufId;
         std::unordered_map<int, Framebuffer> framebuffers;

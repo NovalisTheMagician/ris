@@ -5,6 +5,12 @@
 
 namespace RIS
 {
+    struct TextMetrics
+    {
+        float width;
+        float height;
+    };
+
     class I2DRenderer
     {
     public:
@@ -18,10 +24,12 @@ namespace RIS
         virtual void SetTexture(int textureId, int textureUnit) = 0;
 
         virtual void Begin() = 0;
-        virtual void End() = 0; // ??? really needed?
+        virtual void End() = 0;
 
         virtual void DrawText(const std::string &text, int fontId, const glm::vec2 &position, float size, const glm::vec4 &color) = 0;
         virtual void DrawQuad(const glm::vec2 &position, const glm::vec2 &size, const glm::vec4 &color) = 0;
+
+        virtual TextMetrics MeasureText(const std::string &text, int fontId, float size) = 0;
     };
 
     class IRenderer

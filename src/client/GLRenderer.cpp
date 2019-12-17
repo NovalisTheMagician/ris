@@ -106,7 +106,7 @@ namespace RIS
 #endif
 
         glEnable(GL_FRAMEBUFFER_SRGB);
-        //glEnable(GL_CULL_FACE);
+        glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
 
         std::string version = reinterpret_cast<const char*>(glGetString(GL_VERSION));
@@ -114,7 +114,7 @@ namespace RIS
         std::string shaderVersion = reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION));
         std::string renderer = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
 
-        if(vendor.find("AMD") || vendor.find("amd"))
+        if(vendor.find("AMD") != std::string::npos || vendor.find("amd") != std::string::npos)
             useAmdFix = true;
 
         log.Info("Using OpenGL version " + version + " from " + vendor + " with shaderversion " + shaderVersion + " on " + renderer);
@@ -197,6 +197,9 @@ namespace RIS
 
     int GLRenderer::LoadTexture(const std::string &name, bool flip)
     {
+        if(loadedTextures.count(name) == 1)
+            return loadedTextures.at(name);
+
         ILoader &loader = systems.GetLoader();
         try
         {
@@ -205,6 +208,7 @@ namespace RIS
 
             int id = highestUnusedTexId++;
             textures[id] = Texture::Create(data.get(), size, flip);
+            loadedTextures.insert({name, id});
             return id;
         }
         catch(const std::exception& e)
@@ -219,6 +223,14 @@ namespace RIS
         if(texId >= 0 && textures.count(texId) > 0)
         {
             textures.erase(texId);
+            for(auto it = loadedTextures.begin(); it != loadedTextures.end(); ++it)
+            {
+                if(it->second == texId)
+                {
+                    loadedTextures.erase(it);
+                    break;
+                }
+            }
         }
     }
 
@@ -275,7 +287,7 @@ namespace RIS
 
     void GLRenderer::Draw(int framebufferId)
     {
-        if(framebufferId == DEFAULT_FRAMBUFFER_ID || framebuffers.count(framebufferId) != 1)
+        if(framebufferId == DEFAULT_FRAMBUFFER_ID || framebuffers.count(framebufferId) == 0)
             return;
 
         glEnable(GL_BLEND);

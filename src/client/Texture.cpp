@@ -79,7 +79,7 @@ namespace RIS
     {
         glCreateTextures(GL_TEXTURE_2D, 1, &id);
         glTextureStorage2D(id, 1, GL_RGBA8, 1, 1);
-        glTextureSubImage2D(id, 0, 0, 0, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, glm::value_ptr(color));
+        glTextureSubImage2D(id, 0, 0, 0, 1, 1, GL_RGBA, GL_FLOAT, glm::value_ptr(color));
     }
 
     Texture::Texture(gl::GLenum type)

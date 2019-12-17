@@ -19,7 +19,7 @@ namespace RIS
         virtual ~Component() = default;
 
         virtual void Update() = 0;
-        virtual void Draw(IRenderer &renderer) = 0;
+        virtual void Draw(I2DRenderer &renderer, const glm::vec2 &parentPosition) = 0;
     };
     using ComponentPtr = std::shared_ptr<Component>;
 
@@ -42,13 +42,15 @@ namespace RIS
 
         void SetColor(const glm::vec4 &color);
         void SetPosition(const glm::vec2 &position);
+        void SetTexture(int texture);
+        void SetSize(const glm::vec2 &size);
 
         void Add(ComponentPtr component) override;
         void Remove(ComponentPtr component) override;
         void RemoveAll() override;
 
         void Update() override;
-        void Draw(IRenderer &renderer) override;
+        void Draw(I2DRenderer &renderer, const glm::vec2 &parentPosition) override;
 
     private:
         std::vector<ComponentPtr> components;
@@ -56,6 +58,9 @@ namespace RIS
 
         glm::vec4 color;
         glm::vec2 position;
+        glm::vec2 size;
+
+        int backTexture;
 
     };
     using PanelPtr = std::shared_ptr<UIPanel>;
@@ -72,17 +77,23 @@ namespace RIS
         UILabel(const SystemLocator &systems);
         ~UILabel();
 
-        void SetFont(int font);
+        void SetFont(int font, float fontSize);
         void SetTextColor(const glm::vec4 &color);
+        void SetPosition(const glm::vec2 &position);
         void SetVisible(bool visible);
+        void SetText(const std::string &text);
 
         void Update() override;
-        void Draw(IRenderer &renderer) override;
+        void Draw(I2DRenderer &renderer, const glm::vec2 &parentPosition) override;
 
     private:
         const SystemLocator &systems;
 
+        glm::vec2 position;
+        std::string text;
+
         int font;
+        float fontSize;
         glm::vec4 fontColor;
         bool isVisible;
 

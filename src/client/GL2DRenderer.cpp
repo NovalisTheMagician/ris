@@ -64,6 +64,9 @@ namespace RIS
 
     int GL2DRenderer::LoadFont(const std::string &fontName)
     {
+        if(loadedFonts.count(fontName) == 1)
+            return loadedFonts.at(fontName);
+
         ILoader &loader = renderer.systems.GetLoader();
 
         std::size_t size;
@@ -121,6 +124,7 @@ namespace RIS
 
         int id = highestUnusedFontId++;
         fonts[id] = font;
+        loadedFonts.insert({fontName, id});
 
         return id;
     }
@@ -130,6 +134,14 @@ namespace RIS
         if(fonts.count(fontId) > 0)
         {
             fonts.erase(fontId);
+            for(auto it = loadedFonts.begin(); it != loadedFonts.end(); ++it)
+            {
+                if(it->second == fontId)
+                {
+                    loadedFonts.erase(it);
+                    break;   
+                }
+            }
         }
     }
 
@@ -150,6 +162,7 @@ namespace RIS
     void GL2DRenderer::Begin()
     {
         glDisable(GL_CULL_FACE);
+        glDisable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -166,6 +179,7 @@ namespace RIS
     {
         glDisable(GL_BLEND);
         glEnable(GL_CULL_FACE);
+        glEnable(GL_DEPTH_TEST);
     }
 
     void GL2DRenderer::DrawText(const std::string &text, int fontId, const glm::vec2 &position, float size, const glm::vec4 &color)
@@ -180,8 +194,6 @@ namespace RIS
         renderer.pipeline.SetShader(renderer.uiText);
         renderer.pipeline.Use();
 
-        const size_t numVertices = text.size() * 6;
-
         float penX = 0.0f;
         float penY = 0.0f;
         float fontSize = size;
@@ -189,7 +201,7 @@ namespace RIS
             fontSize = font.size;
 
         std::vector<UIVertex> vertices;
-        for(int i = 0; i < text.size(); ++i)
+        for(int i = 0; i < text.length(); ++i)
         {
             char c = text[i];
             if(c != ' ')
@@ -244,6 +256,8 @@ namespace RIS
         renderer.textures.at(font.textureId).Bind(0);
         uiLayout.SetVertexBuffer(textBuffer, 0);
 
+        std::size_t numVertices = vertices.size();
+
         glDrawArrays(GL_TRIANGLES, 0, numVertices);
     }
 
@@ -259,5 +273,55 @@ namespace RIS
         renderer.pipeline.Use();
 
         glDrawArrays(GL_TRIANGLES, 0, 6);
+    }
+
+    TextMetrics GL2DRenderer::MeasureText(const std::string &text, int fontId, float size)
+    {
+        const Font &font = fonts.at(fontId);
+
+        float penX = 0.0f;
+        float penY = 0.0f;
+        float fontSize = size;
+        if(fontSize == -1)
+            fontSize = font.size;
+        
+        float height = 0;
+
+        for(int i = 0; i < text.length(); ++i)
+        {
+            char c = text[i];
+            if(c != ' ')
+            {
+                if(font.glyphs.count(c) == 0)
+                    continue;
+            
+                const Glyph &glyph = font.glyphs.at(c);
+                if(i > 0)
+                {
+                    char kernChar = text[i-1];
+                    if(glyph.kernings.count(kernChar) > 0)
+                    {
+                        float kernVal = glyph.kernings.at(kernChar);
+                        penX += kernVal * fontSize;
+                    }
+                }
+
+                float glyphHeight = glyph.bboxHeight * fontSize;
+                float glyphAdvanceX = glyph.advanceX * fontSize;
+
+                float h = glyphHeight;
+
+                penX += glyphAdvanceX;
+
+                if(height < h)
+                    height = h;
+            }
+            else
+            {
+                penX += font.spaceAdvance * size;
+            }
+        }
+
+        return { penX, height };
     }
 }

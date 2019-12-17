@@ -18,7 +18,7 @@ using std::string;
 namespace RIS
 {
     UIPanel::UIPanel(const SystemLocator &systems)
-        : systems(systems), components(), color(0, 0, 0, 0), position(0, 0)
+        : systems(systems), components(), color(0, 0, 0, 0), position(0, 0), backTexture(1), size(0, 0)
     {
     }
 
@@ -35,6 +35,16 @@ namespace RIS
     void UIPanel::SetPosition(const glm::vec2 &position)
     {
         this->position = position;
+    }
+
+    void UIPanel::SetSize(const glm::vec2 &size)
+    {
+        this->size = size;
+    }
+
+    void UIPanel::SetTexture(int texture)
+    {
+        backTexture = texture;
     }
 
     void UIPanel::Add(ComponentPtr component)
@@ -67,15 +77,19 @@ namespace RIS
         std::for_each(components.begin(), components.end(), [](auto component){ component->Update(); });
     }
 
-    void UIPanel::Draw(IRenderer &renderer)
+    void UIPanel::Draw(I2DRenderer &renderer, const glm::vec2 &parentPosition)
     {
-        std::for_each(components.begin(), components.end(), [&renderer](auto component){ component->Draw(renderer); });
+        glm::vec2 pos = parentPosition + position;
+
+        renderer.SetTexture(backTexture, 0);
+        renderer.DrawQuad(pos, size, color);
+        std::for_each(components.begin(), components.end(), [&renderer, &pos](auto component){ component->Draw(renderer, pos); });
     }
 
 // UILabel
 
     UILabel::UILabel(const SystemLocator &systems)
-        : systems(systems), fontColor(1, 1, 1, 1), isVisible(true)
+        : systems(systems), fontColor(1, 1, 1, 1), isVisible(true), fontSize(-1), font(0)
     {
 
     }
@@ -85,9 +99,10 @@ namespace RIS
 
     }
 
-    void UILabel::SetFont(int font)
+    void UILabel::SetFont(int font, float fontSize)
     {
         this->font = font;
+        this->fontSize = fontSize;
     }
 
     void UILabel::SetTextColor(const glm::vec4 &color)
@@ -100,14 +115,24 @@ namespace RIS
         isVisible = visible;
     }
 
+    void UILabel::SetPosition(const glm::vec2 &position)
+    {
+        this->position = position;
+    }
+
+    void UILabel::SetText(const string &text)
+    {
+        this->text = text;
+    }
+
     void UILabel::Update()
     {
 
     }
 
-    void UILabel::Draw(IRenderer &renderer)
+    void UILabel::Draw(I2DRenderer &renderer, const glm::vec2 &parentPosition)
     {
-        
+        renderer.DrawText(text, font, parentPosition + position, fontSize, fontColor);
     }
 
 // Simpleuserinterface
@@ -135,6 +160,39 @@ namespace RIS
 
         meow = renderer.LoadTexture("meow");
         immortalFont = renderer.Get2DRenderer().LoadFont("IMMORTAL");
+
+        PanelPtr panel = std::make_shared<UIPanel>(systems);
+        panel->SetPosition({ 100, 100 });
+        panel->SetSize({ 200, 300 });
+        panel->SetColor({ 0.1f, 0.7f, 0.2f, 0.7f });
+        panel->SetTexture(1);
+
+        auto metrics = renderer.Get2DRenderer().MeasureText("Start", immortalFont, 30);
+        float xPos = 100 - metrics.width / 2;
+        float yPos = 300 - metrics.height;
+
+        LabelPtr labelStart = std::make_shared<UILabel>(systems);
+        labelStart->SetText("Start");
+        labelStart->SetTextColor({ 0, 0, 0, 1 });
+        labelStart->SetFont(immortalFont, 30);
+        labelStart->SetPosition({ xPos, yPos });
+        labelStart->SetVisible(true);
+
+        metrics = renderer.Get2DRenderer().MeasureText("Quit", immortalFont, 30);
+        xPos = 100 - metrics.width / 2;
+        yPos = yPos - metrics.height;
+
+        LabelPtr labelQuit = std::make_shared<UILabel>(systems);
+        labelQuit->SetText("Quit");
+        labelQuit->SetTextColor({ 0, 0, 0, 1 });
+        labelQuit->SetFont(immortalFont, 30);
+        labelQuit->SetPosition({ xPos, yPos });
+        labelQuit->SetVisible(true);
+
+        panel->Add(labelStart);
+        panel->Add(labelQuit);
+
+        rootContainer->Add(panel);
     }
 
     void SimpleUserinterface::LoadLayout(const std::string &layout)
@@ -176,12 +234,7 @@ namespace RIS
 
         renderer2D.Begin();
 
-        rootContainer->Draw(renderer);
-
-        renderer2D.SetTexture(meow, 0);
-        renderer2D.DrawQuad({50, 50}, {512, 512}, {1, 1, 1, 1});
-
-        renderer2D.DrawText("Hello World", immortalFont, {0, 0}, 50, {0, 0, 0, 1});
+        rootContainer->Draw(renderer2D, glm::vec2());
 
         renderer2D.End();
 

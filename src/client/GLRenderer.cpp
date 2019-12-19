@@ -114,7 +114,7 @@ namespace RIS
         std::string shaderVersion = reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION));
         std::string renderer = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
 
-        if(vendor.find("AMD") != std::string::npos || vendor.find("amd") != std::string::npos)
+        if(vendor.find("ATI") != std::string::npos || vendor.find("ati") != std::string::npos)
             useAmdFix = true;
 
         log.Info("Using OpenGL version " + version + " from " + vendor + " with shaderversion " + shaderVersion + " on " + renderer);

@@ -18,7 +18,7 @@ using std::string;
 namespace RIS
 {
     UIPanel::UIPanel(const SystemLocator &systems)
-        : systems(systems), components(), color(0, 0, 0, 0), position(0, 0), backTexture(1), size(0, 0)
+        : Container(systems), components(), color(0, 0, 0, 0), position(0, 0), backgroundImage(1), size(0, 0)
     {
     }
 
@@ -42,9 +42,9 @@ namespace RIS
         this->size = size;
     }
 
-    void UIPanel::SetTexture(int texture)
+    void UIPanel::SetImage(int image)
     {
-        backTexture = texture;
+        backgroundImage = image;
     }
 
     void UIPanel::Add(ComponentPtr component)
@@ -81,7 +81,7 @@ namespace RIS
     {
         glm::vec2 pos = parentPosition + position;
 
-        renderer.SetTexture(backTexture, 0);
+        renderer.SetTexture(backgroundImage, 0);
         renderer.DrawQuad(pos, size, color);
         std::for_each(components.begin(), components.end(), [&renderer, &pos](auto component){ component->Draw(renderer, pos); });
     }
@@ -89,7 +89,7 @@ namespace RIS
 // UILabel
 
     UILabel::UILabel(const SystemLocator &systems)
-        : systems(systems), fontColor(1, 1, 1, 1), isVisible(true), fontSize(-1), font(0)
+        : Component(systems), fontColor(1, 1, 1, 1), isVisible(true), fontSize(-1), font(0)
     {
 
     }
@@ -135,12 +135,50 @@ namespace RIS
         renderer.DrawText(text, font, parentPosition + position, fontSize, fontColor);
     }
 
+// UIImage
+
+    UIImage::UIImage(const SystemLocator &systems)
+        : Component(systems), image(1)
+    {
+    }
+
+    UIImage::~UIImage()
+    {
+    }
+
+    void UIImage::SetImage(int image)
+    {
+        this->image = image;
+    }
+
+    void UIImage::SetPosition(const glm::vec2 &position)
+    {
+        this->position = position;
+    }
+
+    void UIImage::SetSize(const glm::vec2 &size)
+    {
+        this->size = size;
+    }
+
+    void UIImage::Update()
+    {
+
+    }
+
+    void UIImage::Draw(I2DRenderer &renderer, const glm::vec2 &parentPosition)
+    {
+        glm::vec2 pos = parentPosition + position;
+        renderer.SetTexture(image, 0);
+        renderer.DrawQuad(position, size, {1, 1, 1, 1});
+    }
+
 // Simpleuserinterface
 
     SimpleUserinterface::SimpleUserinterface(const SystemLocator &systems, Config &config)
         : systems(systems), config(config), uiFramebufferId(-1)
     {
-        rootContainer = std::make_shared<UIPanel>(systems);
+        rootContainer = MakePanel(systems);
     }
 
     SimpleUserinterface::~SimpleUserinterface()
@@ -161,17 +199,17 @@ namespace RIS
         meow = renderer.LoadTexture("meow");
         immortalFont = renderer.Get2DRenderer().LoadFont("IMMORTAL");
 
-        PanelPtr panel = std::make_shared<UIPanel>(systems);
-        panel->SetPosition({ 100, 100 });
+        PanelPtr panel = MakePanel(systems);
+        panel->SetPosition({ uiWidth/2 - 100, uiHeight/2 - 150 });
         panel->SetSize({ 200, 300 });
         panel->SetColor({ 0.1f, 0.7f, 0.2f, 0.7f });
-        panel->SetTexture(1);
+        panel->SetImage(1);
 
         auto metrics = renderer.Get2DRenderer().MeasureText("Start", immortalFont, 30);
         float xPos = 100 - metrics.width / 2;
         float yPos = 300 - metrics.height;
 
-        LabelPtr labelStart = std::make_shared<UILabel>(systems);
+        LabelPtr labelStart = MakeLabel(systems);
         labelStart->SetText("Start");
         labelStart->SetTextColor({ 0, 0, 0, 1 });
         labelStart->SetFont(immortalFont, 30);
@@ -182,17 +220,23 @@ namespace RIS
         xPos = 100 - metrics.width / 2;
         yPos = yPos - metrics.height;
 
-        LabelPtr labelQuit = std::make_shared<UILabel>(systems);
+        LabelPtr labelQuit = MakeLabel(systems);
         labelQuit->SetText("Quit");
         labelQuit->SetTextColor({ 0, 0, 0, 1 });
         labelQuit->SetFont(immortalFont, 30);
         labelQuit->SetPosition({ xPos, yPos });
         labelQuit->SetVisible(true);
 
+        ImagePtr image = MakeImage(systems);
+        image->SetPosition({ 0, uiHeight-256 });
+        image->SetSize({ 256, 256 });
+        image->SetImage(meow);
+
         panel->Add(labelStart);
         panel->Add(labelQuit);
 
         rootContainer->Add(panel);
+        rootContainer->Add(image);
     }
 
     void SimpleUserinterface::LoadLayout(const std::string &layout)

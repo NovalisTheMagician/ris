@@ -12,8 +12,12 @@
 
 #include <algorithm>
 
+#include <iostream>
+
 using namespace std::literals;
 using std::string;
+
+using namespace std::placeholders;
 
 namespace RIS
 {
@@ -72,6 +76,16 @@ namespace RIS
         components.clear();
     }
 
+    void UIPanel::OnChar(char c)
+    {
+        std::for_each(components.begin(), components.end(), [c](auto component){ component->OnChar(c); });
+    }
+
+    void UIPanel::OnMouseMove(float x, float y)
+    {
+        std::for_each(components.begin(), components.end(), [x, y](auto component){ component->OnMouseMove(x, y); });
+    }
+
     void UIPanel::Update()
     {
         std::for_each(components.begin(), components.end(), [](auto component){ component->Update(); });
@@ -91,12 +105,10 @@ namespace RIS
     UILabel::UILabel(const SystemLocator &systems)
         : Component(systems), fontColor(1, 1, 1, 1), isVisible(true), fontSize(-1), font(0)
     {
-
     }
 
     UILabel::~UILabel()
     {
-
     }
 
     void UILabel::SetFont(int font, float fontSize)
@@ -196,6 +208,9 @@ namespace RIS
         uiHeight = config.GetInt("r_height", 600);
         uiFramebufferId = renderer.CreateFramebuffer(uiWidth, uiHeight, true);
 
+        IInput &input = systems.GetInput();
+        input.RegisterChar("ui", std::bind(&SimpleUserinterface::OnChar, this, _1));
+
         meow = renderer.LoadTexture("meow");
         immortalFont = renderer.Get2DRenderer().LoadFont("IMMORTAL");
 
@@ -288,5 +303,16 @@ namespace RIS
     void SimpleUserinterface::Update()
     {
         rootContainer->Update();
+    }
+
+    void SimpleUserinterface::OnChar(char character)
+    {
+        rootContainer->OnChar(character);
+        std::cout << character;
+    }
+
+    void SimpleUserinterface::OnMouseMove(float x, float y)
+    {
+        
     }
 }

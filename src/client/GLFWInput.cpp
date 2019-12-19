@@ -2,6 +2,8 @@
 
 #include "GLFWInput.hpp"
 
+using std::string;
+
 namespace RIS
 {
     const std::unordered_map<int, InputAction> GLFWInput::DEFAULT_KEYMAP = 
@@ -19,7 +21,7 @@ namespace RIS
     GLFWInput *GLFWInput::instance = nullptr;
 
     GLFWInput::GLFWInput(const SystemLocator &systems, Config &config, const GLFWWindow &window)
-        : systems(systems), config(config), keyMap()
+        : systems(systems), config(config), keyMap(), ready(false)
     {
         GLFWwindow *wnd = window.GetWindow();
 
@@ -28,6 +30,8 @@ namespace RIS
         glfwSetCursorPosCallback(wnd, MousePosCallback);
         glfwSetScrollCallback(wnd, MouseScrollCallback);
         glfwSetMouseButtonCallback(wnd, MouseButtonCallback);
+        ready = true;
+        instance = this;
     }
 
     GLFWInput::~GLFWInput()
@@ -36,7 +40,7 @@ namespace RIS
     }
 
     void GLFWInput::KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
-    {
+    {  
         GLFWInput &input = *instance;
         if(action == GLFW_PRESS)
         {
@@ -81,37 +85,121 @@ namespace RIS
 
     void GLFWInput::OnKeyUp(int key)
     {
-
+        if(!ready) return;
+        for(auto& [_, callback] : keyUpCallbacks)
+            callback(key);
     }
 
     void GLFWInput::OnKeyDown(int key)
     {
-
+        if(!ready) return;
+        for(auto& [_, callback] : keyDownCallbacks)
+            callback(key);
     }
 
     void GLFWInput::OnChar(char character)
     {
-
+        if(!ready) return;
+        for(auto& [_, callback] : charCallbacks)
+            callback(character);
     }
 
     void GLFWInput::OnMouseMove(float x, float y)
     {
-
+        if(!ready) return;
+        for(auto& [_, callback] : mouseCallbacks)
+            callback(x, y);
     }
 
     void GLFWInput::OnScrollWheel(float x, float y)
     {
-
+        if(!ready) return;
+        for(auto& [_, callback] : wheelCallbacks)
+            callback(x, y);
     }
 
     void GLFWInput::OnMouseButtonUp(int button)
     {
-
+        if(!ready) return;
+        for(auto& [_, callback] : buttonUpCallbacks)
+            callback(button);
     }
 
     void GLFWInput::OnMouseButtonDown(int button)
     {
+        if(!ready) return;
+        for(auto& [_, callback] : buttonDownCallbacks)
+            callback(button);
+    }
 
+    void GLFWInput::RegisterKeyUp(const string &handle, RIS::KeyCallback callback)
+    {
+        keyUpCallbacks[handle] = callback;
+    }
+
+    void GLFWInput::RegisterKeyDown(const string &handle, RIS::KeyCallback callback)
+    {
+        keyDownCallbacks[handle] = callback;
+    }
+
+    void GLFWInput::RegisterButtonUp(const string &handle, RIS::ButtonCallback callback) 
+    {
+        buttonUpCallbacks[handle] = callback;
+    }
+
+    void GLFWInput::RegisterButtonDown(const string &handle, RIS::ButtonCallback callback)
+    {
+        buttonDownCallbacks[handle] = callback;
+    }
+
+    void GLFWInput::RegisterMouse(const string &handle, RIS::MouseCallback callback)
+    {
+        mouseCallbacks[handle] = callback;
+    }
+
+    void GLFWInput::RegisterWheel(const string &handle, RIS::WheelCallback callback)
+    {
+        wheelCallbacks[handle] = callback;
+    }
+
+    void GLFWInput::RegisterChar(const std::string &handle, RIS::CharCallback callback)
+    {
+        charCallbacks[handle] = callback;
+    }
+
+    void GLFWInput::UnregisterKeyUp(const string &handle)
+    {
+        keyUpCallbacks.erase(handle);
+    }
+
+    void GLFWInput::UnregisterKeyDown(const string &handle)
+    {
+        keyDownCallbacks.erase(handle);
+    }
+
+    void GLFWInput::UnregisterButtonUp(const string &handle)
+    {
+        buttonUpCallbacks.erase(handle);
+    }
+
+    void GLFWInput::UnregisterButtonDown(const string &handle)
+    {
+        buttonDownCallbacks.erase(handle);
+    }
+
+    void GLFWInput::UnregisterMouse(const string &handle)
+    {
+        mouseCallbacks.erase(handle);
+    }
+
+    void GLFWInput::UnregisterWheel(const string &handle)
+    {
+        wheelCallbacks.erase(handle);
+    }
+
+    void GLFWInput::UnregisterChar(const string &handle)
+    {
+        charCallbacks.erase(handle);
     }
 
     void GLFWInput::Update()

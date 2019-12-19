@@ -19,7 +19,7 @@ namespace RIS
         Component(const SystemLocator &systems) : systems(systems) {};
         virtual ~Component() = default;
 
-        virtual void OnMouseMove(int x, int y) {};
+        virtual void OnMouseMove(float x, float y) {};
         virtual void OnMouseDown(int mouseCode) {};
         virtual void OnMouseUp(int mouseCode) {};
 
@@ -62,6 +62,9 @@ namespace RIS
         void Add(ComponentPtr component) override;
         void Remove(ComponentPtr component) override;
         void RemoveAll() override;
+
+        void OnChar(char c) override;
+        void OnMouseMove(float x, float y) override;
 
         void Update() override;
         void Draw(I2DRenderer &renderer, const glm::vec2 &parentPosition) override;
@@ -231,6 +234,10 @@ namespace RIS
 
         void Draw() override;
         void Update() override;
+
+    private:
+        void OnChar(char character);
+        void OnMouseMove(float x, float y);
 
     private:
         const SystemLocator &systems;

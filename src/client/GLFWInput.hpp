@@ -22,6 +22,22 @@ namespace RIS
         GLFWInput(GLFWInput&&) = delete;
         GLFWInput& operator=(GLFWInput&&) = delete;
 
+        void RegisterKeyUp(const std::string &handle, KeyCallback callback) override;
+        void RegisterKeyDown(const std::string &handle, KeyCallback callback) override;
+        void RegisterButtonUp(const std::string &handle, ButtonCallback callback) override;
+        void RegisterButtonDown(const std::string &handle, ButtonCallback callback) override;
+        void RegisterMouse(const std::string &handle, MouseCallback callback) override;
+        void RegisterWheel(const std::string &handle, WheelCallback callback) override;
+        void RegisterChar(const std::string &handle, CharCallback callback) override;
+
+        void UnregisterKeyUp(const std::string &handle) override;
+        void UnregisterKeyDown(const std::string &handle) override;
+        void UnregisterButtonUp(const std::string &handle) override;
+        void UnregisterButtonDown(const std::string &handle) override;
+        void UnregisterMouse(const std::string &handle) override;
+        void UnregisterWheel(const std::string &handle) override;
+        void UnregisterChar(const std::string &handle) override;
+
         void Update() override;
 
     private:
@@ -47,7 +63,20 @@ namespace RIS
         const SystemLocator &systems;
         Config &config;
 
+        bool ready;
+
         std::unordered_map<int, InputAction> keyMap;
+
+        std::unordered_map<std::string, RIS::KeyCallback> keyUpCallbacks;
+        std::unordered_map<std::string, RIS::KeyCallback> keyDownCallbacks;
+
+        std::unordered_map<std::string, RIS::ButtonCallback> buttonUpCallbacks;
+        std::unordered_map<std::string, RIS::ButtonCallback> buttonDownCallbacks;
+
+        std::unordered_map<std::string, RIS::MouseCallback> mouseCallbacks;
+        std::unordered_map<std::string, RIS::WheelCallback> wheelCallbacks;
+
+        std::unordered_map<std::string, RIS::CharCallback> charCallbacks;
 
     };
 }

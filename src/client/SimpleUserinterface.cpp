@@ -3,6 +3,7 @@
 #include "common/IRenderer.hpp"
 #include "common/ILoader.hpp"
 #include "common/IAudio.hpp"
+#include "common/IInput.hpp"
 
 #include "common/Logger.hpp"
 
@@ -12,8 +13,6 @@
 
 #include <algorithm>
 
-#include <iostream>
-
 using namespace std::literals;
 using std::string;
 
@@ -21,171 +20,7 @@ using namespace std::placeholders;
 
 namespace RIS
 {
-    UIPanel::UIPanel(const SystemLocator &systems)
-        : Container(systems), components(), color(0, 0, 0, 0), position(0, 0), backgroundImage(1), size(0, 0)
-    {
-    }
-
-    UIPanel::~UIPanel()
-    {
-        components.clear();
-    }
-
-    void UIPanel::SetColor(const glm::vec4 &color)
-    {
-        this->color = color;
-    }
-
-    void UIPanel::SetPosition(const glm::vec2 &position)
-    {
-        this->position = position;
-    }
-
-    void UIPanel::SetSize(const glm::vec2 &size)
-    {
-        this->size = size;
-    }
-
-    void UIPanel::SetImage(int image)
-    {
-        backgroundImage = image;
-    }
-
-    void UIPanel::Add(ComponentPtr component)
-    {
-        if(component)
-        {
-            components.push_back(component);
-        }
-    }
-
-    void UIPanel::Remove(ComponentPtr component)
-    {
-        if(component)
-        {
-            auto res = std::find(components.begin(), components.end(), component);
-            if(res != components.end())
-            {
-                components.erase(res);
-            }
-        }
-    }
-
-    void UIPanel::RemoveAll()
-    {
-        components.clear();
-    }
-
-    void UIPanel::OnChar(char c)
-    {
-        std::for_each(components.begin(), components.end(), [c](auto component){ component->OnChar(c); });
-    }
-
-    void UIPanel::OnMouseMove(float x, float y)
-    {
-        std::for_each(components.begin(), components.end(), [x, y](auto component){ component->OnMouseMove(x, y); });
-    }
-
-    void UIPanel::Update()
-    {
-        std::for_each(components.begin(), components.end(), [](auto component){ component->Update(); });
-    }
-
-    void UIPanel::Draw(I2DRenderer &renderer, const glm::vec2 &parentPosition)
-    {
-        glm::vec2 pos = parentPosition + position;
-
-        renderer.SetTexture(backgroundImage, 0);
-        renderer.DrawQuad(pos, size, color);
-        std::for_each(components.begin(), components.end(), [&renderer, &pos](auto component){ component->Draw(renderer, pos); });
-    }
-
-// UILabel
-
-    UILabel::UILabel(const SystemLocator &systems)
-        : Component(systems), fontColor(1, 1, 1, 1), isVisible(true), fontSize(-1), font(0)
-    {
-    }
-
-    UILabel::~UILabel()
-    {
-    }
-
-    void UILabel::SetFont(int font, float fontSize)
-    {
-        this->font = font;
-        this->fontSize = fontSize;
-    }
-
-    void UILabel::SetTextColor(const glm::vec4 &color)
-    {
-        fontColor = color;
-    }
-
-    void UILabel::SetVisible(bool visible)
-    {
-        isVisible = visible;
-    }
-
-    void UILabel::SetPosition(const glm::vec2 &position)
-    {
-        this->position = position;
-    }
-
-    void UILabel::SetText(const string &text)
-    {
-        this->text = text;
-    }
-
-    void UILabel::Update()
-    {
-
-    }
-
-    void UILabel::Draw(I2DRenderer &renderer, const glm::vec2 &parentPosition)
-    {
-        renderer.DrawText(text, font, parentPosition + position, fontSize, fontColor);
-    }
-
-// UIImage
-
-    UIImage::UIImage(const SystemLocator &systems)
-        : Component(systems), image(1)
-    {
-    }
-
-    UIImage::~UIImage()
-    {
-    }
-
-    void UIImage::SetImage(int image)
-    {
-        this->image = image;
-    }
-
-    void UIImage::SetPosition(const glm::vec2 &position)
-    {
-        this->position = position;
-    }
-
-    void UIImage::SetSize(const glm::vec2 &size)
-    {
-        this->size = size;
-    }
-
-    void UIImage::Update()
-    {
-
-    }
-
-    void UIImage::Draw(I2DRenderer &renderer, const glm::vec2 &parentPosition)
-    {
-        glm::vec2 pos = parentPosition + position;
-        renderer.SetTexture(image, 0);
-        renderer.DrawQuad(position, size, {1, 1, 1, 1});
-    }
-
-// Simpleuserinterface
+    const int SimpleUserinterface::JSON_VERSION = 1;
 
     SimpleUserinterface::SimpleUserinterface(const SystemLocator &systems, Config &config)
         : systems(systems), config(config), uiFramebufferId(-1)
@@ -195,11 +30,7 @@ namespace RIS
 
     SimpleUserinterface::~SimpleUserinterface()
     {
-
     }
-
-    int meow;
-    int immortalFont;
 
     void SimpleUserinterface::InitializeRootElements()
     {
@@ -210,71 +41,356 @@ namespace RIS
 
         IInput &input = systems.GetInput();
         input.RegisterChar("ui", std::bind(&SimpleUserinterface::OnChar, this, _1));
+        input.RegisterMouse("ui", std::bind(&SimpleUserinterface::OnMouseMove, this, _1, _2));
+        input.RegisterButtonDown("ui", std::bind(&SimpleUserinterface::OnMouseDown, this, _1));
+        input.RegisterButtonUp("ui", std::bind(&SimpleUserinterface::OnMouseUp, this, _1));
 
-        meow = renderer.LoadTexture("meow");
-        immortalFont = renderer.Get2DRenderer().LoadFont("IMMORTAL");
+        LoadLayout("main");
+    }
 
+    void SimpleUserinterface::LoadPanel(const rapidjson::Value &jsonValue, const ContainerPtr &parentContainer, int defaultFont)
+    {
         PanelPtr panel = MakePanel(systems);
-        panel->SetPosition({ uiWidth/2 - 100, uiHeight/2 - 150 });
-        panel->SetSize({ 200, 300 });
-        panel->SetColor({ 0.1f, 0.7f, 0.2f, 0.7f });
-        panel->SetImage(1);
+        std::string name = jsonValue["name"].GetString();
+        panel->SetName(name);
 
-        auto metrics = renderer.Get2DRenderer().MeasureText("Start", immortalFont, 30);
-        float xPos = 100 - metrics.width / 2;
-        float yPos = 300 - metrics.height;
+        auto value = jsonValue.FindMember("position");
+        if(value != jsonValue.MemberEnd())
+        {
+            glm::vec2 position = { value->value[0].GetFloat(), value->value[1].GetFloat() };
+            panel->SetPosition(position);
+        }
+        
+        value = jsonValue.FindMember("size");
+        if(value != jsonValue.MemberEnd())
+        {
+            glm::vec2 size = { value->value[0].GetFloat(), value->value[1].GetFloat() };
+            panel->SetSize(size);
+        }
+        
+        value = jsonValue.FindMember("color");
+        if(value != jsonValue.MemberEnd())
+        {
+            glm::vec4 color = { value->value[0].GetFloat(), value->value[1].GetFloat(), value->value[2].GetFloat(), value->value[3].GetFloat() };
+            panel->SetColor(color);
+        }
 
-        LabelPtr labelStart = MakeLabel(systems);
-        labelStart->SetText("Start");
-        labelStart->SetTextColor({ 0, 0, 0, 1 });
-        labelStart->SetFont(immortalFont, 30);
-        labelStart->SetPosition({ xPos, yPos });
-        labelStart->SetVisible(true);
+        auto componentsIt = jsonValue.FindMember("components");
+        if(componentsIt != jsonValue.MemberEnd())
+        {
+            for(auto &component : componentsIt->value.GetArray())
+            {
+                std::string type = component["type"].GetString();
+                if(type == "panel")
+                {
+                    LoadPanel(component, panel, defaultFont);
+                }
+                else if(type == "label")
+                {
+                    LoadLabel(component, panel, defaultFont);
+                }
+                else if(type == "button")
+                {
+                    LoadButton(component, panel, defaultFont);
+                }
+                else if(type == "image")
+                {
+                    LoadImage(component, panel, defaultFont);
+                }
+                else if(type == "textbox")
+                {
+                    LoadTextbox(component, panel, defaultFont);
+                }
+            }
+        }
 
-        metrics = renderer.Get2DRenderer().MeasureText("Quit", immortalFont, 30);
-        xPos = 100 - metrics.width / 2;
-        yPos = yPos - metrics.height;
+        parentContainer->Add(panel);
+    }
 
-        LabelPtr labelQuit = MakeLabel(systems);
-        labelQuit->SetText("Quit");
-        labelQuit->SetTextColor({ 0, 0, 0, 1 });
-        labelQuit->SetFont(immortalFont, 30);
-        labelQuit->SetPosition({ xPos, yPos });
-        labelQuit->SetVisible(true);
+    void SimpleUserinterface::LoadButton(const rapidjson::Value &jsonValue, const ContainerPtr &parentContainer, int defaultFont)
+    {
+        ButtonPtr button = MakeButton(systems);
 
+        string name = jsonValue["name"].GetString();
+        button->SetName(name);
+
+        auto value = jsonValue.FindMember("position");
+        if(value != jsonValue.MemberEnd())
+        {
+            glm::vec2 position = { value->value[0].GetFloat(), value->value[1].GetFloat() };
+            button->SetPosition(position);
+        }
+        
+        value = jsonValue.FindMember("size");
+        if(value != jsonValue.MemberEnd())
+        {
+            glm::vec2 size = { value->value[0].GetFloat(), value->value[1].GetFloat() };
+            button->SetSize(size);
+        }
+
+        int font = defaultFont;
+        float fontSize = -1;
+
+        value = jsonValue.FindMember("font_size");
+        if(value != jsonValue.MemberEnd())
+        {
+            fontSize = value->value.GetFloat();
+        }
+
+        value = jsonValue.FindMember("font");
+        if(value != jsonValue.MemberEnd())
+        {
+            font = systems.GetRenderer().Get2DRenderer().LoadFont(value->value.GetString());
+        }
+        button->SetFont(font, fontSize);
+
+        value = jsonValue.FindMember("text");
+        if(value != jsonValue.MemberEnd())
+        {
+            string text = value->value.GetString();
+            button->SetText(text);
+        }
+
+        UIAction action = UIAction::Nop;
+        string actionParam1 = "";
+        string actionParam2 = "";
+
+        value = jsonValue.FindMember("action");
+        if(value != jsonValue.MemberEnd())
+        {
+            action = static_cast<UIAction>(value->value.GetUint());
+        }
+        value = jsonValue.FindMember("act_param1");
+        if(value != jsonValue.MemberEnd())
+        {
+            actionParam1 = value->value.GetString();
+        }
+        value = jsonValue.FindMember("act_param2");
+        if(value != jsonValue.MemberEnd())
+        {
+            actionParam2 = value->value.GetString();
+        }
+        button->SetAction(action, actionParam1, actionParam2);
+
+        value = jsonValue.FindMember("normal_color");
+        if(value != jsonValue.MemberEnd())
+        {
+            glm::vec4 color = { value->value[0].GetFloat(), value->value[1].GetFloat(), value->value[2].GetFloat(), value->value[3].GetFloat() };
+            button->SetNormalColor(color);
+        }
+
+        value = jsonValue.FindMember("hover_color");
+        if(value != jsonValue.MemberEnd())
+        {
+            glm::vec4 color = { value->value[0].GetFloat(), value->value[1].GetFloat(), value->value[2].GetFloat(), value->value[3].GetFloat() };
+            button->SetHoverColor(color);
+        }
+
+        value = jsonValue.FindMember("down_color");
+        if(value != jsonValue.MemberEnd())
+        {
+            glm::vec4 color = { value->value[0].GetFloat(), value->value[1].GetFloat(), value->value[2].GetFloat(), value->value[3].GetFloat() };
+            button->SetDownColor(color);
+        }
+
+        value = jsonValue.FindMember("normal_image");
+        if(value != jsonValue.MemberEnd())
+        {
+            string imageName = value->value.GetString();
+            int image = systems.GetRenderer().LoadTexture(imageName);
+            button->SetNormalImage(image);
+        }
+
+        value = jsonValue.FindMember("hover_image");
+        if(value != jsonValue.MemberEnd())
+        {
+            string imageName = value->value.GetString();
+            int image = systems.GetRenderer().LoadTexture(imageName);
+            button->SetHoverImage(image);
+        }
+
+        value = jsonValue.FindMember("down_image");
+        if(value != jsonValue.MemberEnd())
+        {
+            string imageName = value->value.GetString();
+            int image = systems.GetRenderer().LoadTexture(imageName);
+            button->SetDownImage(image);
+        }
+
+        parentContainer->Add(button);
+    }
+    
+    void SimpleUserinterface::LoadLabel(const rapidjson::Value &jsonValue, const ContainerPtr &parentContainer, int defaultFont)
+    {
+        LabelPtr label = MakeLabel(systems);
+
+        string name = jsonValue["name"].GetString();
+        label->SetName(name);
+
+        auto value = jsonValue.FindMember("position");
+        if(value != jsonValue.MemberEnd())
+        {
+            glm::vec2 position = { value->value[0].GetFloat(), value->value[1].GetFloat() };
+            label->SetPosition(position);
+        }
+        
+        int font = defaultFont;
+        float fontSize = -1;
+
+        value = jsonValue.FindMember("font_size");
+        if(value != jsonValue.MemberEnd())
+        {
+            fontSize = value->value.GetFloat();
+        }
+
+        value = jsonValue.FindMember("font");
+        if(value != jsonValue.MemberEnd())
+        {
+            font = systems.GetRenderer().Get2DRenderer().LoadFont(value->value.GetString());
+        }
+        label->SetFont(font, fontSize);
+
+        value = jsonValue.FindMember("text");
+        if(value != jsonValue.MemberEnd())
+        {
+            string text = value->value.GetString();
+            label->SetText(text);
+        }
+
+        value = jsonValue.FindMember("text_color");
+        if(value != jsonValue.MemberEnd())
+        {
+            glm::vec4 textColor = { value->value[0].GetFloat(), value->value[1].GetFloat(), value->value[2].GetFloat(), value->value[3].GetFloat() };
+            label->SetTextColor(textColor);
+        }
+
+        parentContainer->Add(label);
+    }
+    
+    void SimpleUserinterface::LoadImage(const rapidjson::Value &jsonValue, const ContainerPtr &parentContainer, int defaultFont)
+    {
         ImagePtr image = MakeImage(systems);
-        image->SetPosition({ 0, uiHeight-256 });
-        image->SetSize({ 256, 256 });
-        image->SetImage(meow);
 
-        panel->Add(labelStart);
-        panel->Add(labelQuit);
+        string name = jsonValue["name"].GetString();
+        image->SetName(name);
 
-        rootContainer->Add(panel);
-        rootContainer->Add(image);
+        auto value = jsonValue.FindMember("position");
+        if(value != jsonValue.MemberEnd())
+        {
+            glm::vec2 position = { value->value[0].GetFloat(), value->value[1].GetFloat() };
+            image->SetPosition(position);
+        }
+        
+        value = jsonValue.FindMember("size");
+        if(value != jsonValue.MemberEnd())
+        {
+            glm::vec2 size = { value->value[0].GetFloat(), value->value[1].GetFloat() };
+            image->SetSize(size);
+        }
+
+        value = jsonValue.FindMember("image");
+        if(value != jsonValue.MemberEnd())
+        {
+            string imageName = value->value.GetString();
+            int imageId = systems.GetRenderer().LoadTexture(imageName);
+            image->SetImage(imageId);
+        }
+
+        parentContainer->Add(image);
+    }
+    
+    void SimpleUserinterface::LoadTextbox(const rapidjson::Value &jsonValue, const ContainerPtr &parentContainer, int defaultFont)
+    {
+        InputBoxPtr textBox = MakeInputBox(systems);
+
+        string name = jsonValue["name"].GetString();
+        textBox->SetName(name);
     }
 
     void SimpleUserinterface::LoadLayout(const std::string &layout)
     {
-        rootContainer->RemoveAll();
+        if(layouts.count(layout) > 0)
+        {
+            rootContainer = layouts.at(layout);
+            return;
+        }
 
         ILoader &loader = systems.GetLoader();
+        I2DRenderer &renderer = systems.GetRenderer().Get2DRenderer();
         try
         {
             std::size_t size;
             auto data = loader.LoadAsset(AssetType::UILAYOUT, layout, size);
+            string layoutStr(reinterpret_cast<const char*>(data.get()), size);
 
             rapidjson::Document layoutJson;
-            if(layoutJson.ParseInsitu(reinterpret_cast<char*>(data.get())).HasParseError())
+            rapidjson::ParseResult res = layoutJson.Parse(layoutStr.c_str()); 
+            if(res.IsError())
             {
-                Logger::Instance().Error("Failed to parse layout ("s + layout + "): "s + std::to_string(layoutJson.GetParseError()));
+                string errorMsg = rapidjson::GetParseError_En(res.Code());
+                Logger::Instance().Error("Failed to parse layout ("s + layout + "): "s + errorMsg + "(" + std::to_string(res.Offset()) + ")");
                 return;
             }
 
-            for(auto it = layoutJson.MemberBegin(); it != layoutJson.MemberEnd(); ++it)
+            ContainerPtr container = MakePanel(systems);
+
+            if(!layoutJson.HasMember("version"))
             {
-                // TODO
+                Logger::Instance().Error("Failed to load layout ("s + layout + "): invalid schema");
+                return;
             }
+
+            int version = layoutJson["version"].GetInt();
+            if(version != JSON_VERSION)
+            {
+                Logger::Instance().Error("Failed to load layout ("s + layout + "): version mismatch");
+                return;
+            }
+
+            auto nameVal = layoutJson.FindMember("name");
+            if(nameVal != layoutJson.MemberEnd())
+            {
+                container->SetName(nameVal->value.GetString());
+            }
+
+            int defaultFont = 1;
+            auto fontVal = layoutJson.FindMember("font");
+            if(fontVal != layoutJson.MemberEnd())
+            {
+                defaultFont = renderer.LoadFont(fontVal->value.GetString());
+            }
+
+            auto componentsIt = layoutJson.FindMember("components");
+            if(componentsIt != layoutJson.MemberEnd())
+            {
+                for(auto &component : componentsIt->value.GetArray())
+                {
+                    std::string type = component["type"].GetString();
+                    if(type == "panel")
+                    {
+                        LoadPanel(component, container, defaultFont);
+                    }
+                    else if(type == "label")
+                    {
+                        LoadLabel(component, container, defaultFont);
+                    }
+                    else if(type == "button")
+                    {
+                        LoadButton(component, container, defaultFont);
+                    }
+                    else if(type == "image")
+                    {
+                        LoadImage(component, container, defaultFont);
+                    }
+                    else if(type == "textbox")
+                    {
+                        LoadTextbox(component, container, defaultFont);
+                    }
+                }
+            }
+
+            layouts.insert({ layout, container });
+            rootContainer = container;
         }
         catch(const std::exception& e)
         {
@@ -308,11 +424,21 @@ namespace RIS
     void SimpleUserinterface::OnChar(char character)
     {
         rootContainer->OnChar(character);
-        std::cout << character;
     }
 
     void SimpleUserinterface::OnMouseMove(float x, float y)
     {
-        
+        y = uiHeight - y;
+        rootContainer->OnMouseMove(x, y);
+    }
+
+    void SimpleUserinterface::OnMouseDown(int button)
+    {
+        rootContainer->OnMouseDown(button);
+    }
+
+    void SimpleUserinterface::OnMouseUp(int button)
+    {
+        rootContainer->OnMouseUp(button);
     }
 }

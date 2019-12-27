@@ -272,6 +272,7 @@ namespace RIS
 
     void GLRenderer::FramebufferResize(int framebufferId, int width, int height)
     {
+        // do not resize the default framebuffer (0)
         if(framebufferId > 0 && framebuffers.count(framebufferId) > 0)
         {
             Framebuffer &framebuffer = framebuffers.at(framebufferId);

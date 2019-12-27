@@ -166,6 +166,11 @@ namespace RIS
         }
     }
 
+    void GLFWWindow::Exit(int exitCode)
+    {
+        glfwSetWindowShouldClose(window, true);
+    }
+
     bool GLFWWindow::HandleMessages()
     {
         glfwPollEvents();

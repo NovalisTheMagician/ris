@@ -75,7 +75,7 @@ namespace RIS
         string fontStr(reinterpret_cast<const char*>(fontRaw.get()), size);
 
         rapidjson::Document fontJson;
-        rapidjson::ParseResult res = fontJson.Parse(fontStr.c_str());
+        rapidjson::ParseResult res = fontJson.Parse(fontStr.c_str()); 
         if(res.IsError())
         {
             string errorMsg = rapidjson::GetParseError_En(res.Code());

@@ -20,10 +20,69 @@ using namespace std::placeholders;
 
 namespace RIS
 {
+
+    Console::Console(const SystemLocator &systems)
+        : systems(systems)
+    {
+
+    }
+
+    Console::~Console()
+    {
+
+    }
+
+    void Open()
+    {
+
+    }
+
+    void Close()
+    {
+
+    }
+
+    void Print(const std::string &msg)
+    {
+
+    }
+
+    void BindVar(const std::string &name, const long *var)
+    {
+
+    }
+
+    void BindVar(const std::string &name, const std::string *var)
+    {
+
+    }
+
+    void BindFunc(const std::string &name, ConsoleFunc func)
+    {
+
+    }
+
+    bool IsOpen()
+    {
+
+    }
+
+    void Update()
+    {
+
+    }
+
+    void Draw(I2DRenderer &renderer)
+    {
+
+    }
+
+// #################################
+
     const int SimpleUserinterface::JSON_VERSION = 1;
 
     SimpleUserinterface::SimpleUserinterface(const SystemLocator &systems, Config &config)
-        : systems(systems), config(config), uiFramebufferId(-1)
+        : systems(systems), config(config), uiFramebufferId(-1), console(systems)
     {
         rootContainer = MakePanel(systems);
     }
@@ -46,6 +105,11 @@ namespace RIS
         input.RegisterButtonUp("ui", std::bind(&SimpleUserinterface::OnMouseUp, this, _1));
 
         LoadLayout("main");
+    }
+
+    IConsole &SimpleUserinterface::GetConsole()
+    {
+        return console;
     }
 
     void SimpleUserinterface::LoadPanel(const rapidjson::Value &jsonValue, const ContainerPtr &parentContainer, int defaultFont)

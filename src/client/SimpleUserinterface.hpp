@@ -26,14 +26,21 @@
 
 namespace RIS
 {
-    class Console
+    class Console : public IConsole
     {
     public:
-        Console();
+        Console(const SystemLocator &systems, const glm::vec2 &viewSize);
         ~Console();
 
-        void Open();
-        void Close();
+        void Open() override;
+        void Close() override;
+
+        void Print(const std::string &msg) override;
+
+        void BindVar(const std::string &name, const long *var) override;
+        void BindVar(const std::string &name, const std::string *var) override;
+
+        void BindFunc(const std::string &name, ConsoleFunc func) override;
 
         bool IsOpen();
 
@@ -41,8 +48,18 @@ namespace RIS
         void Draw(I2DRenderer &renderer);
 
     private:
+        const SystemLocator &systems;
+
         bool isOpen;
         bool isMoving;
+
+        glm::vec2 viewSize;
+        float currentY;
+        float maxY;
+
+        std::unordered_map<std::string, const long*> longVars;
+        std::unordered_map<std::string, const long*> stringVars;
+        std::unordered_map<std::string, ConsoleFunc> funcVars;
 
     };
 
@@ -55,6 +72,8 @@ namespace RIS
         void InitializeRootElements() override;
 
         void LoadLayout(const std::string &layout) override;
+
+        IConsole& GetConsole() override;
 
         void Draw() override;
         void Update() override;
@@ -77,6 +96,8 @@ namespace RIS
     private:
         const SystemLocator &systems;
         Config &config;
+
+        Console console;
 
         int uiWidth, uiHeight;
         ContainerPtr rootContainer;

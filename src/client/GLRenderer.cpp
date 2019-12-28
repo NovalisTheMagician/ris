@@ -117,6 +117,9 @@ namespace RIS
         if(vendor.find("ATI") != std::string::npos || vendor.find("ati") != std::string::npos)
             useAmdFix = true;
 
+        if(static_cast<const Config&>(config).GetInt("g_ignoreamdfix", 0))
+            useAmdFix = false;
+
         log.Info("Using OpenGL version " + version + " from " + vendor + " with shaderversion " + shaderVersion + " on " + renderer);
 
         renderer2d.Setup();

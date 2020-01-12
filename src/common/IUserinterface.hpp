@@ -1,12 +1,13 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 #include <functional>
 
 namespace RIS
 {
-    using ConsoleFunc = std::function<void(std::string, std::string, std::string)>;
+    using ConsoleFunc = std::function<std::string(std::vector<std::string>)>;
 
     class IConsole
     {
@@ -15,10 +16,12 @@ namespace RIS
 
         virtual void Open() = 0;
         virtual void Close() = 0;
+        virtual void Toggle() = 0;
 
         virtual void Print(const std::string &msg) = 0;
 
         virtual void BindVar(const std::string &name, const long *var) = 0;
+        virtual void BindVar(const std::string &name, const float *var) = 0;
         virtual void BindVar(const std::string &name, const std::string *var) = 0;
 
         virtual void BindFunc(const std::string &name, ConsoleFunc func) = 0;

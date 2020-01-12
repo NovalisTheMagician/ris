@@ -92,22 +92,22 @@ namespace RIS
         std::for_each(components.begin(), components.end(), [x, y](auto component){ component->OnMouseMove(x, y); });
     }
 
-    void UIPanel::OnMouseDown(int mouseCode)
+    void UIPanel::OnMouseDown(InputButtons mouseCode)
     {
         std::for_each(components.begin(), components.end(), [mouseCode](auto component){ component->OnMouseDown(mouseCode); });
     }
 
-    void UIPanel::OnMouseUp(int mouseCode)
+    void UIPanel::OnMouseUp(InputButtons mouseCode)
     {
         std::for_each(components.begin(), components.end(), [mouseCode](auto component){ component->OnMouseUp(mouseCode); });
     }
 
-    void UIPanel::OnKeyDown(int keyCode)
+    void UIPanel::OnKeyDown(InputKeys keyCode)
     {
         std::for_each(components.begin(), components.end(), [keyCode](auto component){ component->OnKeyDown(keyCode); });
     }
 
-    void UIPanel::OnKeyUp(int keyCode)
+    void UIPanel::OnKeyUp(InputKeys keyCode)
     {
         std::for_each(components.begin(), components.end(), [keyCode](auto component){ component->OnKeyUp(keyCode); });
     }

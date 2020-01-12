@@ -93,6 +93,7 @@ namespace RIS
         void DrawQuad(const glm::vec2 &position, const glm::vec2 &size, const glm::vec4 &color) override;
 
         TextMetrics MeasureText(const std::string &text, int fontId, float size) override;
+        float MaxHeightFont(int fontId, float size) override;
 
     private:
         static const int MAX_CHARS;

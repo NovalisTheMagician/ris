@@ -7,6 +7,7 @@ namespace RIS
         Nop,
         Quit,
         ChangeUI,
-        SetValue
+        SetValue,
+        ToggleConsole,
     };
 }

@@ -29,15 +29,19 @@ namespace RIS
     class Console : public IConsole
     {
     public:
-        Console(const SystemLocator &systems, const glm::vec2 &viewSize);
+        Console(const SystemLocator &systems);
         ~Console();
+
+        void InitLimits(const glm::vec2 &viewSize);
 
         void Open() override;
         void Close() override;
+        void Toggle() override;
 
         void Print(const std::string &msg) override;
 
         void BindVar(const std::string &name, const long *var) override;
+        void BindVar(const std::string &name, const float *var) override;
         void BindVar(const std::string &name, const std::string *var) override;
 
         void BindFunc(const std::string &name, ConsoleFunc func) override;
@@ -46,6 +50,14 @@ namespace RIS
 
         void Update();
         void Draw(I2DRenderer &renderer);
+
+        bool ProcessLine(const std::string &lineToProcess);
+
+        void OnChar(char c);
+        void OnKeyDown(InputKeys key);
+
+    private:
+        std::string SetParam(std::vector<std::string> params);
 
     private:
         const SystemLocator &systems;
@@ -56,9 +68,26 @@ namespace RIS
         glm::vec2 viewSize;
         float currentY;
         float maxY;
+        float offsetY;
+
+        int consoleFont;
+        float consoleFontSize;
+        glm::vec4 backgroundColor;
+        glm::vec4 fontColor;
+
+        int maxLines;
+        float maxLineHeight;
+        std::vector<std::string> lines;
+        std::string inputLine;
+
+        int historyIndex;
+        std::vector<std::string> inputHistory;
+
+        float openSpeed;
 
         std::unordered_map<std::string, const long*> longVars;
-        std::unordered_map<std::string, const long*> stringVars;
+        std::unordered_map<std::string, const float*> floatVars;
+        std::unordered_map<std::string, const std::string*> stringVars;
         std::unordered_map<std::string, ConsoleFunc> funcVars;
 
     };
@@ -81,8 +110,9 @@ namespace RIS
     private:
         void OnChar(char character);
         void OnMouseMove(float x, float y);
-        void OnMouseDown(int button);
-        void OnMouseUp(int button);
+        void OnMouseDown(InputButtons button);
+        void OnMouseUp(InputButtons button);
+        void OnKeyDown(InputKeys key);
 
         void LoadPanel(const rapidjson::Value &jsonValue, const ContainerPtr &parentContainer, int defaultFont);
         void LoadButton(const rapidjson::Value &jsonValue, const ContainerPtr &parentContainer, int defaultFont);

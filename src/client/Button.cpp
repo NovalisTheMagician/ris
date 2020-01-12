@@ -137,19 +137,19 @@ namespace RIS
             isInBounds = false;
     }
 
-    void UIButton::OnMouseDown(int button)
+    void UIButton::OnMouseDown(InputButtons button)
     {
-        if(button == 0 && isInBounds)
+        if(button == InputButtons::LEFT && isInBounds)
         {
             isClickedDown = true;
         }
     }
 
-    void UIButton::OnMouseUp(int button)
+    void UIButton::OnMouseUp(InputButtons button)
     {
         auto &window = systems.GetWindow();
 
-        if(button == 0 && isClickedDown)
+        if(button == InputButtons::LEFT && isClickedDown)
         {
             if(isInBounds)
             {
@@ -173,6 +173,11 @@ namespace RIS
                 case UIAction::SetValue:
                     {
 
+                    }
+                    break;
+                case UIAction::ToggleConsole:
+                    {
+                        systems.GetUserinterface().GetConsole().Toggle();
                     }
                     break;
                 }

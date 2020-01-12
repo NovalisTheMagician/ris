@@ -324,4 +324,10 @@ namespace RIS
 
         return { penX, height };
     }
+
+    float GL2DRenderer::MaxHeightFont(int fontId, float size)
+    {
+        const Font &font = fonts.at(fontId);
+        return font.height * size;
+    }
 }

@@ -7,14 +7,20 @@
 
 #include "common/Logger.hpp"
 
+#undef min
+#undef max
 #include <rapidjson/rapidjson.h>
 #include <rapidjson/error/en.h>
 #include <rapidjson/document.h>
 
 #include <algorithm>
+#include <sstream>
+
+#include "common/StringSupport.hpp"
 
 using namespace std::literals;
 using std::string;
+using std::vector;
 
 using namespace std::placeholders;
 
@@ -22,7 +28,8 @@ namespace RIS
 {
 
     Console::Console(const SystemLocator &systems)
-        : systems(systems)
+        : systems(systems), currentY(0), consoleFontSize(15.0f), isOpen(false), isMoving(false), openSpeed(1), backgroundColor(0.3f, 0.3f, 0.3f, 0.85f), fontColor(0.7f, 0.7f, 0.7f, 1),
+            offsetY(7.5f)
     {
 
     }
@@ -32,49 +39,211 @@ namespace RIS
 
     }
 
-    void Open()
+    void Console::InitLimits(const glm::vec2 &viewSize)
     {
+        auto &r2d = systems.GetRenderer().Get2DRenderer();
 
+        this->viewSize = viewSize;
+        maxY = viewSize.y * 0.5f;
+        currentY = viewSize.y;
+
+        consoleFont = r2d.LoadFont("console");
+        maxLineHeight = r2d.MaxHeightFont(consoleFont, consoleFontSize);
+        maxLines = 512;//static_cast<int>(maxY / maxLineHeight);
+
+        IWindow& wnd = systems.GetWindow();
+
+        BindFunc("con", std::bind(&Console::SetParam, this, _1));
+        BindFunc("exit", [&wnd](vector<string> params){ wnd.Exit(0); return ""; });
     }
 
-    void Close()
+    void Console::Open()
     {
-
+        if(!isOpen)
+        {
+            isOpen = true;
+            isMoving = true;
+        }
     }
 
-    void Print(const std::string &msg)
+    void Console::Close()
     {
-
+        if(isOpen)
+        {
+            isOpen = false;
+            isMoving = true;
+        }
     }
 
-    void BindVar(const std::string &name, const long *var)
+    void Console::Toggle()
     {
-
+        if(isOpen)
+            Close();
+        else 
+            Open();
     }
 
-    void BindVar(const std::string &name, const std::string *var)
+    void Console::Print(const std::string &msg)
     {
-
+        while(lines.size() >= maxLines - 2)
+            lines.pop_back();
+        
+        lines.insert(lines.begin(), msg);
     }
 
-    void BindFunc(const std::string &name, ConsoleFunc func)
+    void Console::BindVar(const std::string &name, const long *var)
     {
-
+        longVars.insert_or_assign(name, var);
     }
 
-    bool IsOpen()
+    void Console::BindVar(const std::string &name, const float *var)
     {
-
+        floatVars.insert_or_assign(name, var);
     }
 
-    void Update()
+    void Console::BindVar(const std::string &name, const std::string *var)
     {
-
+        stringVars.insert_or_assign(name, var);
     }
 
-    void Draw(I2DRenderer &renderer)
+    void Console::BindFunc(const std::string &name, ConsoleFunc func)
     {
+        if(name == "set")
+            return;
+        funcVars.insert_or_assign(name, func);
+    }
 
+    bool Console::IsOpen()
+    {
+        return isOpen;
+    }
+
+    void Console::Update()
+    {
+        if(isMoving)
+        {
+            float dir = -1;
+            if(!isOpen)
+            {
+                dir = -dir;
+            }
+
+            currentY += dir * openSpeed;
+
+            if(isOpen && currentY <= maxY)
+            {
+                isMoving = false;
+                currentY = maxY;
+            }
+            else if(!isOpen && currentY >= viewSize.y)
+            {
+                isMoving = false;
+                currentY = viewSize.y;
+            }
+        }
+    }
+
+    void Console::Draw(I2DRenderer &renderer)
+    {
+        if(isOpen || isMoving)
+        {
+            renderer.SetTexture(1, 0);
+            renderer.DrawQuad({0, currentY}, {viewSize.x, maxY}, backgroundColor);
+
+            auto it = lines.begin();
+            for(int i = 1; it != lines.end(); ++it, ++i)
+            {
+                const string &msg = *it;
+                glm::vec2 pos = {0, (currentY + i * maxLineHeight) + offsetY};
+                renderer.DrawText(msg, consoleFont, pos, consoleFontSize, fontColor);
+            }
+            renderer.DrawText(">" + inputLine + "_", consoleFont, {0, currentY + offsetY}, consoleFontSize, fontColor);
+        }
+    }
+
+    void Console::OnChar(char c)
+    {
+        if(isOpen)
+        {
+            inputLine.insert(inputLine.end(), c);
+        }
+    }
+
+    void Console::OnKeyDown(InputKeys key)
+    {
+        if(isOpen)
+        {
+            if(key == InputKeys::ENTER || key == InputKeys::KP_ENTER)
+            {
+                if(inputLine.empty())
+                    return;
+
+                Print(inputLine);
+                if(!ProcessLine(inputLine))
+                    Print("Unkown command: \"" + inputLine + "\"");
+                inputLine = "";
+            }
+            else if(key == InputKeys::BACKSPACE)
+            {
+                if(inputLine.size() > 0)
+                    inputLine.erase(inputLine.end() - 1);
+            }
+        }
+    }
+
+    bool Console::ProcessLine(const string &lineToProcess)
+    {
+        std::istringstream sstream(lineToProcess);
+        std::vector<string> tokens{std::istream_iterator<string>{sstream},
+                            std::istream_iterator<string>{}};
+
+        string keyword = lowerCase(tokens[0]);
+        tokens.erase(tokens.begin());
+        if(keyword == "set")
+        {
+            return true;
+        }
+        else
+        {
+            if(funcVars.count(keyword) > 0)
+            {
+                auto func = funcVars.at(keyword);
+                auto &msg = func(tokens);
+                if(!msg.empty())
+                    Print(msg);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    string Console::SetParam(vector<string> params)
+    {
+        if(params.size() < 1)
+            return "no param specified!";
+
+        if(params[0] == "background")
+        {
+            if(params.size() < 5)
+                return "not enough color data";
+            
+            backgroundColor.r = std::stof(params[1]);
+            backgroundColor.g = std::stof(params[2]);
+            backgroundColor.b = std::stof(params[3]);
+            backgroundColor.a = std::stof(params[4]);
+        }
+        else if(params[0] == "forground")
+        {
+            if(params.size() < 5)
+                return "not enough color data";
+            
+            fontColor.r = std::stof(params[1]);
+            fontColor.g = std::stof(params[2]);
+            fontColor.b = std::stof(params[3]);
+            fontColor.a = std::stof(params[4]);
+        }
+
+        return "";
     }
 
 // #################################
@@ -82,7 +251,7 @@ namespace RIS
     const int SimpleUserinterface::JSON_VERSION = 1;
 
     SimpleUserinterface::SimpleUserinterface(const SystemLocator &systems, Config &config)
-        : systems(systems), config(config), uiFramebufferId(-1), console(systems)
+        : systems(systems), config(config), uiFramebufferId(-1), uiWidth(config.GetInt("r_width", 800)), uiHeight(config.GetInt("r_height", 600)), console(systems)
     {
         rootContainer = MakePanel(systems);
     }
@@ -93,9 +262,12 @@ namespace RIS
 
     void SimpleUserinterface::InitializeRootElements()
     {
+        console.InitLimits(glm::vec2(uiWidth, uiHeight));
+
+        console.Print("Hello World!");
+        console.Print("Hello World!2");
+
         IRenderer &renderer = systems.GetRenderer();
-        uiWidth = config.GetInt("r_width", 800);
-        uiHeight = config.GetInt("r_height", 600);
         uiFramebufferId = renderer.CreateFramebuffer(uiWidth, uiHeight, true);
 
         IInput &input = systems.GetInput();
@@ -103,6 +275,7 @@ namespace RIS
         input.RegisterMouse("ui", std::bind(&SimpleUserinterface::OnMouseMove, this, _1, _2));
         input.RegisterButtonDown("ui", std::bind(&SimpleUserinterface::OnMouseDown, this, _1));
         input.RegisterButtonUp("ui", std::bind(&SimpleUserinterface::OnMouseUp, this, _1));
+        input.RegisterKeyDown("ui", std::bind(&SimpleUserinterface::OnKeyDown, this, _1));
 
         LoadLayout("main");
     }
@@ -475,6 +648,8 @@ namespace RIS
 
         rootContainer->Draw(renderer2D, glm::vec2());
 
+        console.Draw(renderer2D);
+
         renderer2D.End();
 
         renderer.Draw(uiFramebufferId);
@@ -483,11 +658,13 @@ namespace RIS
     void SimpleUserinterface::Update()
     {
         rootContainer->Update();
+        console.Update();
     }
 
     void SimpleUserinterface::OnChar(char character)
     {
         rootContainer->OnChar(character);
+        console.OnChar(character);
     }
 
     void SimpleUserinterface::OnMouseMove(float x, float y)
@@ -496,13 +673,18 @@ namespace RIS
         rootContainer->OnMouseMove(x, y);
     }
 
-    void SimpleUserinterface::OnMouseDown(int button)
+    void SimpleUserinterface::OnMouseDown(InputButtons button)
     {
         rootContainer->OnMouseDown(button);
     }
 
-    void SimpleUserinterface::OnMouseUp(int button)
+    void SimpleUserinterface::OnMouseUp(InputButtons button)
     {
         rootContainer->OnMouseUp(button);
+    }
+
+    void SimpleUserinterface::OnKeyDown(InputKeys key)
+    {
+        console.OnKeyDown(key);
     }
 }

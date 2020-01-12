@@ -55,6 +55,9 @@ namespace RIS
         void OnMouseButtonUp(int button);
         void OnMouseButtonDown(int button);
 
+        InputKeys TranslateKey(int key);
+        InputButtons TranslateButton(int button);
+
     private:
         static const std::unordered_map<int, InputAction> DEFAULT_KEYMAP;
         static GLFWInput *instance;

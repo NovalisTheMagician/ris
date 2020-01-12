@@ -43,8 +43,8 @@ namespace RIS
         void Draw(I2DRenderer &renderer, const glm::vec2 &parentPosition) override;
 
         void OnMouseMove(float x, float y) override;
-        void OnMouseDown(int button) override;
-        void OnMouseUp(int button) override;
+        void OnMouseDown(InputButtons button) override;
+        void OnMouseUp(InputButtons button) override;
 
     private:
         std::string text;

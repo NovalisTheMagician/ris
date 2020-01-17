@@ -48,7 +48,7 @@ namespace RIS
 
         bool IsOpen();
 
-        void Update();
+        void Update(const Timer &timer);
         void Draw(I2DRenderer &renderer);
 
         bool ProcessLine(const std::string &lineToProcess);
@@ -105,7 +105,7 @@ namespace RIS
         IConsole& GetConsole() override;
 
         void Draw() override;
-        void Update() override;
+        void Update(const Timer &timer) override;
 
     private:
         void OnChar(char character);

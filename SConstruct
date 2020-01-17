@@ -17,13 +17,13 @@ dyn_libs = ['libs/glbinding/bin/glbinding.dll', 'libs/glbinding/bin/glbinding-au
 
 client_inc_path = ['src', 'libs/glm/include', 'libs/gli/include', 'libs/glbinding/include', 'libs/glfw/include', 'libs/soloud/include', 'libs/rapidjson/include']
 client_lib_path = ['libs/glbinding/lib', 'libs/glfw/lib', 'libs/soloud/lib']
-client_libs = ['user32', 'kernel32', 'gdi32', 'opengl32', 'glbinding', 'glbinding-aux', 'glfw3dll', 'soloud_static']
+client_libs = ['user32', 'kernel32', 'gdi32', 'opengl32', 'glbinding', 'glbinding-aux', 'glfw3dll', 'soloud_static', 'ws2_32']
 
 common_inc_path = ['src', 'libs/glm/include', 'libs/rapidjson/include']
 
 server_inc_path = ['src']
 server_lib_path = []
-server_libs = ['user32', 'kernel32']
+server_libs = ['user32', 'kernel32', 'ws2_32']
 
 defines = []
 

@@ -28,15 +28,13 @@ namespace RIS
 {
 
     Console::Console(const SystemLocator &systems)
-        : systems(systems), currentY(0), consoleFontSize(15.0f), isOpen(false), isMoving(false), openSpeed(1), backgroundColor(0.3f, 0.3f, 0.3f, 0.85f), fontColor(0.7f, 0.7f, 0.7f, 1),
+        : systems(systems), currentY(0), consoleFontSize(15.0f), isOpen(false), isMoving(false), openSpeed(1000), backgroundColor(0, 0, 0, 0.99f), fontColor(0.7f, 0.7f, 0.7f, 1),
             offsetY(7.5f)
     {
-
     }
 
     Console::~Console()
     {
-
     }
 
     void Console::InitLimits(const glm::vec2 &viewSize)
@@ -49,7 +47,7 @@ namespace RIS
 
         consoleFont = r2d.LoadFont("console");
         maxLineHeight = r2d.MaxHeightFont(consoleFont, consoleFontSize);
-        maxLines = 512;//static_cast<int>(maxY / maxLineHeight);
+        maxLines = 512;
 
         IWindow& wnd = systems.GetWindow();
 
@@ -118,7 +116,7 @@ namespace RIS
         return isOpen;
     }
 
-    void Console::Update()
+    void Console::Update(const Timer &timer)
     {
         if(isMoving)
         {
@@ -128,7 +126,7 @@ namespace RIS
                 dir = -dir;
             }
 
-            currentY += dir * openSpeed;
+            currentY += dir * openSpeed * timer.Delta();
 
             if(isOpen && currentY <= maxY)
             {
@@ -178,15 +176,34 @@ namespace RIS
                 if(inputLine.empty())
                     return;
 
+                inputHistory.insert(inputHistory.begin(), inputLine);
+                historyIndex = 0;
+
                 Print(inputLine);
                 if(!ProcessLine(inputLine))
-                    Print("Unkown command: \"" + inputLine + "\"");
+                    Print("Unknown command: \"" + inputLine + "\"");
                 inputLine = "";
             }
             else if(key == InputKeys::BACKSPACE)
             {
                 if(inputLine.size() > 0)
                     inputLine.erase(inputLine.end() - 1);
+            }
+            else if(key == InputKeys::UP)
+            {
+                if(!inputHistory.empty())
+                {
+                    inputLine = inputHistory[historyIndex];
+                    historyIndex = (historyIndex + 1) % inputHistory.size();
+                }
+            }
+            else if(key == InputKeys::DOWN)
+            {
+                if(!inputHistory.empty())
+                {
+                    historyIndex = (historyIndex - 1) % inputHistory.size();
+                    inputLine = inputHistory[historyIndex];
+                }
             }
         }
     }
@@ -201,6 +218,7 @@ namespace RIS
         tokens.erase(tokens.begin());
         if(keyword == "set")
         {
+            //todo
             return true;
         }
         else
@@ -263,9 +281,6 @@ namespace RIS
     void SimpleUserinterface::InitializeRootElements()
     {
         console.InitLimits(glm::vec2(uiWidth, uiHeight));
-
-        console.Print("Hello World!");
-        console.Print("Hello World!2");
 
         IRenderer &renderer = systems.GetRenderer();
         uiFramebufferId = renderer.CreateFramebuffer(uiWidth, uiHeight, true);
@@ -655,10 +670,10 @@ namespace RIS
         renderer.Draw(uiFramebufferId);
     }
 
-    void SimpleUserinterface::Update()
+    void SimpleUserinterface::Update(const Timer &timer)
     {
         rootContainer->Update();
-        console.Update();
+        console.Update(timer);
     }
 
     void SimpleUserinterface::OnChar(char character)

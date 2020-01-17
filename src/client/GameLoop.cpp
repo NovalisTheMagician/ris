@@ -10,7 +10,11 @@
 #include "common/Timer.hpp"
 #include "common/Logger.hpp"
 
+#include "common/StringSupport.hpp"
+#include "common/ThreadHelper.hpp"
+
 #include <thread>
+#include <atomic>
 #include <mutex>
 
 namespace RIS
@@ -46,18 +50,48 @@ namespace RIS
             timer.Update();
             input.Update();
 
-            interface.Update();
+            interface.Update(timer);
 
             renderer.Clear(0, clearColor);
             interface.Draw();
             window.Present();
         }
 
+        runNetworkThread = false;
+        networkThread.join();
+        runGameplayThread = false;
+        gameplayThread.join();
+
         return 0;
     }
 
     void GameLoop::StartThreads()
     {
+        auto &console = systems.GetUserinterface().GetConsole();
 
+        runNetworkThread = true;
+        networkThread = std::thread(std::bind(&GameLoop::NetworkThread, this));
+        console.Print("Network Thread-Id: " + toString(networkThread.get_id()));
+
+        runGameplayThread = true;
+        gameplayThread = std::thread(std::bind(&GameLoop::GameplayThread, this));
+        console.Print("Gameplay Thread-Id: " + toString(gameplayThread.get_id()));
+    }
+
+    void GameLoop::NetworkThread()
+    {
+        INetwork &network = systems.GetNetwork();
+        while(runNetworkThread)
+        {
+            network.StepLoop();
+        }
+    }
+
+    void GameLoop::GameplayThread()
+    {
+        while(runGameplayThread)
+        {
+
+        }
     }
 }

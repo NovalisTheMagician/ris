@@ -6,6 +6,8 @@
 #include <cwctype>
 #include <codecvt>
 
+#include <sstream>
+
 //from:
 // https://stackoverflow.com/questions/25829143/trim-whitespace-from-a-string/25829178
 // https://stackoverflow.com/questions/42022182/converting-wstring-to-lower-case
@@ -61,4 +63,12 @@ namespace RIS
 		return std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(str);
 	}
 #pragma warning(pop)
+
+	template<typename T>
+	inline std::string toString(const T& val)
+	{
+		std::stringstream ss;
+		ss << val;
+		return ss.str();
+	}
 }

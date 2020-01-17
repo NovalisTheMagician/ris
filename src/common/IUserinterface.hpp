@@ -5,6 +5,8 @@
 
 #include <functional>
 
+#include "common/Timer.hpp"
+
 namespace RIS
 {
     using ConsoleFunc = std::function<std::string(std::vector<std::string>)>;
@@ -40,6 +42,6 @@ namespace RIS
         virtual IConsole& GetConsole() = 0;
 
         virtual void Draw() = 0;
-        virtual void Update() = 0;
+        virtual void Update(const Timer &timer) = 0;
     };
 }

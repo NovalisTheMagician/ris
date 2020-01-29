@@ -13,6 +13,7 @@
 #include <vector>
 #include <unordered_map>
 #include <string>
+#include <mutex>
 
 #include "Component.hpp"
 #include "Container.hpp"
@@ -89,6 +90,8 @@ namespace RIS
         std::unordered_map<std::string, const float*> floatVars;
         std::unordered_map<std::string, const std::string*> stringVars;
         std::unordered_map<std::string, ConsoleFunc> funcVars;
+
+        std::mutex printMutex;
 
     };
 

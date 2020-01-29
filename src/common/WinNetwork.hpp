@@ -5,9 +5,12 @@
 #include "common/SystemLocator.hpp"
 #include "common/Config.hpp"
 
+#include <atomic>
+
 #ifdef _WIN32
 
 #include <WinSock2.h>
+#include <ws2tcpip.h>
 
 namespace RIS
 {
@@ -24,18 +27,35 @@ namespace RIS
 
         void Setup() override;
 
-        void Connect(const std::string &hostName, unsigned short port) override;
+        void Connect(const std::string &hostName, const std::string &port) override;
         void Host(bool publicSession) override;
+        void Disconnect() override;
 
         bool IsServer() const override;
+        bool IsConnecting() const override;
+        bool IsConnected() const override;
 
         void StepLoop() override;
+
+    private:
+        bool IsValidServer() const;
+        bool IsValidClient() const;
+
+        bool ReadSocket(SOCKET socket);
 
     private:
         const SystemLocator &systems;
         Config &config;
 
         bool isServer;
+
+        std::atomic_bool isConnecting;
+        std::atomic_bool isConnected;
+
+        SOCKET serverSocket;
+        std::vector<SOCKET> clientSockets;
+
+        fd_set *readSet;
 
         WSADATA wsa;
 

@@ -89,9 +89,10 @@ namespace RIS
 
     void GameLoop::GameplayThread()
     {
+        Timer timer;
         while(runGameplayThread)
         {
-
+            timer.Update();
         }
     }
 }

@@ -18,6 +18,8 @@
 
 #include "common/StringSupport.hpp"
 
+#include <mutex>
+
 using namespace std::literals;
 using std::string;
 using std::vector;
@@ -28,8 +30,8 @@ namespace RIS
 {
 
     Console::Console(const SystemLocator &systems)
-        : systems(systems), currentY(0), consoleFontSize(15.0f), isOpen(false), isMoving(false), openSpeed(1000), backgroundColor(0, 0, 0, 0.99f), fontColor(0.7f, 0.7f, 0.7f, 1),
-            offsetY(7.5f)
+        : systems(systems), currentY(0), consoleFontSize(15.0f), isOpen(false), isMoving(false), openSpeed(1000), 
+            backgroundColor(0, 0, 0, 0.99f), fontColor(0.7f, 0.7f, 0.7f, 1), offsetY(7.5f)
     {
     }
 
@@ -83,6 +85,8 @@ namespace RIS
 
     void Console::Print(const std::string &msg)
     {
+        std::lock_guard guard(printMutex);
+
         while(lines.size() >= maxLines - 2)
             lines.pop_back();
         
@@ -269,7 +273,8 @@ namespace RIS
     const int SimpleUserinterface::JSON_VERSION = 1;
 
     SimpleUserinterface::SimpleUserinterface(const SystemLocator &systems, Config &config)
-        : systems(systems), config(config), uiFramebufferId(-1), uiWidth(config.GetInt("r_width", 800)), uiHeight(config.GetInt("r_height", 600)), console(systems)
+        : systems(systems), config(config), uiFramebufferId(-1), uiWidth(config.GetInt("r_width", 800)), 
+            uiHeight(config.GetInt("r_height", 600)), console(systems)
     {
         rootContainer = MakePanel(systems);
     }

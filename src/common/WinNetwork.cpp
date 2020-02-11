@@ -68,6 +68,7 @@ namespace RIS
 
             freeaddrinfo(result);
         });
+        connectThread.detach();
 
         clientSockets.insert(clientSockets.begin(), clientSocket);
         isServer = false;
@@ -159,7 +160,7 @@ namespace RIS
 
     bool WinNetwork::ReadSocket(SOCKET socket)
     {
-
+        return false;
     }
 
     void WinNetwork::StepLoop()

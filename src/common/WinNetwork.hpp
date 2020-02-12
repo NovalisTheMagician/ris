@@ -47,7 +47,7 @@ namespace RIS
         const SystemLocator &systems;
         Config &config;
 
-        bool isServer;
+        std::atomic_bool isServer;
 
         std::atomic_bool isConnecting;
         std::atomic_bool isConnected;

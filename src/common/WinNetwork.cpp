@@ -68,6 +68,7 @@ namespace RIS
 
             freeaddrinfo(result);
         });
+        connectThread.detach();
 
         clientSockets.insert(clientSockets.begin(), clientSocket);
         isServer = false;

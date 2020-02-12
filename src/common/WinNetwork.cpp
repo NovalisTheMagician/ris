@@ -159,7 +159,7 @@ namespace RIS
 
     bool WinNetwork::ReadSocket(SOCKET socket)
     {
-
+        return true;
     }
 
     void WinNetwork::StepLoop()

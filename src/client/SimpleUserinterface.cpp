@@ -7,8 +7,6 @@
 
 #include "common/Logger.hpp"
 
-#undef min
-#undef max
 #include <rapidjson/rapidjson.h>
 #include <rapidjson/error/en.h>
 #include <rapidjson/document.h>
@@ -17,6 +15,8 @@
 #include <sstream>
 
 #include "common/StringSupport.hpp"
+
+#include "common/MathHelper.hpp"
 
 #include <mutex>
 
@@ -197,16 +197,16 @@ namespace RIS
             {
                 if(!inputHistory.empty())
                 {
-                    inputLine = inputHistory[historyIndex];
-                    historyIndex = (historyIndex + 1) % inputHistory.size();
+                    inputLine = inputHistory[historyIndex++];
+                    historyIndex = Clamp(0, static_cast<int>(inputHistory.size())-1, historyIndex);
                 }
             }
             else if(key == InputKeys::DOWN)
             {
                 if(!inputHistory.empty())
                 {
-                    historyIndex = (historyIndex - 1) % inputHistory.size();
-                    inputLine = inputHistory[historyIndex];
+                    inputLine = inputHistory[historyIndex--];
+                    historyIndex = Clamp(0, static_cast<int>(inputHistory.size())-1, historyIndex);
                 }
             }
         }
@@ -263,6 +263,10 @@ namespace RIS
             fontColor.g = std::stof(params[2]);
             fontColor.b = std::stof(params[3]);
             fontColor.a = std::stof(params[4]);
+        }
+        else
+        {
+            return "unkown param " + params[0];
         }
 
         return "";

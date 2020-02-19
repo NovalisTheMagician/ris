@@ -6,7 +6,7 @@
 #include <vector>
 #include <array>
 
-#include "ArchiveFormat.hpp"
+#include "common/ArchiveFormat.hpp"
 
 using namespace std::string_literals;
 using std::filesystem::path;

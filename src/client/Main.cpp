@@ -30,6 +30,7 @@ using namespace RIS;
 using namespace RIS::Version;
 
 #ifdef _WIN32
+#define NOMINMAX
 #include <Windows.h>
 #undef CreateWindow
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR cmdLine, int show)

@@ -6,7 +6,8 @@
 // https://stackoverflow.com/a/23899379
 
 #ifdef _WIN32
-#include <windows.h>
+#define NOMINMAX
+#include <Windows.h>
 #undef interface
 const DWORD MS_VC_EXCEPTION=0x406D1388;
 

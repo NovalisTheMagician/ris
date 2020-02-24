@@ -1,7 +1,5 @@
 #include "Timer.hpp"
 
-#include <Windows.h>
-
 using hsclock = std::chrono::high_resolution_clock;
 using std::chrono::duration_cast;
 using std::chrono::microseconds;

@@ -19,7 +19,9 @@ client_inc_path = ['src', 'libs/glm/include', 'libs/gli/include', 'libs/glbindin
 client_lib_path = ['libs/glbinding/lib', 'libs/glfw/lib', 'libs/soloud/lib']
 client_libs = ['user32', 'kernel32', 'gdi32', 'opengl32', 'glbinding', 'glbinding-aux', 'glfw3dll', 'soloud_static', 'ws2_32']
 
-common_inc_path = ['src', 'libs/glm/include', 'libs/rapidjson/include']
+common_inc_path = ['src', 'libs/glm/include', 'libs/rapidjson/include', 'libs/angelscript/include', 'libs/libzip/include', 'libs/libzippp/include']
+common_lib_path = ['libs/angelscript/lib', 'libs/libzip/lib']
+common_libs = ['angelscript64', 'libz-static', 'libzip-static']
 
 server_inc_path = ['src']
 server_lib_path = []
@@ -67,8 +69,8 @@ test_objs = env.Object(test_files, CPPPATH=client_inc_path, CPPFLAGS=cl_flags, C
 rc_obj = env.RES(rc_file)
 
 barc = env.Program('bin/tools/barc', barc_objs, LINKFLAGS=lk_flags)
-client = env.Program('bin/RIS', client_objs + common_objs + rc_obj, LIBS=client_libs, LIBPATH=client_lib_path, LINKFLAGS=lk_flags)
-server = env.Program('bin/RIS_server', server_objs + common_objs, LIBS=server_libs, LIBPATH=server_lib_path, LINKFLAGS=lk_flags)
+client = env.Program('bin/RIS', client_objs + common_objs + rc_obj, LIBS=client_libs + common_libs, LIBPATH=client_lib_path + common_lib_path, LINKFLAGS=lk_flags)
+server = env.Program('bin/RIS_server', server_objs + common_objs, LIBS=server_libs + common_libs, LIBPATH=server_lib_path + common_lib_path, LINKFLAGS=lk_flags)
 
 test = env.Program('bin/amd_test', test_objs, LIBS=client_libs, LIBPATH=client_lib_path, LINKFLAGS=lk_flags + ['/SUBSYSTEM:WINDOWS'])
 

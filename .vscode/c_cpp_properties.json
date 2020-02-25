@@ -9,7 +9,10 @@
                 "${workspaceFolder}/libs/glm/include/*",
                 "${workspaceFolder}/libs/gli/include/*",
                 "${workspaceFolder}/libs/soloud/include/*",
-                "${workspaceFolder}/libs/rapidjson/include/*"
+                "${workspaceFolder}/libs/rapidjson/include/*",
+                "${workspaceFolder}/libs/angelscript/include/*",
+                "${workspaceFolder}/libs/libzip/include/*",
+                "${workspaceFolder}/libs/libzippp/include/*"
             ],
             "defines": [
                 "_DEBUG",

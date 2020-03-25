@@ -111,28 +111,30 @@ namespace RIS
         return false;
     }
 
-    std::unique_ptr<std::byte[]> BarcLoader::LoadAsset(AssetType type, const std::string &name, std::size_t &size, bool ignoreOverlays)
+    std::future<std::tuple<std::unique_ptr<std::byte[]>, std::size_t>> BarcLoader::LoadAsset(AssetType type, const std::string &name, bool ignoreOverlays)
     {
         bool foundInArchive = HasAsset(type, name);
         if(!foundInArchive)
         {
             if(assetRoot.empty())
                 throw LoaderException("Asset (" + name + ") not found");
-            return LoadAssetFromFilesystem(type, name, size);
+            return LoadAssetFromFilesystem(type, name);
         }
 
-        auto &assetEntry = assetTable[type][name];
-        std::fstream &stream = archiveOverlays[assetEntry.streamId];
+        return std::async(std::launch::async, [this, type, name]()
+        {
+            auto &assetEntry = assetTable[type][name];
+            std::fstream &stream = archiveOverlays[assetEntry.streamId];
+            std::size_t size = assetEntry.size;
+            std::unique_ptr<std::byte[]> data(new std::byte[size]);
+            stream.seekg(assetEntry.offset);
+            stream.read(reinterpret_cast<char*>(data.get()), size);
 
-        size = assetEntry.size;
-        std::unique_ptr<std::byte[]> data(new std::byte[size]);
-        stream.seekg(assetEntry.offset);
-        stream.read(reinterpret_cast<char*>(data.get()), size);
-
-        return data;
+            return std::make_tuple(std::move(data), size);
+        });
     }
 
-    std::unique_ptr<std::byte[]> BarcLoader::LoadAssetFromFilesystem(AssetType type, const std::string &name, std::size_t &size)
+    std::future<std::tuple<std::unique_ptr<std::byte[]>, std::size_t>> BarcLoader::LoadAssetFromFilesystem(AssetType type, const std::string &name)
     {
         std::string extension = "";
         std::filesystem::path folder = "";
@@ -149,16 +151,20 @@ namespace RIS
         }
         std::filesystem::path filePath = assetRoot / folder / (name + extension);
 
-        std::fstream stream(filePath, std::fstream::in | std::fstream::binary | std::fstream::ate);
-        if(!stream)
+        if(!std::filesystem::exists(filePath))
             throw LoaderException("Asset (" + filePath.generic_string() + ") not found");
 
-        size = stream.tellg();
-        stream.seekg(0);
+        return std::async(std::launch::async, [filePath]()
+        {
+            std::fstream stream(filePath, std::fstream::in | std::fstream::binary | std::fstream::ate);
 
-        std::unique_ptr<std::byte[]> data(new std::byte[size]);
-        stream.read(reinterpret_cast<char*>(data.get()), size);
+            std::size_t size = stream.tellg();
+            stream.seekg(0);
 
-        return data;
+            std::unique_ptr<std::byte[]> data(new std::byte[size]);
+            stream.read(reinterpret_cast<char*>(data.get()), size);
+
+            return std::make_tuple(std::move(data), size);
+        });
     }
 }

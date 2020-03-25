@@ -2,7 +2,7 @@
 
 #include <string>
 #include <vector>
-
+#include <stdexcept>
 #include <functional>
 
 #include "common/Timer.hpp"
@@ -10,6 +10,33 @@
 namespace RIS
 {
     using ConsoleFunc = std::function<std::string(std::vector<std::string>)>;
+
+    namespace Helpers
+    {
+        inline std::function<std::string(std::vector<std::string>)> BoolFunc(bool &value, const std::string &onMsg, const std::string &offMsg)
+        {
+            return [&, onMsg, offMsg](auto& params)
+            {
+                using namespace std::literals;
+                if(params.size() == 0)
+                {
+                    return std::to_string(value);
+                }
+                else
+                {
+                    try
+                    {
+                        value = std::stoi(params.at(0));
+                        return value ? onMsg : offMsg;
+                    }
+                    catch(const std::exception& e)
+                    {
+                        return "Invalid Value"s;
+                    }
+                }
+            };
+        }
+    }
 
     class IConsole
     {
@@ -21,10 +48,6 @@ namespace RIS
         virtual void Toggle() = 0;
 
         virtual void Print(const std::string &msg) = 0;
-
-        virtual void BindVar(const std::string &name, const long *var) = 0;
-        virtual void BindVar(const std::string &name, const float *var) = 0;
-        virtual void BindVar(const std::string &name, const std::string *var) = 0;
 
         virtual void BindFunc(const std::string &name, ConsoleFunc func) = 0;
 

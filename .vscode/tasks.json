@@ -11,6 +11,13 @@
             "group": "build"
         },
         {
+            "label": "build client (DEBUG) (ST)",
+            "type": "shell",
+            "command": "scons client debug=1",
+            "problemMatcher": "$msCompile",
+            "group": "build"
+        },
+        {
             "label": "build client (RELEASE)",
             "type": "shell",
             "command": "scons client -j4",

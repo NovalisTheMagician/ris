@@ -5,6 +5,7 @@
 #include "SOLAudio.hpp"
 #include "SimpleUserinterface.hpp"
 #include "common/BarcLoader.hpp"
+#include "common/ZipLoader.hpp"
 #include "GLFWInput.hpp"
 
 #ifdef _WIN32
@@ -79,7 +80,7 @@ namespace RIS
 
     ILoaderPtr SystemFactory::CreateLoader(const std::string &debugAssetFolder) const
     {
-        auto system = std::make_unique<BarcLoader>(locator, config, debugAssetFolder);
+        auto system = std::make_unique<ZipLoader>(locator, config, debugAssetFolder);
         locator.Provide(system.get());
         return system;
     }

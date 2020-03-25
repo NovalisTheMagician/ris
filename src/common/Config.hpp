@@ -4,6 +4,8 @@
 #include <string>
 #include <sstream>
 
+#include <variant>
+
 namespace RIS
 {
 	class Config
@@ -13,17 +15,24 @@ namespace RIS
 		~Config();
 		Config(const Config&) = delete;
 		Config& operator=(const Config&) = delete;
+		Config(Config&&) = default;
+		Config& operator=(Config&&) = default;
 
-		const std::string& GetString(const std::string &key, const std::string &def) const;
-		const std::string& GetString(const std::string &key, const std::string &def);
-		int GetInt(const std::string &key, const int &def) const;
-		int GetInt(const std::string &key, const int &def);
+		template<typename T>
+		const T& GetValue(const std::string &key, const T &defValue) const;
+		template<typename T>
+		const T& GetValue(const std::string &key, const T &defValue);
+
+		int GetValue(const std::string &key, const int &defValue) const;
+		int GetValue(const std::string &key, const int &defValue);
 
 		template<typename T>
 		void SetValue(const std::string &key, const T &value);
 
 	private:
-		std::unordered_map<std::string, std::string> configMap;
+		using VariantType = std::variant<std::string, float, bool>;
+
+		std::unordered_map<std::string, VariantType> configMap;
 		std::string configPath;
 
 		bool isDirty;
@@ -31,11 +40,52 @@ namespace RIS
 	};
 
 	template<typename T>
+	const T& Config::GetValue(const std::string &key, const T& defValue) const
+	{
+		if (configMap.count(key) > 0)
+		{
+			auto value = configMap.at(key);
+			try 
+			{
+				return std::get<T>(value);
+			}
+			catch (const std::bad_variant_access&) 
+			{
+			}
+		}
+		return defValue;
+	}
+
+	template<typename T>
+	const T& Config::GetValue(const std::string &key, const T& defValue)
+	{
+		if (configMap.count(key) > 0)
+		{
+			auto value = configMap.at(key);
+			try 
+			{
+				return std::get<T>(value);
+			}
+			catch (const std::bad_variant_access&) 
+			{
+			}
+		}
+		configMap[key] = defValue;
+		isDirty = true;
+		return defValue;
+	}
+
+	template<typename T>
 	void Config::SetValue(const std::string &key, const T &value)
 	{
-		std::stringstream sstream;
-		sstream << value;
-		configMap[key] = sstream.str();
+		configMap[key] = value;
+		isDirty = true;
+	}
+
+	template<>
+	inline void Config::SetValue<int>(const std::string &key, const int &value)
+	{
+		configMap[key] = static_cast<float>(value);
 		isDirty = true;
 	}
 }

@@ -69,10 +69,8 @@ namespace RIS
 
         ILoader &loader = renderer.systems.GetLoader();
 
-        std::size_t size;
-        auto fontRaw = loader.LoadAsset(AssetType::FONT, fontName, size);
-
-        string fontStr(reinterpret_cast<const char*>(fontRaw.get()), size);
+        auto [data, size] = loader.LoadAsset(AssetType::FONT, fontName).get();
+        string fontStr(reinterpret_cast<const char*>(data.get()), size);
 
         rapidjson::Document fontJson;
         rapidjson::ParseResult res = fontJson.Parse(fontStr.c_str()); 

@@ -9,15 +9,15 @@ env.Append(BUILDERS = {'ShaderSrc' : shadersrc_bld})
 env['SHDAERFLAGS'] = []
 
 cl_flags = ['/EHsc', '/std:c++17', '/FS']
-lk_flags = ['/nologo']
+lk_flags = ['/nologo', '/INCREMENTAL:NO', '/LTCG:NOSTATUS', '/MACHINE:X64']
 
 shader_flags = ['-c', '--target-env=opengl', '-Werror']
 
 dyn_libs = ['libs/glbinding/bin/glbinding.dll', 'libs/glbinding/bin/glbinding-aux.dll', 'libs/glfw/bin/glfw3.dll']
 
-client_inc_path = ['src', 'libs/glm/include', 'libs/gli/include', 'libs/glbinding/include', 'libs/glfw/include', 'libs/soloud/include', 'libs/rapidjson/include']
+client_inc_path = ['src', 'libs/glm/include', 'libs/gli/include', 'libs/glbinding/include', 'libs/glfw/include', 'libs/soloud/include', 'libs/rapidjson/include', 'libs/libzip/include', 'libs/libzippp/include']
 client_lib_path = ['libs/glbinding/lib', 'libs/glfw/lib', 'libs/soloud/lib']
-client_libs = ['user32', 'kernel32', 'gdi32', 'opengl32', 'glbinding', 'glbinding-aux', 'glfw3dll', 'soloud_static', 'ws2_32']
+client_libs = ['user32', 'kernel32', 'gdi32', 'opengl32', 'glbinding', 'glbinding-aux', 'glfw3dll', 'soloud_static', 'ws2_32', 'advapi32']
 
 common_inc_path = ['src', 'libs/glm/include', 'libs/rapidjson/include', 'libs/angelscript/include', 'libs/libzip/include', 'libs/libzippp/include']
 common_lib_path = ['libs/angelscript/lib', 'libs/libzip/lib']
@@ -27,7 +27,7 @@ server_inc_path = ['src']
 server_lib_path = []
 server_libs = ['user32', 'kernel32', 'ws2_32']
 
-defines = []
+defines = ['ZIP_STATIC']
 
 debug = ARGUMENTS.get('debug', 0)
 verbose = ARGUMENTS.get('verbose', 0)

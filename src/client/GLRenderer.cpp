@@ -117,15 +117,15 @@ namespace RIS
         if(vendor.find("ATI") != std::string::npos || vendor.find("ati") != std::string::npos)
             useAmdFix = true;
 
-        if(static_cast<const Config&>(config).GetInt("g_ignoreamdfix", 0))
+        if(static_cast<const Config&>(config).GetValue("g_ignoreamdfix", false))
             useAmdFix = false;
 
         log.Info("Using OpenGL version " + version + " from " + vendor + " with shaderversion " + shaderVersion + " on " + renderer);
 
         renderer2d.Setup();
 
-        int width = config.GetInt("r_width", 800);
-        int height = config.GetInt("r_height", 600);
+        int width = config.GetValue("r_width", 800);
+        int height = config.GetValue("r_height", 600);
         Resize(width, height);
 
         framebuffers.emplace(DEFAULT_FRAMBUFFER_ID, 0);
@@ -136,11 +136,11 @@ namespace RIS
         float maxAniso;
         glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &maxAniso);
 
-        float aniso = static_cast<float>(config.GetInt("r_anisotropic", static_cast<int>(maxAniso)));
+        float aniso = config.GetValue("r_anisotropic", maxAniso);
         if(aniso > maxAniso)
         {
             aniso = maxAniso;
-            config.SetValue("r_anisotropic", static_cast<int>(aniso));
+            config.SetValue("r_anisotropic", aniso);
         }
 
         defaultSampler = Sampler::Create(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, aniso);
@@ -178,24 +178,25 @@ namespace RIS
     void GLRenderer::LoadRequiredResources()
     {
         ILoader &loader = systems.GetLoader();
-        size_t size;
 
         AssetType shaderLoadType = useAmdFix ? AssetType::SHADERSRC : AssetType::SHADER;
 
-        auto shaderBin = loader.LoadAsset(shaderLoadType, "uiVert", size);
-        uiVertex = Shader::Create(shaderBin.get(), size, GL_VERTEX_SHADER, useAmdFix);
+        auto shaderUivFut = loader.LoadAsset(shaderLoadType, "uiVert");
+        auto shaderUifFut = loader.LoadAsset(shaderLoadType, "uiFrag");
+        auto shaderUitFut = loader.LoadAsset(shaderLoadType, "uiText");
+        auto shaderPpvFut = loader.LoadAsset(shaderLoadType, "ppVert");
+        auto shaderPpcFut = loader.LoadAsset(shaderLoadType, "ppCopy");
 
-        shaderBin = loader.LoadAsset(shaderLoadType, "uiFrag", size);
-        uiFragment = Shader::Create(shaderBin.get(), size, GL_FRAGMENT_SHADER, useAmdFix);
-
-        shaderBin = loader.LoadAsset(shaderLoadType, "uiText", size);
-        uiText = Shader::Create(shaderBin.get(), size, GL_FRAGMENT_SHADER, useAmdFix);
-
-        shaderBin = loader.LoadAsset(shaderLoadType, "ppVert", size);
-        ppVertex = Shader::Create(shaderBin.get(), size, GL_VERTEX_SHADER, useAmdFix);
-
-        shaderBin = loader.LoadAsset(shaderLoadType, "ppCopy", size);
-        ppCopy = Shader::Create(shaderBin.get(), size, GL_FRAGMENT_SHADER, useAmdFix);
+        auto [dataUiv, sizeUiv] = shaderUivFut.get();
+        uiVertex = Shader::Create(dataUiv.get(), sizeUiv, GL_VERTEX_SHADER, useAmdFix);
+        auto [dataUif, sizeUif] = shaderUifFut.get();
+        uiFragment = Shader::Create(dataUif.get(), sizeUif, GL_FRAGMENT_SHADER, useAmdFix);
+        auto [dataUit, sizeUit] = shaderUitFut.get();
+        uiText = Shader::Create(dataUit.get(), sizeUit, GL_FRAGMENT_SHADER, useAmdFix);
+        auto [dataPpv, sizePpv] = shaderPpvFut.get();
+        ppVertex = Shader::Create(dataPpv.get(), sizePpv, GL_VERTEX_SHADER, useAmdFix);
+        auto [dataPpc, sizePpc] = shaderPpcFut.get();
+        ppCopy = Shader::Create(dataPpc.get(), sizePpc, GL_FRAGMENT_SHADER, useAmdFix);
     }
 
     int GLRenderer::LoadTexture(const std::string &name, bool flip)
@@ -206,8 +207,7 @@ namespace RIS
         ILoader &loader = systems.GetLoader();
         try
         {
-            std::size_t size;
-            auto data = loader.LoadAsset(AssetType::TEXTURE, name, size);
+            auto [data, size] = loader.LoadAsset(AssetType::TEXTURE, name).get();
 
             int id = highestUnusedTexId++;
             textures[id] = Texture::Create(data.get(), size, flip);
@@ -244,9 +244,9 @@ namespace RIS
         int framebufferWidth = width;
         int framebufferHeight = height;
         if(width == -1)
-            framebufferWidth = config.GetInt("r_width", 800);
+            framebufferWidth = config.GetValue("r_width", 800);
         if(height == -1)
-            framebufferHeight = config.GetInt("r_height", 600);
+            framebufferHeight = config.GetValue("r_height", 600);
 
         //GL_SRGB8_ALPHA8
         //GL_RGBA8

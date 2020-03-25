@@ -1,6 +1,7 @@
 #include <memory>
 
 #include <string>
+#include <algorithm>
 
 #include <glm/glm.hpp>
 
@@ -84,6 +85,22 @@ int main(int argc, char *argv[])
         userinterface = factory.CreateUserinterface();
         loader = factory.CreateLoader(assetFolder);
         input = factory.CreateInput();
+
+        std::string baseArchive = "test.zip";
+        if(args.IsSet("-base"))
+        {
+            baseArchive = args.GetParameter("-base");
+        }
+        loader->AddOverlay(baseArchive);
+
+        if(args.IsSet("-file"))
+        {
+            const auto &params = args.GetParameters("-base");
+            std::for_each(params.begin(), params.end(), [&](const std::string &archiveFile)
+            {
+                loader->AddOverlay(archiveFile);
+            });
+        }
 
         renderer->LoadRequiredResources();
         userinterface->InitializeRootElements();

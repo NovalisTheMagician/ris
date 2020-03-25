@@ -18,17 +18,12 @@
 
 #include "common/MathHelper.hpp"
 
-#include <mutex>
-
 using namespace std::literals;
-using std::string;
-using std::vector;
 
 using namespace std::placeholders;
 
 namespace RIS
 {
-
     Console::Console(const SystemLocator &systems)
         : systems(systems), currentY(0), consoleFontSize(15.0f), isOpen(false), isMoving(false), openSpeed(1000), 
             backgroundColor(0, 0, 0, 0.99f), fontColor(0.7f, 0.7f, 0.7f, 1), offsetY(7.5f)
@@ -53,8 +48,8 @@ namespace RIS
 
         IWindow& wnd = systems.GetWindow();
 
-        BindFunc("con", std::bind(&Console::SetParam, this, _1));
-        BindFunc("exit", [&wnd](vector<string> params){ wnd.Exit(0); return ""; });
+        BindFunc("con", [this](std::vector<std::string> params){ return SetParam(params); });
+        BindFunc("exit", [&wnd](std::vector<std::string> params){ wnd.Exit(0); return ""; });
     }
 
     void Console::Open()
@@ -85,33 +80,15 @@ namespace RIS
 
     void Console::Print(const std::string &msg)
     {
-        std::lock_guard guard(printMutex);
-
         while(lines.size() >= maxLines - 2)
             lines.pop_back();
         
         lines.insert(lines.begin(), msg);
     }
 
-    void Console::BindVar(const std::string &name, const long *var)
-    {
-        longVars.insert_or_assign(name, var);
-    }
-
-    void Console::BindVar(const std::string &name, const float *var)
-    {
-        floatVars.insert_or_assign(name, var);
-    }
-
-    void Console::BindVar(const std::string &name, const std::string *var)
-    {
-        stringVars.insert_or_assign(name, var);
-    }
-
     void Console::BindFunc(const std::string &name, ConsoleFunc func)
     {
-        if(name == "set")
-            return;
+        if(name == "set") throw std::runtime_error("Can't bind a function with the name \"set\"");
         funcVars.insert_or_assign(name, func);
     }
 
@@ -155,7 +132,7 @@ namespace RIS
             auto it = lines.begin();
             for(int i = 1; it != lines.end(); ++it, ++i)
             {
-                const string &msg = *it;
+                const std::string &msg = *it;
                 glm::vec2 pos = {0, (currentY + i * maxLineHeight) + offsetY};
                 renderer.DrawText(msg, consoleFont, pos, consoleFontSize, fontColor);
             }
@@ -212,34 +189,28 @@ namespace RIS
         }
     }
 
-    bool Console::ProcessLine(const string &lineToProcess)
+    bool Console::ProcessLine(const std::string &lineToProcess)
     {
         std::istringstream sstream(lineToProcess);
-        std::vector<string> tokens{std::istream_iterator<string>{sstream},
-                            std::istream_iterator<string>{}};
+        std::vector<std::string> tokens{std::istream_iterator<std::string>{sstream},
+                            std::istream_iterator<std::string>{}};
 
-        string keyword = lowerCase(tokens[0]);
+        std::string keyword = lowerCase(tokens[0]);
         tokens.erase(tokens.begin());
-        if(keyword == "set")
+        
+        if(funcVars.count(keyword) > 0)
         {
-            //todo
+            auto func = funcVars.at(keyword);
+            auto &msg = func(tokens);
+            if(!msg.empty())
+                Print(msg);
             return true;
         }
-        else
-        {
-            if(funcVars.count(keyword) > 0)
-            {
-                auto func = funcVars.at(keyword);
-                auto &msg = func(tokens);
-                if(!msg.empty())
-                    Print(msg);
-                return true;
-            }
-        }
+
         return false;
     }
 
-    string Console::SetParam(vector<string> params)
+    std::string Console::SetParam(std::vector<std::string> params)
     {
         if(params.size() < 1)
             return "no param specified!";
@@ -277,8 +248,8 @@ namespace RIS
     const int SimpleUserinterface::JSON_VERSION = 1;
 
     SimpleUserinterface::SimpleUserinterface(const SystemLocator &systems, Config &config)
-        : systems(systems), config(config), uiFramebufferId(-1), uiWidth(config.GetInt("r_width", 800)), 
-            uiHeight(config.GetInt("r_height", 600)), console(systems)
+        : systems(systems), config(config), uiFramebufferId(-1), uiWidth(config.GetValue("r_width", 800)), 
+            uiHeight(config.GetValue("r_height", 600)), console(systems)
     {
         rootContainer = MakePanel(systems);
     }
@@ -372,7 +343,7 @@ namespace RIS
     {
         ButtonPtr button = MakeButton(systems);
 
-        string name = jsonValue["name"].GetString();
+        std::string name = jsonValue["name"].GetString();
         button->SetName(name);
 
         auto value = jsonValue.FindMember("position");
@@ -408,13 +379,13 @@ namespace RIS
         value = jsonValue.FindMember("text");
         if(value != jsonValue.MemberEnd())
         {
-            string text = value->value.GetString();
+            std::string text = value->value.GetString();
             button->SetText(text);
         }
 
         UIAction action = UIAction::Nop;
-        string actionParam1 = "";
-        string actionParam2 = "";
+        std::string actionParam1 = "";
+        std::string actionParam2 = "";
 
         value = jsonValue.FindMember("action");
         if(value != jsonValue.MemberEnd())
@@ -457,7 +428,7 @@ namespace RIS
         value = jsonValue.FindMember("normal_image");
         if(value != jsonValue.MemberEnd())
         {
-            string imageName = value->value.GetString();
+            std::string imageName = value->value.GetString();
             int image = systems.GetRenderer().LoadTexture(imageName);
             button->SetNormalImage(image);
         }
@@ -465,7 +436,7 @@ namespace RIS
         value = jsonValue.FindMember("hover_image");
         if(value != jsonValue.MemberEnd())
         {
-            string imageName = value->value.GetString();
+            std::string imageName = value->value.GetString();
             int image = systems.GetRenderer().LoadTexture(imageName);
             button->SetHoverImage(image);
         }
@@ -473,7 +444,7 @@ namespace RIS
         value = jsonValue.FindMember("down_image");
         if(value != jsonValue.MemberEnd())
         {
-            string imageName = value->value.GetString();
+            std::string imageName = value->value.GetString();
             int image = systems.GetRenderer().LoadTexture(imageName);
             button->SetDownImage(image);
         }
@@ -485,7 +456,7 @@ namespace RIS
     {
         LabelPtr label = MakeLabel(systems);
 
-        string name = jsonValue["name"].GetString();
+        std::string name = jsonValue["name"].GetString();
         label->SetName(name);
 
         auto value = jsonValue.FindMember("position");
@@ -514,7 +485,7 @@ namespace RIS
         value = jsonValue.FindMember("text");
         if(value != jsonValue.MemberEnd())
         {
-            string text = value->value.GetString();
+            std::string text = value->value.GetString();
             label->SetText(text);
         }
 
@@ -532,7 +503,7 @@ namespace RIS
     {
         ImagePtr image = MakeImage(systems);
 
-        string name = jsonValue["name"].GetString();
+        std::string name = jsonValue["name"].GetString();
         image->SetName(name);
 
         auto value = jsonValue.FindMember("position");
@@ -552,7 +523,7 @@ namespace RIS
         value = jsonValue.FindMember("image");
         if(value != jsonValue.MemberEnd())
         {
-            string imageName = value->value.GetString();
+            std::string imageName = value->value.GetString();
             int imageId = systems.GetRenderer().LoadTexture(imageName);
             image->SetImage(imageId);
         }
@@ -564,7 +535,7 @@ namespace RIS
     {
         InputBoxPtr textBox = MakeInputBox(systems);
 
-        string name = jsonValue["name"].GetString();
+        std::string name = jsonValue["name"].GetString();
         textBox->SetName(name);
     }
 
@@ -580,15 +551,14 @@ namespace RIS
         I2DRenderer &renderer = systems.GetRenderer().Get2DRenderer();
         try
         {
-            std::size_t size;
-            auto data = loader.LoadAsset(AssetType::UILAYOUT, layout, size);
-            string layoutStr(reinterpret_cast<const char*>(data.get()), size);
+            auto [data, size] = loader.LoadAsset(AssetType::UILAYOUT, layout).get();
+            std::string layoutStr(reinterpret_cast<const char*>(data.get()), size);
 
             rapidjson::Document layoutJson;
             rapidjson::ParseResult res = layoutJson.Parse(layoutStr.c_str()); 
             if(res.IsError())
             {
-                string errorMsg = rapidjson::GetParseError_En(res.Code());
+                std::string errorMsg = rapidjson::GetParseError_En(res.Code());
                 Logger::Instance().Error("Failed to parse layout ("s + layout + "): "s + errorMsg + "(" + std::to_string(res.Offset()) + ")");
                 return;
             }

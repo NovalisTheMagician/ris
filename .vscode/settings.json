@@ -71,7 +71,10 @@
         "filesystem": "cpp",
         "regex": "cpp",
         "*.glsli": "glsl",
-        "*.amd.src": "glsl"
+        "*.amd.src": "glsl",
+        "variant": "cpp",
+        "condition_variable": "cpp",
+        "future": "cpp"
     },
     "python.linting.enabled": false,
     "python.pythonPath": "D:\\Python38-32\\python.exe",

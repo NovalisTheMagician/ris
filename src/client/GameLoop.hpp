@@ -5,9 +5,6 @@
 #include "common/Args.hpp"
 #include "common/Timer.hpp"
 
-#include <thread>
-#include <atomic>
-
 namespace RIS
 {
     class GameLoop
@@ -24,21 +21,11 @@ namespace RIS
         int Start();
 
     private:
-        void StartThreads();
-
-        void NetworkThread();
-        void GameplayThread();
 
     private:
         const SystemLocator &systems;
         const Args &args;
         const Config &config;
-
-        std::thread networkThread;
-        std::atomic_bool runNetworkThread;
-
-        std::thread gameplayThread;
-        std::atomic_bool runGameplayThread;
 
     };
 }

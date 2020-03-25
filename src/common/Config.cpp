@@ -6,19 +6,12 @@
 
 #include "StringSupport.hpp"
 
-using std::string;
-using std::wstring;
-using std::stringstream;
-
-using std::ifstream;
-using std::ofstream;
-
 namespace RIS
 {
 	Config::Config(const std::string &configPath)
 		: configMap(), configPath(configPath), isDirty(false)
 	{
-		ifstream inputStream(configPath);
+		std::ifstream inputStream(configPath);
 		if (!inputStream)
 		{
 			std::ofstream(configPath);
@@ -26,19 +19,42 @@ namespace RIS
 		}
 
 		this->configPath = configPath;
-		string line;
+		std::string line;
 		while (std::getline(inputStream, line))
 		{
 			if (line[0] == '/' && line[1] == '/') continue;
 
-			stringstream ss(line);
-			string key, value;
+			std::stringstream ss(line);
+			std::string key, value;
 			std::getline(ss, key, '=');
 			std::getline(ss, value, '=');
 
 			trim(key);
 			trim(value);
 
+			//is it a number?
+			try
+			{
+				float val = std::stof(value);
+				configMap[key] = val;
+				continue;
+			}
+			catch(const std::invalid_argument& e)
+			{}
+
+			//is it a bool?
+			try
+			{
+				bool val;
+				std::stringstream ss(value);
+				ss >> std::boolalpha >> val;
+				configMap[key] = val;
+				continue;
+			}
+			catch(const std::exception& e)
+			{}
+			
+			// it's a string!
 			configMap[key] = value;
 		}
 	}
@@ -47,12 +63,16 @@ namespace RIS
 	{
 		if (isDirty)
 		{
-			ofstream outputStream(configPath);
+			std::ofstream outputStream(configPath);
 			if (outputStream)
 			{
 				for (auto const&[key, val] : configMap)
 				{
-					outputStream << key << "=" << val << std::endl;
+					auto &k = key;
+					std::visit([&](auto&& arg)
+					{
+						outputStream << k << "=" << std::boolalpha << arg << std::endl;
+					}, val);
 				}
 			}
 
@@ -60,49 +80,37 @@ namespace RIS
 		}
 	}
 
-	const string& Config::GetString(const string &key, const string &def) const
+	int Config::GetValue(const std::string &key, const int &defValue) const
 	{
 		if (configMap.count(key) > 0)
 		{
-			return configMap.at(key);
+			auto value = configMap.at(key);
+			try 
+			{
+				return static_cast<int>(std::get<float>(value));
+			}
+			catch (const std::bad_variant_access&) 
+			{
+			}
 		}
-		return def;
+		return defValue;
 	}
 
-	const string& Config::GetString(const string &key, const string &def)
+	int Config::GetValue(const std::string &key, const int &defValue)
 	{
 		if (configMap.count(key) > 0)
 		{
-			return configMap.at(key);
+			auto value = configMap.at(key);
+			try 
+			{
+				return static_cast<int>(std::get<float>(value));
+			}
+			catch (const std::bad_variant_access&) 
+			{
+			}
 		}
-		configMap[key] = def;
+		configMap[key] = static_cast<float>(defValue);
 		isDirty = true;
-		return def;
-	}
-
-	int Config::GetInt(const string &key, const int &def) const
-	{
-		if (configMap.count(key) > 0)
-		{
-			stringstream ss(configMap.at(key));
-			int val;
-			ss >> val;
-			return val;
-		}
-		return def;
-	}
-
-	int Config::GetInt(const string &key, const int &def)
-	{
-		if (configMap.count(key) > 0)
-		{
-			stringstream ss(configMap.at(key));
-			int val;
-			ss >> val;
-			return val;
-		}
-		configMap[key] = std::to_string(def);
-		isDirty = true;
-		return def;
+		return defValue;
 	}
 }

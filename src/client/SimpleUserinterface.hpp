@@ -13,7 +13,7 @@
 #include <vector>
 #include <unordered_map>
 #include <string>
-#include <mutex>
+#include <variant>
 
 #include "Component.hpp"
 #include "Container.hpp"
@@ -40,10 +40,6 @@ namespace RIS
         void Toggle() override;
 
         void Print(const std::string &msg) override;
-
-        void BindVar(const std::string &name, const long *var) override;
-        void BindVar(const std::string &name, const float *var) override;
-        void BindVar(const std::string &name, const std::string *var) override;
 
         void BindFunc(const std::string &name, ConsoleFunc func) override;
 
@@ -86,12 +82,7 @@ namespace RIS
 
         float openSpeed;
 
-        std::unordered_map<std::string, const long*> longVars;
-        std::unordered_map<std::string, const float*> floatVars;
-        std::unordered_map<std::string, const std::string*> stringVars;
         std::unordered_map<std::string, ConsoleFunc> funcVars;
-
-        std::mutex printMutex;
 
     };
 

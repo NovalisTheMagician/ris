@@ -29,10 +29,10 @@ namespace RIS
 
         glfwWindowHint(GLFW_RESIZABLE, false);
 
-        int width = config.GetInt("r_width", 800);
-        int height = config.GetInt("r_height", 600);
-        int fullscreen = config.GetInt("r_fullscreen", 0);
-        bool vsync = config.GetInt("r_vsync", 0);
+        int width = config.GetValue("r_width", 800);
+        int height = config.GetValue("r_height", 600);
+        int fullscreen = config.GetValue("r_fullscreen", 0);
+        bool vsync = config.GetValue("r_vsync", false);
 
         glfwWindowHint(GLFW_RED_BITS, 8);
         glfwWindowHint(GLFW_GREEN_BITS, 8);
@@ -109,9 +109,8 @@ namespace RIS
         auto &loader = systems.GetLoader();
         try
         {
-            size_t size;
-            auto asset = loader.LoadAsset(AssetType::TEXTURE, icon, size);
-            gli::texture tex = gli::load(reinterpret_cast<const char*>(asset.get()), size);
+            auto [data, size] = loader.LoadAsset(AssetType::TEXTURE, icon).get();
+            gli::texture tex = gli::load(reinterpret_cast<const char*>(data.get()), size);
             if(tex.empty() || tex.format() != gli::format::FORMAT_RGBA8_UNORM_PACK8)
             {
                 Logger::Instance().Warning("Window icon (" + icon + ") has an unsupported format"s);
@@ -137,9 +136,8 @@ namespace RIS
         auto &loader = systems.GetLoader();
         try
         {
-            size_t size;
-            auto asset = loader.LoadAsset(AssetType::TEXTURE, cursor, size);
-            gli::texture tex = gli::load(reinterpret_cast<const char*>(asset.get()), size);
+            auto [data, size] = loader.LoadAsset(AssetType::TEXTURE, cursor).get();
+            gli::texture tex = gli::load(reinterpret_cast<const char*>(data.get()), size);
             if(tex.empty() || tex.format() != gli::format::FORMAT_RGBA8_UNORM_PACK8)
             {
                 Logger::Instance().Warning("Window cursor (" + cursor + ") has an unsupported format"s);

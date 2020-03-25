@@ -8,7 +8,7 @@
 #include <vector>
 #include <fstream>
 #include <filesystem>
-
+#include <future>
 #include <unordered_map>
 #include <map>
 
@@ -33,13 +33,13 @@ namespace RIS
         void AddOverlay(const std::string &overlayName) override;
 
         bool HasAsset(AssetType type, const std::string &name) const override;
-        std::unique_ptr<std::byte[]> LoadAsset(AssetType type, const std::string &name, std::size_t &size, bool ignoreOverlays = false) override;
+        std::future<std::tuple<std::unique_ptr<std::byte[]>, std::size_t>> LoadAsset(AssetType type, const std::string &name, bool ignoreOverlays = false) override;
 
     private:
         void BuildTables(std::fstream &stream, int streamId);
         void PopulateTable(AssetType type, std::vector<ArchiveTableEntry> entries, std::fstream &stream, int streamId);
 
-        std::unique_ptr<std::byte[]> LoadAssetFromFilesystem(AssetType type, const std::string &name, std::size_t &size);
+        std::future<std::tuple<std::unique_ptr<std::byte[]>, std::size_t>> LoadAssetFromFilesystem(AssetType type, const std::string &name);
 
     private:
         struct TableEntry

@@ -1,5 +1,7 @@
 #include "Shader.hpp"
 
+#include "common/Logger.hpp"
+
 #include <glbinding/gl46core/gl.h>
 
 #include <glm/glm.hpp>
@@ -48,7 +50,8 @@ namespace RIS
         if(isSrc)
         {
             std::string shaderSrc(reinterpret_cast<const char*>(shaderBinary), size);
-            CleanShader(shaderSrc);            
+
+            CleanShader(shaderSrc);
 
             auto str = shaderSrc.c_str();
 

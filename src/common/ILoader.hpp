@@ -3,6 +3,8 @@
 #include <memory>
 #include <string>
 #include <cstddef>
+#include <future>
+#include <tuple>
 
 namespace RIS
 {
@@ -26,6 +28,6 @@ namespace RIS
         virtual void AddOverlay(const std::string &overlayName) = 0;
 
         virtual bool HasAsset(AssetType type, const std::string &name) const = 0;
-        virtual std::unique_ptr<std::byte[]> LoadAsset(AssetType type, const std::string &name, std::size_t &size, bool ignoreOverlays = false) = 0;
+        virtual std::future<std::tuple<std::unique_ptr<std::byte[]>, std::size_t>> LoadAsset(AssetType type, const std::string &name, bool ignoreOverlays = false) = 0;
     };
 }

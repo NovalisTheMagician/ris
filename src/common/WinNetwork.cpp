@@ -35,7 +35,7 @@ namespace RIS
             throw NetworkException("Already connected");
         }
 
-        bool forceIPV6 = config.GetInt("net_forceipv6", 0);
+        bool forceIPV6 = config.GetValue("net_forceipv6", false);
 
         struct addrinfo hints = {0};
         hints.ai_socktype = SOCK_STREAM;
@@ -81,8 +81,8 @@ namespace RIS
             throw NetworkException("Already connected");
         }
 
-        bool forceIPV6 = config.GetInt("net_forceipv6", 0);
-        std::string port = config.GetString("net_port", "20201");
+        bool forceIPV6 = config.GetValue("net_forceipv6", false);
+        std::string port = config.GetValue<std::string>("net_port", "20201");
 
         struct addrinfo hints = {0};
         hints.ai_socktype = SOCK_STREAM;

@@ -59,6 +59,11 @@ namespace RIS
         this->input = input;
     }
 
+    void SystemLocator::Provide(IScriptEngine *script)
+    {
+        this->script = script;
+    }
+
     IWindow& SystemLocator::GetWindow() const
     {
         if(window == nullptr)
@@ -129,5 +134,13 @@ namespace RIS
             throw SystemNotProvidedException("Input");
             
         return *input;
+    }
+
+    IScriptEngine& SystemLocator::GetScriptEngine() const
+    {
+        if(script == nullptr)
+            throw SystemNotProvidedException("ScriptEngine");
+            
+        return *script;
     }
 }

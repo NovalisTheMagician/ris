@@ -4,6 +4,7 @@
 #include "common/ILoader.hpp"
 #include "common/IAudio.hpp"
 #include "common/IInput.hpp"
+#include "common/LuaScriptEngine.hpp"
 
 #include "common/Logger.hpp"
 
@@ -627,6 +628,13 @@ namespace RIS
         {
             Logger::Instance().Error("Failed to load layout ("s + layout + "): "s + e.what());
         }
+    }
+
+    void SimpleUserinterface::RegisterFunctions()
+    {
+        auto &scriptEngine = dynamic_cast<LuaScriptEngine&>(systems.GetScriptEngine());
+        
+        scriptEngine.RegisterFunction([this](const char *str){ console.Print(str); }, "print");
     }
 
     void SimpleUserinterface::Draw()

@@ -51,6 +51,7 @@ namespace RIS
         case AssetType::TEXT:       extension = ".txt";     folder = "texts"; break;
         case AssetType::UILAYOUT:   extension = ".json";    folder = "ui"; break;
         case AssetType::FONT:       extension = ".json";    folder = "ui"; break;
+        case AssetType::SCRIPT:     extension = ".lua";     folder = "scripts"; break;
         }
         return { folder, extension };
     }

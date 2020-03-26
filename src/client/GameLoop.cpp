@@ -6,12 +6,15 @@
 #include "common/IUserinterface.hpp"
 #include "common/IAudio.hpp"
 #include "common/INetwork.hpp"
+#include "common/LuaScriptEngine.hpp"
 
 #include "common/Timer.hpp"
 #include "common/Logger.hpp"
 
 #include "common/StringSupport.hpp"
 #include "common/ThreadHelper.hpp"
+
+using namespace std::literals;
 
 namespace RIS
 {
@@ -33,9 +36,17 @@ namespace RIS
         IInput &input = systems.GetInput();
         IUserinterface &interface = systems.GetUserinterface();
         IAudio &audio = systems.GetAudio();
+        LuaScriptEngine &scriptEngine = dynamic_cast<LuaScriptEngine&>(systems.GetScriptEngine());
 
         bool god = false;
         interface.GetConsole().BindFunc("god", Helpers::BoolFunc(god, "Godmode ON", "Godmode OFF"));
+
+        scriptEngine.LoadScript("main");
+        scriptEngine.RegisterFunction([](const char *msg){ Logger::Instance().Info(msg); }, "logger", "info");
+        scriptEngine.RegisterFunction([](const char *msg){ Logger::Instance().Warning(msg); }, "logger", "warning");
+        scriptEngine.RegisterFunction([](const char *msg){ Logger::Instance().Error(msg); }, "logger", "error");
+
+        scriptEngine.CallFunction("", "main", 5);
 
         glm::vec4 clearColor(0.392f, 0.584f, 0.929f, 1.0f);
         //clearColor = glm::pow(clearColor, glm::vec4(2.2f));

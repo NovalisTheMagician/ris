@@ -7,6 +7,7 @@
 #include "common/BarcLoader.hpp"
 #include "common/ZipLoader.hpp"
 #include "GLFWInput.hpp"
+#include "common/LuaScriptEngine.hpp"
 
 #ifdef _WIN32
 #include "common/WinNetwork.hpp"
@@ -27,6 +28,7 @@ namespace RIS
     using IUserinterfacePtr = std::unique_ptr<IUserinterface>;
     using ILoaderPtr = std::unique_ptr<ILoader>;
     using IInputPtr = std::unique_ptr<IInput>;
+    using IScriptEnginePtr = std::unique_ptr<LuaScriptEngine>;
 
     SystemFactory::SystemFactory(SystemLocator &locator, Config &config) 
         : locator(locator), config(config)
@@ -92,6 +94,13 @@ namespace RIS
             throw std::runtime_error("Created window is incompatible with the input module");
 
         auto system = std::make_unique<GLFWInput>(locator, config, *window);
+        locator.Provide(system.get());
+        return system;
+    }
+
+    IScriptEnginePtr SystemFactory::CreateScriptEngine() const
+    {
+        auto system = std::make_unique<LuaScriptEngine>(locator, config);
         locator.Provide(system.get());
         return system;
     }

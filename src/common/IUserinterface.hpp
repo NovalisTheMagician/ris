@@ -64,6 +64,8 @@ namespace RIS
 
         virtual IConsole& GetConsole() = 0;
 
+        virtual void RegisterFunctions() = 0;
+
         virtual void Draw() = 0;
         virtual void Update(const Timer &timer) = 0;
     };

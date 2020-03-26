@@ -15,13 +15,15 @@ shader_flags = ['-c', '--target-env=opengl', '-Werror']
 
 dyn_libs = ['libs/glbinding/bin/glbinding.dll', 'libs/glbinding/bin/glbinding-aux.dll', 'libs/glfw/bin/glfw3.dll']
 
-client_inc_path = ['src', 'libs/glm/include', 'libs/gli/include', 'libs/glbinding/include', 'libs/glfw/include', 'libs/soloud/include', 'libs/rapidjson/include', 'libs/libzip/include', 'libs/libzippp/include']
+client_inc_path = ['src', 'libs/glm/include', 'libs/gli/include', 'libs/glbinding/include', 'libs/glfw/include', 'libs/soloud/include', 'libs/rapidjson/include', 'libs/libzip/include', 
+                    'libs/libzippp/include', 'libs/chaiscript/include', 'libs/lua/include', 'libs/luastate/include']
 client_lib_path = ['libs/glbinding/lib', 'libs/glfw/lib', 'libs/soloud/lib']
 client_libs = ['user32', 'kernel32', 'gdi32', 'opengl32', 'glbinding', 'glbinding-aux', 'glfw3dll', 'soloud_static', 'ws2_32', 'advapi32']
 
-common_inc_path = ['src', 'libs/glm/include', 'libs/rapidjson/include', 'libs/angelscript/include', 'libs/libzip/include', 'libs/libzippp/include']
-common_lib_path = ['libs/angelscript/lib', 'libs/libzip/lib']
-common_libs = ['angelscript64', 'libz-static', 'libzip-static']
+common_inc_path = ['src', 'libs/glm/include', 'libs/rapidjson/include', 'libs/libzip/include', 'libs/libzippp/include', 'libs/chaiscript/include', 'libs/lua/include', 
+                    'libs/luastate/include']
+common_lib_path = ['libs/libzip/lib', 'libs/lua/lib']
+common_libs = ['libz-static', 'libzip-static', 'lua5.3.0-static']
 
 server_inc_path = ['src']
 server_lib_path = []
@@ -52,6 +54,11 @@ barc_files = Glob('src/tools/barc/*.cpp')
 client_files = Glob('src/client/*.cpp')
 server_files = Glob('src/server/*.cpp')
 common_files = Glob('src/common/*.cpp')
+
+common_files += Glob('src/as_addon/scriptarray/*.cpp')
+common_files += Glob('src/as_addon/scriptdictionary/*.cpp')
+common_files += Glob('src/as_addon/scriptmath/*.cpp')
+common_files += Glob('src/as_addon/scriptstdstring/*.cpp')
 
 test_files = Glob('src/test/*.cpp')
 

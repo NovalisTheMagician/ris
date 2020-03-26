@@ -18,6 +18,7 @@ namespace RIS
         TEXT,
         UILAYOUT,
         FONT,
+        SCRIPT,
     };
 
     class ILoader

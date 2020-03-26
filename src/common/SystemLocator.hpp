@@ -12,6 +12,7 @@
 #include "IPhysics.hpp"
 #include "IWorld.hpp"
 #include "IInput.hpp"
+#include "IScriptEngine.hpp"
 
 namespace RIS
 {
@@ -41,6 +42,7 @@ namespace RIS
         void Provide(IPhysics *physics);
         void Provide(IWorld *world);
         void Provide(IInput *input);
+        void Provide(IScriptEngine *script);
 
         IWindow& GetWindow() const;
         IRenderer& GetRenderer() const;
@@ -51,6 +53,7 @@ namespace RIS
         IPhysics& GetPhysics() const;
         IWorld& GetWorld() const;
         IInput& GetInput() const;
+        IScriptEngine& GetScriptEngine() const;
 
     private:
         IWindow *window;
@@ -62,6 +65,7 @@ namespace RIS
         IPhysics *physics;
         IWorld *world;
         IInput *input;
+        IScriptEngine *script;
 
     };
 }

@@ -98,6 +98,8 @@ namespace RIS
 
         IConsole& GetConsole() override;
 
+        void RegisterFunctions() override;
+
         void Draw() override;
         void Update(const Timer &timer) override;
 

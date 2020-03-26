@@ -12,6 +12,7 @@
 #include "common/IUserinterface.hpp"
 #include "common/ILoader.hpp"
 #include "common/IInput.hpp"
+#include "common/IScriptEngine.hpp"
 #include "Factory.hpp"
 
 #include "common/SystemLocator.hpp"
@@ -24,7 +25,6 @@
 
 #include "GameLoop.hpp"
 
-using std::unique_ptr;
 using namespace std::literals::string_literals;
 
 using namespace RIS;
@@ -68,13 +68,14 @@ int main(int argc, char *argv[])
 
     const SystemFactory factory(locator, config);
 
-    unique_ptr<IWindow> window;
-    unique_ptr<IRenderer> renderer;
-    unique_ptr<INetwork> network;
-    unique_ptr<IAudio> audio;
-    unique_ptr<IUserinterface> userinterface;
-    unique_ptr<ILoader> loader;
-    unique_ptr<IInput> input;
+    std::unique_ptr<IWindow> window;
+    std::unique_ptr<IRenderer> renderer;
+    std::unique_ptr<INetwork> network;
+    std::unique_ptr<IAudio> audio;
+    std::unique_ptr<IUserinterface> userinterface;
+    std::unique_ptr<ILoader> loader;
+    std::unique_ptr<IInput> input;
+    std::unique_ptr<IScriptEngine> scriptEngine;
 
     try
     {
@@ -85,6 +86,7 @@ int main(int argc, char *argv[])
         userinterface = factory.CreateUserinterface();
         loader = factory.CreateLoader(assetFolder);
         input = factory.CreateInput();
+        scriptEngine = factory.CreateScriptEngine();
 
         std::string baseArchive = "test.zip";
         if(args.IsSet("-base"))
@@ -104,6 +106,8 @@ int main(int argc, char *argv[])
 
         renderer->LoadRequiredResources();
         userinterface->InitializeRootElements();
+
+        userinterface->RegisterFunctions();
     }
     catch(const std::exception& e)
     {

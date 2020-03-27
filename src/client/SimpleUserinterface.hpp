@@ -92,13 +92,11 @@ namespace RIS
         SimpleUserinterface(const SystemLocator &systems, Config &config);
         ~SimpleUserinterface();
 
-        void InitializeRootElements() override;
+        void PostInit() override;
 
         void LoadLayout(const std::string &layout) override;
 
         IConsole& GetConsole() override;
-
-        void RegisterFunctions() override;
 
         void Draw() override;
         void Update(const Timer &timer) override;

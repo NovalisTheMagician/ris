@@ -104,10 +104,9 @@ int main(int argc, char *argv[])
             });
         }
 
-        renderer->LoadRequiredResources();
-        userinterface->InitializeRootElements();
-
-        userinterface->RegisterFunctions();
+        renderer->PostInit();
+        userinterface->PostInit();
+        scriptEngine->PostInit();
     }
     catch(const std::exception& e)
     {

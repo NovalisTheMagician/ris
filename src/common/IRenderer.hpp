@@ -38,7 +38,7 @@ namespace RIS
     public:
         virtual ~IRenderer() = default;
 
-        virtual void LoadRequiredResources() = 0;
+        virtual void PostInit() = 0;
 
         virtual int LoadTexture(const std::string &name, bool flip = true) = 0;
         virtual void DestroyTexture(int texId) = 0;

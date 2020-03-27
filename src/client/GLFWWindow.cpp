@@ -1,6 +1,7 @@
 #include "GLFWWindow.hpp"
 
 #include "common/Logger.hpp"
+#include "common/LuaScriptEngine.hpp"
 
 #include <exception>
 
@@ -81,13 +82,17 @@ namespace RIS
 
         glfwMakeContextCurrent(window);
         glfwSwapInterval(vsync);
-
-        //glfwSwapInterval(1);
     }
 
     GLFWWindow::~GLFWWindow()
     {
         glfwTerminate();
+    }
+
+    void GLFWWindow::PostInit()
+    {
+        LuaScriptEngine &scriptEngine = dynamic_cast<LuaScriptEngine&>(systems.GetScriptEngine());
+        scriptEngine.RegisterFunction([this](){ Exit(0); }, "game", "exit");
     }
 
     void  GLFWWindow::SetRelativeMouse(bool setRelative)

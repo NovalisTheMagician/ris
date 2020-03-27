@@ -26,6 +26,8 @@ namespace RIS
 
         void LoadScript(const std::string &scriptName, const std::string &module = "") override;
 
+        void PostInit() override;
+
         template<typename T>
         void RegisterFunction(T fun, const std::string &name);
 

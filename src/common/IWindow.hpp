@@ -9,6 +9,8 @@ namespace RIS
     public:
         virtual ~IWindow() = default;
 
+        virtual void PostInit() = 0;
+
         virtual void SetRelativeMouse(bool setRelative) = 0;
 
         virtual void SetWindowIcon(const std::string &icon) = 0;

@@ -11,7 +11,7 @@ namespace RIS
 
         virtual void LoadScript(const std::string &scriptName, const std::string &module) = 0;
 
-        
+        virtual void PostInit() = 0;
 
     };
 }

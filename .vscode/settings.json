@@ -74,7 +74,8 @@
         "*.amd.src": "glsl",
         "variant": "cpp",
         "condition_variable": "cpp",
-        "future": "cpp"
+        "future": "cpp",
+        "numeric": "cpp"
     },
     "python.linting.enabled": false,
     "python.pythonPath": "D:\\Python38-32\\python.exe",

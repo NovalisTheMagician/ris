@@ -42,9 +42,9 @@ namespace RIS
         interface.GetConsole().BindFunc("god", Helpers::BoolFunc(god, "Godmode ON", "Godmode OFF"));
 
         scriptEngine.LoadScript("main");
-        scriptEngine.RegisterFunction([](const char *msg){ Logger::Instance().Info(msg); }, "logger", "info");
-        scriptEngine.RegisterFunction([](const char *msg){ Logger::Instance().Warning(msg); }, "logger", "warning");
-        scriptEngine.RegisterFunction([](const char *msg){ Logger::Instance().Error(msg); }, "logger", "error");
+        scriptEngine.RegisterFunction([](const char *msg){ Logger::Instance().Info("{lua}"s + msg); }, "logger", "info");
+        scriptEngine.RegisterFunction([](const char *msg){ Logger::Instance().Warning("{lua}"s + msg); }, "logger", "warning");
+        scriptEngine.RegisterFunction([](const char *msg){ Logger::Instance().Error("{lua}"s + msg); }, "logger", "error");
 
         scriptEngine.CallFunction("", "main", 5);
 

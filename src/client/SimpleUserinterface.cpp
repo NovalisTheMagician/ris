@@ -89,7 +89,6 @@ namespace RIS
 
     void Console::BindFunc(const std::string &name, ConsoleFunc func)
     {
-        if(name == "set") throw std::runtime_error("Can't bind a function with the name \"set\"");
         funcVars.insert_or_assign(name, func);
     }
 
@@ -259,7 +258,7 @@ namespace RIS
     {
     }
 
-    void SimpleUserinterface::InitializeRootElements()
+    void SimpleUserinterface::PostInit()
     {
         console.InitLimits(glm::vec2(uiWidth, uiHeight));
 
@@ -267,11 +266,16 @@ namespace RIS
         uiFramebufferId = renderer.CreateFramebuffer(uiWidth, uiHeight, true);
 
         IInput &input = systems.GetInput();
-        input.RegisterChar("ui", std::bind(&SimpleUserinterface::OnChar, this, _1));
-        input.RegisterMouse("ui", std::bind(&SimpleUserinterface::OnMouseMove, this, _1, _2));
-        input.RegisterButtonDown("ui", std::bind(&SimpleUserinterface::OnMouseDown, this, _1));
-        input.RegisterButtonUp("ui", std::bind(&SimpleUserinterface::OnMouseUp, this, _1));
-        input.RegisterKeyDown("ui", std::bind(&SimpleUserinterface::OnKeyDown, this, _1));
+        input.RegisterChar("ui", [this](char ch){ OnChar(ch); });
+        input.RegisterMouse("ui", [this](float x, float y){ OnMouseMove(x, y); });
+        input.RegisterButtonDown("ui", [this](InputButtons button){ OnMouseDown(button); });
+        input.RegisterButtonUp("ui", [this](InputButtons button){ OnMouseUp(button); });
+        input.RegisterKeyDown("ui", [this](InputKeys key){ OnKeyDown(key); });
+
+        auto &scriptEngine = dynamic_cast<LuaScriptEngine&>(systems.GetScriptEngine());
+
+        scriptEngine.RegisterFunction([this](const char *str){ console.Print(str); }, "print");
+        //scriptEngine.RegisterFunction([this](bool b){ console.Print(std::to_string(b)); }, "print");
 
         LoadLayout("main");
     }
@@ -628,13 +632,6 @@ namespace RIS
         {
             Logger::Instance().Error("Failed to load layout ("s + layout + "): "s + e.what());
         }
-    }
-
-    void SimpleUserinterface::RegisterFunctions()
-    {
-        auto &scriptEngine = dynamic_cast<LuaScriptEngine&>(systems.GetScriptEngine());
-        
-        scriptEngine.RegisterFunction([this](const char *str){ console.Print(str); }, "print");
     }
 
     void SimpleUserinterface::Draw()

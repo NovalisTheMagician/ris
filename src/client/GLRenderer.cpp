@@ -175,7 +175,7 @@ namespace RIS
         textures.clear();
     }
 
-    void GLRenderer::LoadRequiredResources()
+    void GLRenderer::PostInit()
     {
         ILoader &loader = systems.GetLoader();
 

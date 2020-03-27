@@ -140,7 +140,7 @@ namespace RIS
         GLRenderer &operator=(const GLRenderer &) = delete;
         GLRenderer &operator=(GLRenderer &&) = delete;
 
-        void LoadRequiredResources() override;
+        void PostInit() override;
 
         int LoadTexture(const std::string &name, bool flip = true) override;
         void DestroyTexture(int texId) override;

@@ -13,7 +13,8 @@
                 "${workspaceFolder}/libs/libzip/include/*",
                 "${workspaceFolder}/libs/libzippp/include/*",
                 "${workspaceFolder}/libs/lua/include/*",
-                "${workspaceFolder}/libs/luastate/include/*"
+                "${workspaceFolder}/libs/luastate/include/*",
+                "${workspaceFolder}/libs/tiny_gltf/include/*"
             ],
             "defines": [
                 "_DEBUG",

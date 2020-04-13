@@ -55,11 +55,10 @@ namespace RIS
         void OnMouseButtonUp(int button);
         void OnMouseButtonDown(int button);
 
-        InputKeys TranslateKey(int key);
-        InputButtons TranslateButton(int button);
+        InputKey TranslateKey(int key);
+        InputButton TranslateButton(int button);
 
     private:
-        static const std::unordered_map<int, InputAction> DEFAULT_KEYMAP;
         static GLFWInput *instance;
 
     private:
@@ -67,8 +66,6 @@ namespace RIS
         Config &config;
 
         bool ready;
-
-        std::unordered_map<int, InputAction> keyMap;
 
         std::unordered_map<std::string, RIS::KeyCallback> keyUpCallbacks;
         std::unordered_map<std::string, RIS::KeyCallback> keyDownCallbacks;

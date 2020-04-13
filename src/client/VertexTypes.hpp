@@ -11,5 +11,22 @@ namespace RIS
             glm::vec2 position;
             glm::vec2 texCoords;
         };
+
+        struct ModelVertex
+        {
+            glm::vec3 position;
+            glm::vec3 normal;
+            glm::vec2 texCoords;
+            glm::ivec4 joints;
+            glm::vec4 weights;
+        };
+
+        struct TerrainVertex
+        {
+            glm::vec3 position;
+            glm::vec3 normal;
+            glm::vec2 texCoord0;
+            glm::vec2 texCoord1;
+        };
     }
 }

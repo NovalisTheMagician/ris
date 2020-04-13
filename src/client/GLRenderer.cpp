@@ -3,6 +3,16 @@
 #include <glbinding/gl46core/gl.h>
 #include <glbinding/glbinding.h>
 
+#define TINYGLTF_IMPLEMENTATION
+#define TINYGLTF_NO_EXTERNAL_IMAGE
+#define TINYGLTF_USE_RAPIDJSON
+#define TINYGLTF_USE_CPP14
+#define TINYGLTF_NO_INCLUDE_STB_IMAGE
+#define TINYGLTF_NO_INCLUDE_STB_IMAGE_WRITE
+#define TINYGLTF_NO_STB_IMAGE_WRITE
+#define TINYGLTF_NO_STB_IMAGE
+#include <tiny_gltf.h>
+
 #define GLFW_DLL
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -16,9 +26,12 @@
 #include <vector>
 #include <string>
 
+#include <experimental/unordered_map>
+
 #include "common/Logger.hpp"
 
 #include "common/ILoader.hpp"
+#include "common/LuaScriptEngine.hpp"
 
 #include "VertexTypes.hpp"
 
@@ -38,12 +51,13 @@ extern "C"
 
 namespace RIS
 {
-    const int GLRenderer::DEFAULT_FRAMBUFFER_ID = 0;
-    const int GLRenderer::DEFAULT_TEXTURE_ID = 1;
-    const int GLRenderer::MISSING_TEXTURE_ID = 0;
+    const ResourceId GLRenderer::DEFAULT_FRAMBUFFER_ID = 0;
+    const ResourceId GLRenderer::DEFAULT_TEXTURE_ID = 1;
+    const ResourceId GLRenderer::MISSING_TEXTURE_ID = 0;
+    const ResourceId GLRenderer::MISSING_MODEL_ID = 0;
 
     GLRenderer::GLRenderer(const SystemLocator &systems, Config &config)
-        : systems(systems), config(config), textures(), highestUnusedTexId(2), framebuffers(), highestUnusedFrambufId(1), renderer2d(*this), useAmdFix(false)
+        : systems(systems), config(config), renderer2d(*this)
     {
         auto &log = Logger::Instance();
 
@@ -105,7 +119,7 @@ namespace RIS
         glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 #endif
 
-        glEnable(GL_FRAMEBUFFER_SRGB);
+        //glEnable(GL_FRAMEBUFFER_SRGB);
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
 
@@ -130,8 +144,8 @@ namespace RIS
 
         framebuffers.emplace(DEFAULT_FRAMBUFFER_ID, 0);
 
-        textures.insert(std::make_pair(DEFAULT_TEXTURE_ID, Texture::Create(glm::vec4(1, 1, 1, 1))));
-        textures.insert(std::make_pair(MISSING_TEXTURE_ID, Texture::Create(glm::vec4(1, 0, 1, 1))));
+        textures.insert({DEFAULT_TEXTURE_ID, Texture::Create(glm::vec4(1, 1, 1, 1))});
+        textures.insert({MISSING_TEXTURE_ID, Texture::Create(glm::vec4(1, 0, 1, 1))});
 
         float maxAniso;
         glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &maxAniso);
@@ -162,6 +176,23 @@ namespace RIS
         postprocessVAO.SetAttribFormat(1, 2, GL_FLOAT, offsetof(VertexType::UIVertex, texCoords));
         postprocessVAO.SetVertexBuffer(fullscreenQuad, 0);
 
+        modelVAO = VertexArray::Create();
+        modelVAO.SetAttribFormat(0, 3, GL_FLOAT, offsetof(VertexType::ModelVertex, position));
+        modelVAO.SetAttribFormat(1, 3, GL_FLOAT, offsetof(VertexType::ModelVertex, normal));
+        modelVAO.SetAttribFormat(2, 2, GL_FLOAT, offsetof(VertexType::ModelVertex, texCoords));
+        modelVAO.SetAttribFormat(3, 4, GL_INT, offsetof(VertexType::ModelVertex, joints));
+        modelVAO.SetAttribFormat(4, 4, GL_FLOAT, offsetof(VertexType::ModelVertex, weights));
+
+        Buffer emptyVBO = Buffer<VertexType::ModelVertex>::CreateImmutable({glm::vec3(), glm::vec3(), glm::vec2()}, GL_DYNAMIC_STORAGE_BIT);
+        Buffer emptyIBO = Buffer<uint16_t>::CreateImmutable(static_cast<uint16_t>(0), GL_DYNAMIC_STORAGE_BIT);
+        vertexBuffers.insert(vertexBuffers.begin(), std::move(emptyVBO));
+        indexBuffers.insert(indexBuffers.begin(), std::move(emptyIBO));
+
+        models.insert({MISSING_MODEL_ID, Model(vertexBuffers.front(), indexBuffers.front(), 1, true)});
+
+        perFrameBuffer = Buffer<PerFrameMatrices>::CreateImmutable(perFrameData, GL_DYNAMIC_STORAGE_BIT);
+        perObjectBuffer = Buffer<PerObjectMatrices>::CreateImmutable(perObjectData, GL_DYNAMIC_STORAGE_BIT);
+
         GLenum enc;
         glGetNamedFramebufferAttachmentParameteriv(0, GL_FRONT_LEFT, GL_FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING, &enc);
         if(enc != GL_SRGB)
@@ -177,6 +208,12 @@ namespace RIS
 
     void GLRenderer::PostInit()
     {
+        auto createShader = [this](auto &future, gl::GLenum shaderType)
+        {
+            auto [data, size] = future.get();
+            return Shader::Create(data.get(), size, shaderType, useAmdFix);
+        };
+
         ILoader &loader = systems.GetLoader();
 
         AssetType shaderLoadType = useAmdFix ? AssetType::SHADERSRC : AssetType::SHADER;
@@ -187,19 +224,25 @@ namespace RIS
         auto shaderPpvFut = loader.LoadAsset(shaderLoadType, "ppVert");
         auto shaderPpcFut = loader.LoadAsset(shaderLoadType, "ppCopy");
 
-        auto [dataUiv, sizeUiv] = shaderUivFut.get();
-        uiVertex = Shader::Create(dataUiv.get(), sizeUiv, GL_VERTEX_SHADER, useAmdFix);
-        auto [dataUif, sizeUif] = shaderUifFut.get();
-        uiFragment = Shader::Create(dataUif.get(), sizeUif, GL_FRAGMENT_SHADER, useAmdFix);
-        auto [dataUit, sizeUit] = shaderUitFut.get();
-        uiText = Shader::Create(dataUit.get(), sizeUit, GL_FRAGMENT_SHADER, useAmdFix);
-        auto [dataPpv, sizePpv] = shaderPpvFut.get();
-        ppVertex = Shader::Create(dataPpv.get(), sizePpv, GL_VERTEX_SHADER, useAmdFix);
-        auto [dataPpc, sizePpc] = shaderPpcFut.get();
-        ppCopy = Shader::Create(dataPpc.get(), sizePpc, GL_FRAGMENT_SHADER, useAmdFix);
+        auto shaderMStaticVertFut = loader.LoadAsset(shaderLoadType, "mStaticVert");
+        auto shaderMUnlitFut = loader.LoadAsset(shaderLoadType, "mUnlit");
+
+        uiVertex = createShader(shaderUivFut, GL_VERTEX_SHADER);
+        uiFragment = createShader(shaderUifFut, GL_FRAGMENT_SHADER);
+        uiText = createShader(shaderUitFut, GL_FRAGMENT_SHADER);
+        ppVertex = createShader(shaderPpvFut, GL_VERTEX_SHADER);
+        ppCopy = createShader(shaderPpcFut, GL_FRAGMENT_SHADER);
+
+        staticModelShader = createShader(shaderMStaticVertFut, GL_VERTEX_SHADER);
+        modelUnlitShader = createShader(shaderMUnlitFut, GL_FRAGMENT_SHADER);
+
+        LuaScriptEngine &scriptEngine = dynamic_cast<LuaScriptEngine&>(systems.GetScriptEngine());
+
+        scriptEngine.Register([this](const char *name){ return LoadTexture(name); }, "renderer", "loadTexture");
+        scriptEngine.Register([this](const char *name){ return renderer2d.LoadFont(name); }, "renderer", "loadFont");
     }
 
-    int GLRenderer::LoadTexture(const std::string &name, bool flip)
+    ResourceId GLRenderer::LoadTexture(const std::string &name, bool flip)
     {
         if(loadedTextures.count(name) == 1)
             return loadedTextures.at(name);
@@ -209,7 +252,7 @@ namespace RIS
         {
             auto [data, size] = loader.LoadAsset(AssetType::TEXTURE, name).get();
 
-            int id = highestUnusedTexId++;
+            ResourceId id = highestUnusedTexId++;
             textures[id] = Texture::Create(data.get(), size, flip);
             loadedTextures.insert({name, id});
             return id;
@@ -217,27 +260,199 @@ namespace RIS
         catch(const std::exception& e)
         {
             Logger::Instance().Error("Failed to load texture (" + name + "): "s + e.what());
-            return MISSING_TEXTURE_ID;
         }
+        return MISSING_TEXTURE_ID;
     }
 
-    void GLRenderer::DestroyTexture(int texId)
+    void GLRenderer::DestroyTexture(ResourceId texId)
     {
+        using std::experimental::erase_if;
+
         if(texId >= 0 && textures.count(texId) > 0)
         {
             textures.erase(texId);
-            for(auto it = loadedTextures.begin(); it != loadedTextures.end(); ++it)
-            {
-                if(it->second == texId)
-                {
-                    loadedTextures.erase(it);
-                    break;
-                }
-            }
+            erase_if(loadedTextures, [texId](const std::pair<std::string, ResourceId> &elem){ return elem.second == texId; });
         }
     }
 
-    int GLRenderer::CreateFramebuffer(int width, int height, bool useDepth)
+    ResourceId GLRenderer::LoadModel(const std::string &name)
+    {
+        if(loadedModels.count(name) == 1)
+            return loadedModels.at(name);
+
+        Logger &logger = Logger::Instance();
+        ILoader &loader = systems.GetLoader();
+        try
+        {
+            auto [data, size] = loader.LoadAsset(AssetType::MODEL, name).get();
+
+            tinygltf::TinyGLTF gltfLoader;
+            tinygltf::Model model;
+            std::string err, warn;
+
+            bool result = gltfLoader.LoadBinaryFromMemory(&model, &err, &warn, reinterpret_cast<unsigned char*>(data.get()), size);
+            if(!warn.empty()) logger.Warning(warn);
+            if(!err.empty()) logger.Error(err);
+            if(result)
+            {
+                auto checkAttribs = [](const std::map<std::string, int> &attribs)
+                {
+                    int hasAll = 0;
+                    std::for_each(attribs.begin(), attribs.end(), [&hasAll](const std::pair<std::string, int> attrib)
+                    {
+                        if(attrib.first.compare("POSITION") == 0) hasAll++;
+                        else if(attrib.first.compare("NORMAL") == 0) hasAll++;
+                        else if(attrib.first.compare("TEXCOORD_0") == 0) hasAll++;
+                    });
+                    return hasAll == 3;
+                };
+
+                auto transformBytesToShorts = [](auto begin, auto end)
+                {
+                    size_t size = end - begin;
+                    std::vector<unsigned short> shorts(size / 2);
+                    for(size_t i = 0; i < size / 2; ++i)
+                    {
+                        size_t idx = i * 2;
+                        auto msb = *(begin + (idx+1));
+                        auto lsb = *(begin + idx);
+                        shorts[i] = msb << 8 | lsb;
+                    }
+                    return shorts;
+                };
+
+                auto transformBytesToFloats = [](auto begin, auto end)
+                {
+                    size_t size = end - begin;
+                    std::vector<float> floats(size / 4);
+                    for(size_t i = 0; i < size / 4; ++i)
+                    {
+                        size_t idx = i * 4;
+                        auto d = *(begin + (idx+3));
+                        auto c = *(begin + (idx+2));
+                        auto b = *(begin + (idx+1));
+                        auto a = *(begin + idx);
+                        unsigned char arr[] = { a, b, c, d };
+                        float result;
+                        std::copy(  reinterpret_cast<const char*>(&arr[0]),
+                                    reinterpret_cast<const char*>(&arr[4]),
+                                    reinterpret_cast<char*>(&result));
+                        floats[i] = result;
+                    }
+                    return floats;
+                };
+
+                auto transformFloatsToVec3 = [](const std::vector<float> &floats)
+                {
+                    std::vector<glm::vec3> vectors(floats.size() / 3);
+                    for(size_t i = 0; i < floats.size() / 3; ++i)
+                    {
+                        size_t idx = i * 3;
+                        auto x = floats.at(idx);
+                        auto y = floats.at(idx+1);
+                        auto z = floats.at(idx+2);
+                        vectors[i] = glm::vec3(x, y, z);
+                    }
+                    return vectors;
+                };
+
+                auto transformFloatsToVec2 = [](const std::vector<float> &floats)
+                {
+                    std::vector<glm::vec2> vectors(floats.size() / 2);
+                    for(size_t i = 0; i < floats.size() / 2; ++i)
+                    {
+                        size_t idx = i * 2;
+                        auto x = floats.at(idx);
+                        auto y = floats.at(idx+1);
+                        vectors[i] = glm::vec2(x, y);
+                    }
+                    return vectors;
+                };
+
+                auto zipToModelFormat = [](const std::vector<glm::vec3> &positions, const std::vector<glm::vec3> &normals, const std::vector<glm::vec2> &texcoords)
+                {
+                    std::vector<VertexType::ModelVertex> vertices(positions.size());
+                    for(size_t i = 0; i < positions.size(); ++i)
+                    {
+                        vertices[i] = { positions.at(i), normals.at(i), texcoords.at(i) };
+                    }
+                    return vertices;
+                };
+
+                ResourceId id = highestUnusedModelId++;
+                const tinygltf::Mesh &mesh = model.meshes.at(0);
+                const tinygltf::Primitive &primitive = mesh.primitives.at(0);
+
+                if(!checkAttribs(primitive.attributes))
+                    throw std::exception("model in wrong format");
+
+                std::vector<uint16_t> indices;
+                std::vector<glm::vec3> positions;
+                std::vector<glm::vec3> normals;
+                std::vector<glm::vec2> texcoords;
+
+                size_t index = 0;
+                for(const tinygltf::BufferView &bufferView : model.bufferViews)
+                {
+                    const tinygltf::Buffer buffer = model.buffers.at(bufferView.buffer);
+                    auto begin = buffer.data.begin() + bufferView.byteOffset;
+                    auto end = buffer.data.begin() + bufferView.byteOffset + bufferView.byteLength;
+
+                    if(index == 0) // POSITION VEC3
+                    {
+                        positions = transformFloatsToVec3(transformBytesToFloats(begin, end));
+                    }
+                    else if(index == 1) // NORMAL VEC3
+                    {
+                        normals = transformFloatsToVec3(transformBytesToFloats(begin, end));
+                    }
+                    else if(index == 3) // TEXCOORD VEC2
+                    {
+                        texcoords = transformFloatsToVec2(transformBytesToFloats(begin, end));
+                    }
+                    else if(index == 4) // INDEX USHORT
+                    {
+                        indices.resize(bufferView.byteLength);
+                        indices = transformBytesToShorts(begin, end);
+                    }
+                    index++;
+                }
+
+                std::vector<VertexType::ModelVertex> vertices = zipToModelFormat(positions, normals, texcoords);
+
+                Buffer vertexBuffer = Buffer<VertexType::ModelVertex>::CreateImmutable(vertices, GL_DYNAMIC_STORAGE_BIT);
+                Buffer indexBuffer = Buffer<uint16_t>::CreateImmutable(indices, GL_DYNAMIC_STORAGE_BIT);
+
+                vertexBuffers.insert(vertexBuffers.end(), std::move(vertexBuffer));
+                indexBuffers.insert(indexBuffers.end(), std::move(indexBuffer));
+                
+                int numIndices = model.accessors.at(primitive.indices).count;
+
+                models.insert({id, Model(vertexBuffers.back(), indexBuffers.back(), numIndices, true)});
+                loadedModels.insert({name, id});
+
+                return id;
+            }
+        }
+        catch(const std::exception &e)
+        {
+            Logger::Instance().Error("Failed to load model (" + name + "): "s + e.what());
+        }
+        return MISSING_MODEL_ID;
+    }
+
+    void GLRenderer::DestroyModel(ResourceId modId)
+    {
+        using std::experimental::erase_if;
+
+        if(modId >= 0 && models.count(modId) > 0)
+        {
+            models.erase(modId);
+            erase_if(loadedModels, [modId](const std::pair<std::string, ResourceId> &elem){ return elem.second == modId; });
+        }
+    }
+
+    ResourceId GLRenderer::CreateFramebuffer(int width, int height, bool useDepth)
     {
         int id = highestUnusedFrambufId++;
 
@@ -256,7 +471,7 @@ namespace RIS
         return id;
     }
 
-    void GLRenderer::DestroyFramebuffer(int framebufId)
+    void GLRenderer::DestroyFramebuffer(ResourceId framebufId)
     {
         if(framebufId > 0 && framebuffers.count(framebufId) > 0)
         {
@@ -264,7 +479,7 @@ namespace RIS
         }
     }
 
-    void GLRenderer::SetFramebuffer(int framebufferId)
+    void GLRenderer::SetFramebuffer(ResourceId framebufferId)
     {
         if(framebufferId >= 0 && framebuffers.count(framebufferId) > 0)
         {
@@ -273,7 +488,7 @@ namespace RIS
         }
     }
 
-    void GLRenderer::FramebufferResize(int framebufferId, int width, int height)
+    void GLRenderer::FramebufferResize(ResourceId framebufferId, int width, int height)
     {
         // do not resize the default framebuffer (0)
         if(framebufferId > 0 && framebuffers.count(framebufferId) > 0)
@@ -283,13 +498,42 @@ namespace RIS
         }
     }
 
-    void GLRenderer::Clear(int framebufferId, const glm::vec4 &clearColor, float depth)
+    void GLRenderer::Clear(ResourceId framebufferId, const glm::vec4 &clearColor, float depth)
     {
         Framebuffer &framebuffer = framebuffers.at(framebufferId);
         framebuffer.Clear(clearColor, depth);
     }
 
-    void GLRenderer::Draw(int framebufferId)
+    void GLRenderer::Begin(const glm::mat4 &viewProjection)
+    {
+        perFrameData.viewProjection = viewProjection;
+        perFrameBuffer.UpdateData(perFrameData);
+    }
+
+    void GLRenderer::Draw(ResourceId modelId, const glm::mat4 &world)
+    {
+        perObjectData.world = world;
+        perObjectBuffer.UpdateData(perObjectData);
+
+        perFrameBuffer.Bind(GL_UNIFORM_BUFFER, 0);
+        perObjectBuffer.Bind(GL_UNIFORM_BUFFER, 1);
+
+        Model &model = models.at(modelId);
+        model.Bind(modelVAO);
+        modelVAO.Bind();
+
+        pipeline.SetShader(staticModelShader);
+        pipeline.SetShader(modelUnlitShader);
+        pipeline.Use();
+
+        glDrawElements(GL_TRIANGLES, model.NumIndices(), GL_UNSIGNED_SHORT, nullptr);
+    }
+
+    void GLRenderer::End()
+    {
+    }
+
+    void GLRenderer::Draw(ResourceId framebufferId)
     {
         if(framebufferId == DEFAULT_FRAMBUFFER_ID || framebuffers.count(framebufferId) == 0)
             return;
@@ -310,6 +554,8 @@ namespace RIS
         SetFramebuffer(DEFAULT_FRAMBUFFER_ID);
 
         glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        glDisable(GL_BLEND);
     }
 
     void GLRenderer::Resize(int width, int height)

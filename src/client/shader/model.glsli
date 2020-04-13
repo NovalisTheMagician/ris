@@ -1,0 +1,9 @@
+layout(std140, binding=0) uniform perFrameMatrices 
+{
+    mat4 viewProjection;
+} perFrame;
+
+layout(std140, binding=1) uniform perObjectMatrices
+{
+    mat4 world;
+} perObject;

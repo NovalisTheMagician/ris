@@ -62,7 +62,7 @@ namespace RIS
         textBuffer = Buffer<UIVertex>::CreateImmutable(MAX_CHARS*6, GL_DYNAMIC_STORAGE_BIT);
     }
 
-    int GL2DRenderer::LoadFont(const std::string &fontName)
+    ResourceId GL2DRenderer::LoadFont(const std::string &fontName)
     {
         if(loadedFonts.count(fontName) == 1)
             return loadedFonts.at(fontName);
@@ -127,7 +127,7 @@ namespace RIS
         return id;
     }
 
-    void GL2DRenderer::DestroyFont(int fontId)
+    void GL2DRenderer::DestroyFont(ResourceId fontId)
     {
         if(fonts.count(fontId) > 0)
         {
@@ -149,7 +149,7 @@ namespace RIS
         perFrameBuffer.UpdateData(perFrame);
     }
 
-    void GL2DRenderer::SetTexture(int textureId, int textureUnit)
+    void GL2DRenderer::SetTexture(ResourceId textureId, int textureUnit)
     {
         if(renderer.textures.count(textureId) != 1)
             return;
@@ -180,7 +180,7 @@ namespace RIS
         glEnable(GL_DEPTH_TEST);
     }
 
-    void GL2DRenderer::DrawText(const std::string &text, int fontId, const glm::vec2 &position, float size, const glm::vec4 &color)
+    void GL2DRenderer::DrawText(const std::string &text, ResourceId fontId, const glm::vec2 &position, float size, const glm::vec4 &color)
     {
         const Font &font = fonts.at(fontId);
 
@@ -273,7 +273,7 @@ namespace RIS
         glDrawArrays(GL_TRIANGLES, 0, 6);
     }
 
-    TextMetrics GL2DRenderer::MeasureText(const std::string &text, int fontId, float size)
+    TextMetrics GL2DRenderer::MeasureText(const std::string &text, ResourceId fontId, float size)
     {
         const Font &font = fonts.at(fontId);
 
@@ -323,7 +323,7 @@ namespace RIS
         return { penX, height };
     }
 
-    float GL2DRenderer::MaxHeightFont(int fontId, float size)
+    float GL2DRenderer::MaxHeightFont(ResourceId fontId, float size)
     {
         const Font &font = fonts.at(fontId);
         return font.height * size;

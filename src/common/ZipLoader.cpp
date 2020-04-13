@@ -23,7 +23,17 @@ namespace RIS
 
     void ZipLoader::AddOverlay(const std::string &overlayName)
     {
-        archives.emplace_back(overlayName);
+        if(!overlayName.empty())
+        {
+            try
+            {
+                archives.emplace_back(overlayName);
+            }
+            catch(const std::exception &e)
+            {
+                throw ZipLoaderException("Couldn't open " + overlayName);
+            }
+        }
     }
 
     bool ZipLoader::HasAsset(AssetType type, const std::string &name) const
@@ -44,7 +54,7 @@ namespace RIS
         switch(type)
         {
         case AssetType::TEXTURE:    extension = ".dds";     folder = "textures"; break;
-        case AssetType::MODEL:      extension = ".mdl";     folder = "models"; break;
+        case AssetType::MODEL:      extension = ".glb";     folder = "models"; break;
         case AssetType::SOUND:      extension = ".wav";     folder = "sounds"; break;
         case AssetType::SHADER:     extension = ".spv";     folder = "shaders"; break;
         case AssetType::SHADERSRC:  extension = ".amd.src"; folder = "shaders"; break;

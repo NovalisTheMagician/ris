@@ -16,7 +16,7 @@ shader_flags = ['-c', '--target-env=opengl', '-Werror']
 dyn_libs = ['libs/glbinding/bin/glbinding.dll', 'libs/glbinding/bin/glbinding-aux.dll', 'libs/glfw/bin/glfw3.dll']
 
 client_inc_path = ['src', 'libs/glm/include', 'libs/gli/include', 'libs/glbinding/include', 'libs/glfw/include', 'libs/soloud/include', 'libs/rapidjson/include', 'libs/libzip/include', 
-                    'libs/libzippp/include', 'libs/chaiscript/include', 'libs/lua/include', 'libs/luastate/include']
+                    'libs/libzippp/include', 'libs/chaiscript/include', 'libs/lua/include', 'libs/luastate/include', 'libs/tiny_gltf/include']
 client_lib_path = ['libs/glbinding/lib', 'libs/glfw/lib', 'libs/soloud/lib']
 client_libs = ['user32', 'kernel32', 'gdi32', 'opengl32', 'glbinding', 'glbinding-aux', 'glfw3dll', 'soloud_static', 'ws2_32', 'advapi32']
 

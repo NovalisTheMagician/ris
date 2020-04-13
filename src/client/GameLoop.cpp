@@ -14,6 +14,8 @@
 #include "common/StringSupport.hpp"
 #include "common/ThreadHelper.hpp"
 
+#include <glm/gtc/matrix_transform.hpp>
+
 using namespace std::literals;
 
 namespace RIS
@@ -42,11 +44,16 @@ namespace RIS
         interface.GetConsole().BindFunc("god", Helpers::BoolFunc(god, "Godmode ON", "Godmode OFF"));
 
         scriptEngine.LoadScript("main");
-        scriptEngine.RegisterFunction([](const char *msg){ Logger::Instance().Info("{lua}"s + msg); }, "logger", "info");
-        scriptEngine.RegisterFunction([](const char *msg){ Logger::Instance().Warning("{lua}"s + msg); }, "logger", "warning");
-        scriptEngine.RegisterFunction([](const char *msg){ Logger::Instance().Error("{lua}"s + msg); }, "logger", "error");
+        scriptEngine.Register([](const char *msg){ Logger::Instance().Info("{lua}"s + msg); }, "logger", "info");
+        scriptEngine.Register([](const char *msg){ Logger::Instance().Warning("{lua}"s + msg); }, "logger", "warning");
+        scriptEngine.Register([](const char *msg){ Logger::Instance().Error("{lua}"s + msg); }, "logger", "error");
 
-        scriptEngine.CallFunction("", "main", 5);
+        scriptEngine.CallFunction("", "main");
+
+        ResourceId cubeModel = renderer.LoadModel("cube");
+        glm::mat4 projection = glm::perspective(glm::radians(60.0f), 16.0f / 9.0f, 0.1f, 1000.0f);
+        glm::mat4 view = glm::lookAt(glm::vec3(5, 5, 5), glm::vec3(), glm::vec3(0, 1, 0));
+        glm::mat4 world = glm::mat4(1.0f);
 
         glm::vec4 clearColor(0.392f, 0.584f, 0.929f, 1.0f);
         //clearColor = glm::pow(clearColor, glm::vec4(2.2f));
@@ -61,7 +68,13 @@ namespace RIS
             interface.Update(timer);
 
             renderer.Clear(0, clearColor);
+
+            renderer.Begin(projection * view);
+            renderer.Draw(cubeModel, world);
+            renderer.End();
+
             interface.Draw();
+            
             window.Present();
         }
 

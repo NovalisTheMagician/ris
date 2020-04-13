@@ -23,6 +23,8 @@
 #include "Shader.hpp"
 #include "ProgramPipeline.hpp"
 
+#include "Model.hpp"
+
 namespace RIS
 {
     struct RendererException : public std::runtime_error
@@ -66,7 +68,7 @@ namespace RIS
         float spaceAdvance;
         std::unordered_map<char, Glyph> glyphs;
 
-        int textureId;
+        ResourceId textureId;
     };
 
     class GLRenderer;
@@ -79,21 +81,21 @@ namespace RIS
 
         void Setup();
 
-        int LoadFont(const std::string &fontName) override;
-        void DestroyFont(int fontId) override;
+        ResourceId LoadFont(const std::string &fontName) override;
+        void DestroyFont(ResourceId fontId) override;
 
         void SetViewsize(int width, int height) override;
 
-        void SetTexture(int textureId, int textureUnit) override;
+        void SetTexture(ResourceId textureId, int textureUnit) override;
 
         void Begin() override;
         void End() override;
 
-        void DrawText(const std::string &text, int fontId, const glm::vec2 &position, float size, const glm::vec4 &color) override;
+        void DrawText(const std::string &text, ResourceId fontId, const glm::vec2 &position, float size, const glm::vec4 &color) override;
         void DrawQuad(const glm::vec2 &position, const glm::vec2 &size, const glm::vec4 &color) override;
 
-        TextMetrics MeasureText(const std::string &text, int fontId, float size) override;
-        float MaxHeightFont(int fontId, float size) override;
+        TextMetrics MeasureText(const std::string &text, ResourceId fontId, float size) override;
+        float MaxHeightFont(ResourceId fontId, float size) override;
 
     private:
         static const int MAX_CHARS;
@@ -123,9 +125,9 @@ namespace RIS
         Buffer<VertexType::UIVertex> textBuffer, uiBuffer;
         VertexArray uiLayout;
 
-        int highestUnusedFontId;
-        std::unordered_map<int, Font> fonts;
-        std::unordered_map<std::string, int> loadedFonts;
+        ResourceId highestUnusedFontId;
+        std::unordered_map<ResourceId, Font> fonts;
+        std::unordered_map<std::string, ResourceId> loadedFonts;
 
     };
 
@@ -142,42 +144,74 @@ namespace RIS
 
         void PostInit() override;
 
-        int LoadTexture(const std::string &name, bool flip = true) override;
-        void DestroyTexture(int texId) override;
+        ResourceId LoadTexture(const std::string &name, bool flip = true) override;
+        void DestroyTexture(ResourceId texId) override;
 
-        int CreateFramebuffer(int width = -1, int height = -1, bool useDepth = true) override;
-        void DestroyFramebuffer(int framebufId) override;
+        ResourceId LoadModel(const std::string &name) override;
+        void DestroyModel(ResourceId texId) override;
 
-        void SetFramebuffer(int framebufferId) override;
-        void FramebufferResize(int framebufferId, int width, int height) override;
+        ResourceId CreateFramebuffer(int width = -1, int height = -1, bool useDepth = true) override;
+        void DestroyFramebuffer(ResourceId framebufId) override;
 
-        void Clear(int framebufferId, const glm::vec4 &clearColor = glm::vec4(0, 0, 0, 1), float depth = 1.0f) override;
+        void SetFramebuffer(ResourceId framebufferId) override;
+        void FramebufferResize(ResourceId framebufferId, int width, int height) override;
 
-        void Draw(int framebufferId) override;
+        void Clear(ResourceId framebufferId, const glm::vec4 &clearColor = glm::vec4(0, 0, 0, 1), float depth = 1.0f) override;
+
+        void Begin(const glm::mat4 &viewProjection) override;
+        void Draw(ResourceId modelId, const glm::mat4 &world) override;
+        void End() override;
+
+        void Draw(ResourceId framebufferId) override;
 
         void Resize(int width, int height) override;
 
         I2DRenderer& Get2DRenderer() override;
 
     public:
-        static const int DEFAULT_FRAMBUFFER_ID;
-        static const int DEFAULT_TEXTURE_ID;
-        static const int MISSING_TEXTURE_ID;
+        static const ResourceId DEFAULT_FRAMBUFFER_ID;
+        static const ResourceId DEFAULT_TEXTURE_ID;
+        static const ResourceId MISSING_TEXTURE_ID;
+        static const ResourceId MISSING_MODEL_ID;
+
+    private:
+        struct PerFrameMatrices
+        {
+            glm::mat4 viewProjection;
+        };
+
+        struct PerObjectMatrices
+        {
+            glm::mat4 world;
+        };
 
     private:
         const SystemLocator &systems;
         Config &config;
 
-        int highestUnusedTexId;
-        std::unordered_map<int, Texture> textures;
-        std::unordered_map<std::string, int> loadedTextures;
+        ResourceId highestUnusedTexId = 2;
+        std::unordered_map<ResourceId, Texture> textures;
+        std::unordered_map<std::string, ResourceId> loadedTextures;
 
-        int highestUnusedFrambufId;
-        std::unordered_map<int, Framebuffer> framebuffers;
+        ResourceId highestUnusedModelId = 1;
+        std::unordered_map<ResourceId, Model> models;
+        std::unordered_map<std::string, ResourceId> loadedModels;
+        std::vector<Buffer<VertexType::ModelVertex>> vertexBuffers;
+        std::vector<Buffer<uint16_t>> indexBuffers;
+
+        ResourceId highestUnusedFrambufId = 1;
+        std::unordered_map<ResourceId, Framebuffer> framebuffers;
 
         Buffer<VertexType::UIVertex> fullscreenQuad;
         VertexArray postprocessVAO;
         Shader ppVertex, ppCopy;
+
+        VertexArray modelVAO;
+        Shader staticModelShader, modelUnlitShader;
+        Buffer<PerFrameMatrices> perFrameBuffer;
+        Buffer<PerObjectMatrices> perObjectBuffer;
+        PerFrameMatrices perFrameData;
+        PerObjectMatrices perObjectData;
 
         Sampler defaultSampler, uiSampler;
 
@@ -187,7 +221,7 @@ namespace RIS
         GL2DRenderer renderer2d;
         Camera camera;
 
-        bool useAmdFix;
+        bool useAmdFix = false;
 
         friend GL2DRenderer;
 

@@ -88,7 +88,11 @@ int main(int argc, char *argv[])
         input = factory.CreateInput();
         scriptEngine = factory.CreateScriptEngine();
 
-        std::string baseArchive = "test.zip";
+        std::string baseArchive = "main.zip";
+        if(args.IsSet("-debug"))
+        {
+            baseArchive = "";
+        }
         if(args.IsSet("-base"))
         {
             baseArchive = args.GetParameter("-base");
@@ -104,6 +108,7 @@ int main(int argc, char *argv[])
             });
         }
 
+        window->PostInit();
         renderer->PostInit();
         userinterface->PostInit();
         scriptEngine->PostInit();

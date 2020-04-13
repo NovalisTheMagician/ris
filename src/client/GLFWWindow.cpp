@@ -92,7 +92,8 @@ namespace RIS
     void GLFWWindow::PostInit()
     {
         LuaScriptEngine &scriptEngine = dynamic_cast<LuaScriptEngine&>(systems.GetScriptEngine());
-        scriptEngine.RegisterFunction([this](){ Exit(0); }, "game", "exit");
+        scriptEngine.Register([this](){ Exit(0); }, "window", "exit");
+        scriptEngine.Register([this](bool relative){ SetRelativeMouse(relative); }, "window", "setRelativeMouse");
     }
 
     void  GLFWWindow::SetRelativeMouse(bool setRelative)

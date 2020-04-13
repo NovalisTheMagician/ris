@@ -7,10 +7,9 @@
 namespace RIS
 {
     UIButton::UIButton(const SystemLocator &systems)
-        : Component(systems), action(UIAction::Nop), text(""), font(1), fontSize(-1), normalColor(1, 1, 1, 1), hoverColor(0.7f, 0.7f, 0.7f, 1), 
-            downColor(0.5f, 0.5f, 0.5f, 1), normalImage(1), hoverImage(1), downImage(1), textColor(0, 0, 0, 1), isInBounds(false),
-            isClickedDown(false), param1(""), param2("")
+        : Component(systems)
     {
+        callback = [](){};
     }
 
     UIButton::~UIButton()
@@ -87,11 +86,9 @@ namespace RIS
         downImage = image;
     }
 
-    void UIButton::SetAction(UIAction action, const std::string &param1, const std::string &param2)
+    void UIButton::SetCallback(ButtonFunc func)
     {
-        this->action = action;
-        this->param1 = param1;
-        this->param2 = param2;
+        callback = func;
     }
 
     void UIButton::Update()
@@ -137,50 +134,23 @@ namespace RIS
             isInBounds = false;
     }
 
-    void UIButton::OnMouseDown(InputButtons button)
+    void UIButton::OnMouseDown(InputButton button)
     {
-        if(button == InputButtons::LEFT && isInBounds)
+        if(button == InputButton::LEFT && isInBounds)
         {
             isClickedDown = true;
         }
     }
 
-    void UIButton::OnMouseUp(InputButtons button)
+    void UIButton::OnMouseUp(InputButton button)
     {
         auto &window = systems.GetWindow();
 
-        if(button == InputButtons::LEFT && isClickedDown)
+        if(button == InputButton::LEFT && isClickedDown)
         {
             if(isInBounds)
             {
-                //do action
-                std::cout << "Doing action " << std::to_string(static_cast<int>(action)) << std::endl;
-                switch(action)
-                {
-                case UIAction::Quit: window.Exit(0); break;
-                case UIAction::ChangeUI: 
-                    {
-                        if(!param1.empty())
-                        {
-                            systems.GetUserinterface().LoadLayout(param1);
-                        }
-                        else
-                        {
-                            Logger::Instance().Warning("Tried to change layout to empty");
-                        }
-                    }
-                    break;
-                case UIAction::SetValue:
-                    {
-
-                    }
-                    break;
-                case UIAction::ToggleConsole:
-                    {
-                        systems.GetUserinterface().GetConsole().Toggle();
-                    }
-                    break;
-                }
+                callback();
             }
             isClickedDown = false;
         }

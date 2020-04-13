@@ -10,10 +10,12 @@
 #include <string>
 #include <memory>
 
-#include "UIAction.hpp"
+#include <functional>
 
 namespace RIS
 {
+    using ButtonFunc = std::function<void()>;
+
     class UIButton : public Component
     {
     public:
@@ -37,34 +39,35 @@ namespace RIS
         void SetDownColor(const glm::vec4 &color);
         void SetDownImage(int image);
 
-        void SetAction(UIAction action, const std::string &param1 = "", const std::string &param2 = "");
+        void SetCallback(ButtonFunc func);
 
         void Update() override;
         void Draw(I2DRenderer &renderer, const glm::vec2 &parentPosition) override;
 
         void OnMouseMove(float x, float y) override;
-        void OnMouseDown(InputButtons button) override;
-        void OnMouseUp(InputButtons button) override;
+        void OnMouseDown(InputButton button) override;
+        void OnMouseUp(InputButton button) override;
 
     private:
-        std::string text;
+        std::string text = "";
 
-        int font;
-        float fontSize;
-        glm::vec4 textColor;
+        int font = 1;
+        float fontSize = -1;
+        glm::vec4 textColor = glm::vec4(0, 0, 0, 1);
 
         glm::vec2 position, size;
 
-        glm::vec4 normalColor, hoverColor, downColor;
-        int normalImage, hoverImage, downImage;
-
-        UIAction action;
-        std::string param1, param2;
+        glm::vec4 normalColor = glm::vec4(1, 1, 1, 1);
+        glm::vec4 hoverColor = glm::vec4(0.7f, 0.7f, 0.7f, 1);
+        glm::vec4 downColor = glm::vec4(0.5f, 0.5f, 0.5f, 1);
+        int normalImage = 1, hoverImage = 1, downImage = 1;
 
         glm::vec2 parentPos;
 
-        bool isInBounds;
-        bool isClickedDown;
+        bool isInBounds = false;
+        bool isClickedDown = false;
+
+        ButtonFunc callback;
 
     };
     using ButtonPtr = std::shared_ptr<UIButton>;

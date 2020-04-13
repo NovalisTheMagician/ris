@@ -7,7 +7,7 @@ using std::string;
 namespace RIS
 {
     UILabel::UILabel(const SystemLocator &systems)
-        : Component(systems), fontColor(1, 1, 1, 1), isVisible(true), fontSize(-1), font(0)
+        : Component(systems)
     {
     }
 

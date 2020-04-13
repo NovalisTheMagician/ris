@@ -32,11 +32,11 @@ namespace RIS
 
         void OnChar(char c) override;
         void OnMouseMove(float x, float y) override;
-        void OnMouseDown(InputButtons mouseCode) override;
-        void OnMouseUp(InputButtons mouseCode) override;
+        void OnMouseDown(InputButton mouseCode) override;
+        void OnMouseUp(InputButton mouseCode) override;
 
-        void OnKeyDown(InputKeys keyCode) override;
-        void OnKeyUp(InputKeys keyCode) override;
+        void OnKeyDown(InputKey keyCode) override;
+        void OnKeyUp(InputKey keyCode) override;
 
         void Update() override;
         void Draw(I2DRenderer &renderer, const glm::vec2 &parentPosition) override;

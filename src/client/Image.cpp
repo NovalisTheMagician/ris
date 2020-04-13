@@ -3,7 +3,7 @@
 namespace RIS
 {
     UIImage::UIImage(const SystemLocator &systems)
-        : Component(systems), image(1)
+        : Component(systems)
     {
     }
 
@@ -14,6 +14,11 @@ namespace RIS
     void UIImage::SetImage(int image)
     {
         this->image = image;
+    }
+
+    void UIImage::SetColor(const glm::vec4 &color)
+    {
+        this->color = color;
     }
 
     void UIImage::SetPosition(const glm::vec2 &position)

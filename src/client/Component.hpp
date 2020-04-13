@@ -14,11 +14,11 @@ namespace RIS
         virtual ~Component() = default;
 
         virtual void OnMouseMove(float x, float y) {};
-        virtual void OnMouseDown(InputButtons mouseCode) {};
-        virtual void OnMouseUp(InputButtons mouseCode) {};
+        virtual void OnMouseDown(InputButton mouseCode) {};
+        virtual void OnMouseUp(InputButton mouseCode) {};
 
-        virtual void OnKeyDown(InputKeys keyCode) {};
-        virtual void OnKeyUp(InputKeys keyCode) {};
+        virtual void OnKeyDown(InputKey keyCode) {};
+        virtual void OnKeyUp(InputKey keyCode) {};
 
         virtual void OnChar(char c) {};
 

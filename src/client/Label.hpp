@@ -29,12 +29,12 @@ namespace RIS
 
     private:
         glm::vec2 position;
-        std::string text;
+        std::string text = "";
 
-        int font;
-        float fontSize;
-        glm::vec4 fontColor;
-        bool isVisible;
+        int font = 1;
+        float fontSize = -1;
+        glm::vec4 fontColor = glm::vec4(1, 1, 1, 1);
+        bool isVisible = true;
 
     };
     using LabelPtr = std::shared_ptr<UILabel>;

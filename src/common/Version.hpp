@@ -8,6 +8,6 @@ namespace RIS
     {
         const int MAJOR = 0;
         const int MINOR = 1;
-        const std::string GAME_NAME = "RIS";
+        const std::string GAME_NAME = "Game";
     }
 }

@@ -21,12 +21,14 @@ namespace RIS
         void SetImage(int image);
         void SetPosition(const glm::vec2 &position);
         void SetSize(const glm::vec2 &size);
+        void SetColor(const glm::vec4 &color);
 
         void Update() override;
         void Draw(I2DRenderer &renderer, const glm::vec2 &parentPosition) override;
 
     private:
-        int image;
+        int image = 1;
+        glm::vec4 color = glm::vec4(1, 1, 1, 1);
         glm::vec2 position, size;
 
     };

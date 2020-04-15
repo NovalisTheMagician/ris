@@ -170,22 +170,22 @@ namespace RIS
     {
         IRenderer &renderer = systems.GetRenderer();
         I2DRenderer &renderer2D = renderer.Get2DRenderer();
+        IPostProcessor &postProcessor = renderer.GetPostProcessor();
 
         // for intel gpus: bind the framebuffer first before clearing it
         renderer.SetFramebuffer(uiFramebufferId);
         renderer.Clear(uiFramebufferId, glm::vec4(0, 0, 0, 0));
 
         renderer2D.Begin();
-
         rootContainer->Draw(renderer2D, glm::vec2());
-
         console.Draw(renderer2D);
-
         renderer2D.End();
 
-        renderer.Draw(uiFramebufferId);
-
         renderer.SetFramebuffer(0);
+        postProcessor.Begin();
+        postProcessor.SetFramebufferTexture(uiFramebufferId, 0);
+        postProcessor.Draw(0);
+        postProcessor.End();
     }
 
     void SimpleUserinterface::Update(const Timer &timer)

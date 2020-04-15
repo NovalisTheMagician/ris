@@ -9,15 +9,15 @@
 
 namespace RIS
 {
-    class Model
+    class Mesh
     {
     public:
-        Model(const Buffer<VertexType::ModelVertex> &vertexBuffer, const Buffer<uint16_t> &indexBuffer, int numIndices, bool isStatic);
+        Mesh(const Buffer<VertexType::ModelVertex> &vertexBuffer, const Buffer<uint16_t> &indexBuffer, int numIndices, bool isStatic);
 
-        Model(const Model &) = delete;
-        Model(Model &&) = default;
-        Model &operator=(const Model &) = delete;
-        Model &operator=(Model &&) = default;
+        Mesh(const Mesh &) = delete;
+        Mesh(Mesh &&) = default;
+        Mesh &operator=(const Mesh &) = delete;
+        Mesh &operator=(Mesh &&) = default;
 
         void Bind(VertexArray &vao);
 

@@ -60,6 +60,29 @@ namespace RIS
 
         uiBuffer = Buffer<UIVertex>::CreateImmutable(vertices, GL_DYNAMIC_STORAGE_BIT);
         textBuffer = Buffer<UIVertex>::CreateImmutable(MAX_CHARS*6, GL_DYNAMIC_STORAGE_BIT);
+
+        uiSampler = Sampler::Create(GL_LINEAR, GL_LINEAR, 1.0f);
+    }
+
+    void GL2DRenderer::LoadShaders()
+    {
+        auto createShader = [this](auto &future, gl::GLenum shaderType)
+        {
+            auto [data, size] = future.get();
+            return Shader::Create(data.get(), size, shaderType, renderer.useAmdFix);
+        };
+
+        ILoader &loader = renderer.systems.GetLoader();
+
+        AssetType shaderLoadType = renderer.useAmdFix ? AssetType::SHADERSRC : AssetType::SHADER;
+
+        auto shaderUivFut = loader.LoadAsset(shaderLoadType, "uiVert");
+        auto shaderUifFut = loader.LoadAsset(shaderLoadType, "uiFrag");
+        auto shaderUitFut = loader.LoadAsset(shaderLoadType, "uiText");
+
+        uiVertex = createShader(shaderUivFut, GL_VERTEX_SHADER);
+        uiFragment = createShader(shaderUifFut, GL_FRAGMENT_SHADER);
+        uiText = createShader(shaderUitFut, GL_FRAGMENT_SHADER);
     }
 
     ResourceId GL2DRenderer::LoadFont(const std::string &fontName)
@@ -167,9 +190,9 @@ namespace RIS
         perFrameBuffer.Bind(GL_UNIFORM_BUFFER, 0);
         perObjectBuffer.Bind(GL_UNIFORM_BUFFER, 1);
 
-        renderer.uiSampler.Bind(0);
+        uiSampler.Bind(0);
 
-        renderer.pipeline.SetShader(renderer.uiVertex);
+        renderer.pipeline.SetShader(uiVertex);
         uiLayout.Bind();
     }
 
@@ -189,7 +212,7 @@ namespace RIS
         perObject.size = glm::vec2(1);
         perObjectBuffer.UpdateData(perObject);
 
-        renderer.pipeline.SetShader(renderer.uiText);
+        renderer.pipeline.SetShader(uiText);
         renderer.pipeline.Use();
 
         float penX = 0.0f;
@@ -267,7 +290,7 @@ namespace RIS
         perObjectBuffer.UpdateData(perObject);
         perObjectBuffer.Bind(GL_UNIFORM_BUFFER, 1);
         uiLayout.SetVertexBuffer(uiBuffer, 0);
-        renderer.pipeline.SetShader(renderer.uiFragment);
+        renderer.pipeline.SetShader(uiFragment);
         renderer.pipeline.Use();
 
         glDrawArrays(GL_TRIANGLES, 0, 6);

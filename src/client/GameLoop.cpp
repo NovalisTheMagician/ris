@@ -35,6 +35,7 @@ namespace RIS
     {
         IWindow &window = systems.GetWindow();
         IRenderer &renderer = systems.GetRenderer();
+        I3DRenderer &renderer3d = renderer.Get3DRenderer();
         IInput &input = systems.GetInput();
         IUserinterface &interface = systems.GetUserinterface();
         IAudio &audio = systems.GetAudio();
@@ -50,8 +51,9 @@ namespace RIS
 
         scriptEngine.CallFunction("", "main");
 
-        ResourceId cubeModel = renderer.LoadModel("cube");
-        glm::mat4 projection = glm::perspective(glm::radians(60.0f), 16.0f / 9.0f, 0.1f, 1000.0f);
+        ResourceId cubeModel = renderer3d.LoadMesh("cube");
+        ResourceId catTexture = renderer.LoadTexture("meow");
+        glm::mat4 projection = glm::perspective(glm::radians(60.0f), 4.0f / 3.0f, 0.1f, 1000.0f);
         glm::mat4 view = glm::lookAt(glm::vec3(5, 5, 5), glm::vec3(), glm::vec3(0, 1, 0));
         glm::mat4 world = glm::mat4(1.0f);
 
@@ -69,9 +71,9 @@ namespace RIS
 
             renderer.Clear(0, clearColor);
 
-            renderer.Begin(projection * view);
-            renderer.Draw(cubeModel, world);
-            renderer.End();
+            renderer3d.Begin(projection * view);
+            renderer3d.Draw(cubeModel, world);
+            renderer3d.End();
 
             interface.Draw();
             

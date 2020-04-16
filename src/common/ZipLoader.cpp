@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <fstream>
 
+#include "common/Logger.hpp"
+
 namespace RIS
 {
     ZipLoader::ZipLoader(const SystemLocator &systems, Config &config, const std::string &assetRoot)
@@ -84,14 +86,14 @@ namespace RIS
         const auto& [folder, extension] = GetAssetProps(type);
         std::filesystem::path filePath = folder / (name + extension);
 
-        return std::async(std::launch::async, [filePath, name, this]()
+        return std::async(std::launch::deferred, [filePath, name, this]()
         {
             for(auto it = archives.rbegin(); it != archives.rend(); ++it)
             {
                 auto &archive = *it;
                 try
                 {
-                    int64_t fileIndex = archive.find(filePath.generic_string());
+                    int64_t fileIndex = archive.find(filePath.generic_string(), ZIP_FL_NOCASE);
                     libzip::stat fileStat = archive.stat(fileIndex);
                     std::size_t size = static_cast<std::size_t>(fileStat.size);
                     
@@ -103,7 +105,9 @@ namespace RIS
                     return std::make_tuple(std::move(data), size);
                 }
                 catch(const std::runtime_error &e)
-                {}
+                {
+                    Logger::Instance().Error(e.what());
+                }
             }
             throw ZipLoaderException("Asset (" + name + ") not found");
         });

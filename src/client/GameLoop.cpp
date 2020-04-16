@@ -58,7 +58,6 @@ namespace RIS
         glm::mat4 world = glm::mat4(1.0f);
 
         glm::vec4 clearColor(0.392f, 0.584f, 0.929f, 1.0f);
-        //clearColor = glm::pow(clearColor, glm::vec4(2.2f));
 
         Timer timer;
 

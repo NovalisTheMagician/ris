@@ -53,8 +53,8 @@ namespace RIS
         modelVAO.SetAttribFormat(0, 3, GL_FLOAT, offsetof(VertexType::ModelVertex, position));
         modelVAO.SetAttribFormat(1, 3, GL_FLOAT, offsetof(VertexType::ModelVertex, normal));
         modelVAO.SetAttribFormat(2, 2, GL_FLOAT, offsetof(VertexType::ModelVertex, texCoords));
-        modelVAO.SetAttribFormat(3, 4, GL_INT, offsetof(VertexType::ModelVertex, joints));
-        modelVAO.SetAttribFormat(4, 4, GL_FLOAT, offsetof(VertexType::ModelVertex, weights));
+        //modelVAO.SetAttribFormat(3, 4, GL_INT, offsetof(VertexType::ModelVertex, joints));
+        //modelVAO.SetAttribFormat(4, 4, GL_FLOAT, offsetof(VertexType::ModelVertex, weights));
 
         Buffer emptyVBO = Buffer::Create(sizeof VertexType::ModelVertex, GL_DYNAMIC_STORAGE_BIT);
         Buffer emptyIBO = Buffer::Create(sizeof uint16_t, GL_DYNAMIC_STORAGE_BIT);
@@ -131,76 +131,22 @@ namespace RIS
                     return hasAll == 3;
                 };
 
-                auto transformBytesToShorts = [](auto begin, auto end)
+                auto interleave = [](const std::vector<std::pair<size_t, std::vector<unsigned char>>> &buffers, size_t numElements)
                 {
-                    size_t size = end - begin;
-                    std::vector<unsigned short> shorts(size / 2);
-                    for(size_t i = 0; i < size / 2; ++i)
-                    {
-                        size_t idx = i * 2;
-                        auto msb = *(begin + (idx+1));
-                        auto lsb = *(begin + idx);
-                        shorts[i] = msb << 8 | lsb;
-                    }
-                    return shorts;
-                };
+                    std::vector<unsigned char> buffer;
 
-                auto transformBytesToFloats = [](auto begin, auto end)
-                {
-                    size_t size = end - begin;
-                    std::vector<float> floats(size / 4);
-                    for(size_t i = 0; i < size / 4; ++i)
+                    for(size_t i = 0; i < numElements; ++i)
                     {
-                        size_t idx = i * 4;
-                        auto d = *(begin + (idx+3));
-                        auto c = *(begin + (idx+2));
-                        auto b = *(begin + (idx+1));
-                        auto a = *(begin + idx);
-                        unsigned char arr[] = { a, b, c, d };
-                        float result;
-                        std::copy(  reinterpret_cast<const char*>(&arr[0]),
-                                    reinterpret_cast<const char*>(&arr[4]),
-                                    reinterpret_cast<char*>(&result));
-                        floats[i] = result;
+                        for(const auto &buf : buffers)
+                        {
+                            size_t stride = buf.first;
+                            size_t offset = stride * i;
+                            const auto &b = buf.second;
+                            buffer.insert(buffer.end(), b.begin() + offset, b.begin() + offset + stride);
+                        }
                     }
-                    return floats;
-                };
 
-                auto transformFloatsToVec3 = [](const std::vector<float> &floats)
-                {
-                    std::vector<glm::vec3> vectors(floats.size() / 3);
-                    for(size_t i = 0; i < floats.size() / 3; ++i)
-                    {
-                        size_t idx = i * 3;
-                        auto x = floats.at(idx);
-                        auto y = floats.at(idx+1);
-                        auto z = floats.at(idx+2);
-                        vectors[i] = glm::vec3(x, y, z);
-                    }
-                    return vectors;
-                };
-
-                auto transformFloatsToVec2 = [](const std::vector<float> &floats)
-                {
-                    std::vector<glm::vec2> vectors(floats.size() / 2);
-                    for(size_t i = 0; i < floats.size() / 2; ++i)
-                    {
-                        size_t idx = i * 2;
-                        auto x = floats.at(idx);
-                        auto y = floats.at(idx+1);
-                        vectors[i] = glm::vec2(x, y);
-                    }
-                    return vectors;
-                };
-
-                auto zipToModelFormat = [](const std::vector<glm::vec3> &positions, const std::vector<glm::vec3> &normals, const std::vector<glm::vec2> &texcoords)
-                {
-                    std::vector<VertexType::ModelVertex> vertices(positions.size());
-                    for(size_t i = 0; i < positions.size(); ++i)
-                    {
-                        vertices[i] = { positions.at(i), normals.at(i), texcoords.at(i) };
-                    }
-                    return vertices;
+                    return buffer;
                 };
 
                 ResourceId id = highestUnusedModelId++;
@@ -210,47 +156,38 @@ namespace RIS
                 if(!checkAttribs(primitive.attributes))
                     throw std::exception("model in wrong format");
 
-                std::vector<uint16_t> indices;
-                std::vector<glm::vec3> positions;
-                std::vector<glm::vec3> normals;
-                std::vector<glm::vec2> texcoords;
+                std::vector<std::vector<unsigned char>> buffers;
 
                 size_t index = 0;
                 for(const tinygltf::BufferView &bufferView : model.bufferViews)
                 {
-                    const tinygltf::Buffer buffer = model.buffers.at(bufferView.buffer);
+                    const tinygltf::Buffer &buffer = model.buffers.at(bufferView.buffer);
                     auto begin = buffer.data.begin() + bufferView.byteOffset;
                     auto end = buffer.data.begin() + bufferView.byteOffset + bufferView.byteLength;
 
-                    if(index == 0) // POSITION VEC3
-                    {
-                        positions = transformFloatsToVec3(transformBytesToFloats(begin, end));
-                    }
-                    else if(index == 1) // NORMAL VEC3
-                    {
-                        normals = transformFloatsToVec3(transformBytesToFloats(begin, end));
-                    }
-                    else if(index == 3) // TEXCOORD VEC2
-                    {
-                        texcoords = transformFloatsToVec2(transformBytesToFloats(begin, end));
-                    }
-                    else if(index == 4) // INDEX USHORT
-                    {
-                        indices.resize(bufferView.byteLength);
-                        indices = transformBytesToShorts(begin, end);
-                    }
+                    buffers.push_back(std::vector(begin, end));
+
                     index++;
                 }
 
-                std::vector<VertexType::ModelVertex> vertices = zipToModelFormat(positions, normals, texcoords);
+                int indexBufferIndex = primitive.indices;
+                int positionIndex = primitive.attributes.at("POSITION");
+                int normalIndex = primitive.attributes.at("NORMAL");
+                int texcoordIndex = primitive.attributes.at("TEXCOORD_0");
 
-                Buffer vertexBuffer = Buffer::Create(vertices, GL_DYNAMIC_STORAGE_BIT);
-                Buffer indexBuffer = Buffer::Create(indices, GL_DYNAMIC_STORAGE_BIT);
+                size_t numElements = buffers.at(positionIndex).size() / sizeof glm::vec3;
+
+                Buffer vertexBuffer = Buffer::Create(interleave({{sizeof glm::vec3, buffers.at(positionIndex)}, 
+                                                                {sizeof glm::vec3, buffers.at(normalIndex)},
+                                                                {sizeof glm::vec2, buffers.at(texcoordIndex)}},
+                                                                numElements),
+                                                    GL_DYNAMIC_STORAGE_BIT);
+                Buffer indexBuffer = Buffer::Create(buffers.at(indexBufferIndex), GL_DYNAMIC_STORAGE_BIT);
 
                 vertexBuffers.insert(vertexBuffers.end(), std::move(vertexBuffer));
                 indexBuffers.insert(indexBuffers.end(), std::move(indexBuffer));
                 
-                int numIndices = model.accessors.at(primitive.indices).count;
+                int numIndices = model.accessors.at(indexBufferIndex).count;
 
                 models.insert({id, Mesh(vertexBuffers.back(), indexBuffers.back(), numIndices, true)});
                 loadedModels.insert({name, id});

@@ -35,6 +35,15 @@ namespace RIS
         IRenderer &renderer = systems.GetRenderer();
         uiFramebufferId = renderer.CreateFramebuffer(uiWidth, uiHeight, true);
 
+        fpsLabel = MakeLabel(systems);
+        fpsLabel->SetPosition({0, uiHeight - 22});
+        fpsLabel->SetText("0");
+        fpsLabel->SetTextColor({1, 1, 1, 1});
+        fpsLabel->SetFont(1, 16);
+
+        console.BindFunc("fps", Helpers::BoolFunc(showFps, "Show FPS", "Hide FPS"));
+        console.BindFunc("frametime", Helpers::BoolFunc(showFrametime, "Show Frametime", "Hide Frametime"));
+
         IInput &input = systems.GetInput();
         input.RegisterChar("ui", [this](char ch){ OnChar(ch); });
         input.RegisterMouse("ui", [this](float x, float y){ OnMouseMove(x, y); });
@@ -177,6 +186,8 @@ namespace RIS
         renderer.Clear(uiFramebufferId, glm::vec4(0, 0, 0, 0));
 
         renderer2D.Begin();
+        if(showFps)
+            fpsLabel->Draw(renderer2D, glm::vec2());
         rootContainer->Draw(renderer2D, glm::vec2());
         console.Draw(renderer2D);
         renderer2D.End();
@@ -190,6 +201,11 @@ namespace RIS
 
     void SimpleUserinterface::Update(const Timer &timer)
     {
+        frameTime = timer.Delta();
+        if(showFrametime)
+            fpsLabel->SetText(std::to_string(frameTime));
+        else
+            fpsLabel->SetText(std::to_string(static_cast<int>(1 / frameTime)));
         rootContainer->Update();
         console.Update(timer);
     }

@@ -58,6 +58,11 @@ namespace RIS
         int uiWidth, uiHeight;
         ContainerPtr rootContainer;
 
+        LabelPtr fpsLabel;
+        bool showFps = false;
+        bool showFrametime = false;
+        float frameTime;
+
         int currentId = 0;
 
         std::unordered_map<std::string, int> namedLayouts;

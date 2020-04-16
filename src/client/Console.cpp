@@ -73,7 +73,7 @@ namespace RIS
 
     void Console::BindFunc(const std::string &name, ConsoleFunc func)
     {
-        funcVars.insert_or_assign(name, func);
+        funcVars.insert_or_assign(lowerCase(name), func);
     }
 
     bool Console::IsOpen()

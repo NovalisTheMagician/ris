@@ -41,9 +41,9 @@ namespace RIS
 
     void GL2DRenderer::Setup()
     {
-        perFrameBuffer = Buffer<PerFrameBuffer>::CreateImmutable(perFrame, GL_DYNAMIC_STORAGE_BIT);
+        perFrameBuffer = Buffer::Create(perFrame, GL_DYNAMIC_STORAGE_BIT);
 
-        perObjectBuffer = Buffer<PerObjectBuffer>::CreateImmutable(perObject, GL_DYNAMIC_STORAGE_BIT);
+        perObjectBuffer = Buffer::Create(perObject, GL_DYNAMIC_STORAGE_BIT);
 
         uiLayout = VertexArray::Create();
         uiLayout.SetAttribFormat(0, 2, GL_FLOAT, offsetof(UIVertex, position));
@@ -58,8 +58,8 @@ namespace RIS
         vertices[4] = { {1, 0}, {1, 0} };
         vertices[5] = { {1, 1}, {1, 1} };
 
-        uiBuffer = Buffer<UIVertex>::CreateImmutable(vertices, GL_DYNAMIC_STORAGE_BIT);
-        textBuffer = Buffer<UIVertex>::CreateImmutable(MAX_CHARS*6, GL_DYNAMIC_STORAGE_BIT);
+        uiBuffer = Buffer::Create(vertices, GL_DYNAMIC_STORAGE_BIT);
+        textBuffer = Buffer::Create(MAX_CHARS*6 * sizeof UIVertex, GL_DYNAMIC_STORAGE_BIT);
 
         uiSampler = Sampler::Create(GL_LINEAR, GL_LINEAR, 1.0f);
     }
@@ -275,7 +275,7 @@ namespace RIS
         }
         textBuffer.UpdateData(vertices);
         renderer.textures.at(font.textureId).Bind(0);
-        uiLayout.SetVertexBuffer(textBuffer, 0);
+        uiLayout.SetVertexBuffer<UIVertex>(textBuffer);
 
         std::size_t numVertices = vertices.size();
 
@@ -289,7 +289,7 @@ namespace RIS
         perObject.size = size;
         perObjectBuffer.UpdateData(perObject);
         perObjectBuffer.Bind(GL_UNIFORM_BUFFER, 1);
-        uiLayout.SetVertexBuffer(uiBuffer, 0);
+        uiLayout.SetVertexBuffer<UIVertex>(uiBuffer);
         renderer.pipeline.SetShader(uiFragment);
         renderer.pipeline.Use();
 

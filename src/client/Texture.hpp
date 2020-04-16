@@ -28,8 +28,7 @@ namespace RIS
         Texture(Texture &&other);
         Texture& operator=(Texture &&other);
 
-        template<typename T>
-        void SetBuffer(const Buffer<T> &buffer, gl::GLenum format);
+        void SetBuffer(const Buffer &buffer, gl::GLenum format);
 
         void Bind(gl::GLuint textureUnit);
 
@@ -40,10 +39,4 @@ namespace RIS
         static Texture Create();
 
     };
-
-    template<typename T>
-    void Texture::SetBuffer(const Buffer<T> &buffer, gl::GLenum format)
-    {
-        gl::glTextureBuffer(id, format, buffer.GetId());
-    }
 }

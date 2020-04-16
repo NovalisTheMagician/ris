@@ -43,6 +43,8 @@ namespace RIS
         virtual ResourceId LoadMesh(const std::string &name) = 0;
         virtual void DestroyMesh(ResourceId modelId) = 0;
 
+        virtual void SetTexture(ResourceId textureId) = 0;
+
         virtual void Begin(const glm::mat4 &viewProjection) = 0;
         virtual void End() = 0;
 

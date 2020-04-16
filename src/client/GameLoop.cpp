@@ -51,8 +51,8 @@ namespace RIS
 
         scriptEngine.CallFunction("", "main");
 
-        ResourceId cubeModel = renderer3d.LoadMesh("cube");
-        ResourceId catTexture = renderer.LoadTexture("meow");
+        ResourceId cubeModel = renderer3d.LoadMesh("monkey");
+        ResourceId catTexture = renderer.LoadTexture("monkey");
         glm::mat4 projection = glm::perspective(glm::radians(60.0f), 4.0f / 3.0f, 0.1f, 1000.0f);
         glm::mat4 view = glm::lookAt(glm::vec3(5, 5, 5), glm::vec3(), glm::vec3(0, 1, 0));
         glm::mat4 world = glm::mat4(1.0f);
@@ -72,6 +72,7 @@ namespace RIS
             renderer.Clear(0, clearColor);
 
             renderer3d.Begin(projection * view);
+            renderer3d.SetTexture(catTexture);
             renderer3d.Draw(cubeModel, world);
             renderer3d.End();
 

@@ -53,4 +53,14 @@ namespace RIS
     {
         glBindVertexArray(id);
     }
+
+    void VertexArray::SetVertexBuffer(const Buffer &buffer, int bindingPoint, size_t stride, size_t offset)
+    {
+        glVertexArrayVertexBuffer(id, bindingPoint, buffer.GetId(), offset, stride);
+    }
+
+    void VertexArray::SetIndexBuffer(const Buffer &buffer)
+    {
+        glVertexArrayElementBuffer(id, buffer.GetId());
+    }
 }

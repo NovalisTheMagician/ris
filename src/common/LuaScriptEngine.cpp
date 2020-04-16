@@ -29,19 +29,24 @@ namespace RIS
         ILoader &loader = systems.GetLoader();
 
         auto &fut = loader.LoadAsset(AssetType::SCRIPT, scriptName);
-        auto [data, size] = fut.get();
-        std::string scriptContent(reinterpret_cast<char*>(data.get()), size);
-
-        loadedScripts.insert(loadedScripts.end(), scriptName);
         try
         {
+            auto [data, size] = fut.get();
+            std::string scriptContent(reinterpret_cast<char*>(data.get()), size);
             luaState.doString(scriptContent);
+            loadedScripts.insert(loadedScripts.end(), scriptName);
         }
         catch(const lua::LoadError &e)
         {
             IConsole &console = systems.GetUserinterface().GetConsole();
             console.Print("Lua load error: "s + e.what());
             Logger::Instance().Error("Lua load error: "s + e.what());
+        }
+        catch(const std::exception &e)
+        {
+            IConsole &console = systems.GetUserinterface().GetConsole();
+            console.Print("Script load error: "s + e.what());
+            Logger::Instance().Error("Script load error: "s + e.what());
         }
     }
 
@@ -96,10 +101,11 @@ namespace RIS
         }
         else
         {
-            loadedScripts.erase(std::find(loadedScripts.begin(), loadedScripts.end(), script));
+            auto elem = std::find(loadedScripts.begin(), loadedScripts.end(), script);
+            if(elem != loadedScripts.end())
+                loadedScripts.erase(elem);
             LoadScript(script);
         }
-        
     }
 
     LState& LuaScriptEngine::GetState()

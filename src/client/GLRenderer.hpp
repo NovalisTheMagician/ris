@@ -120,10 +120,10 @@ namespace RIS
         PerFrameBuffer perFrame;
         PerObjectBuffer perObject;
 
-        Buffer<PerFrameBuffer> perFrameBuffer;
-        Buffer<PerObjectBuffer> perObjectBuffer;
+        Buffer perFrameBuffer;
+        Buffer perObjectBuffer;
 
-        Buffer<VertexType::UIVertex> textBuffer, uiBuffer;
+        Buffer textBuffer, uiBuffer;
         VertexArray uiLayout;
 
         ResourceId highestUnusedFontId;
@@ -146,6 +146,8 @@ namespace RIS
 
         ResourceId LoadMesh(const std::string &name) override;
         void DestroyMesh(ResourceId modelId) override;
+
+        void SetTexture(ResourceId textureId) override;
 
         void Begin(const glm::mat4 &viewProjection) override;
         void End() override;
@@ -172,13 +174,13 @@ namespace RIS
         ResourceId highestUnusedModelId = 1;
         std::unordered_map<ResourceId, Mesh> models;
         std::unordered_map<std::string, ResourceId> loadedModels;
-        std::vector<Buffer<VertexType::ModelVertex>> vertexBuffers;
-        std::vector<Buffer<uint16_t>> indexBuffers;
+        std::vector<Buffer> vertexBuffers;
+        std::vector<Buffer> indexBuffers;
 
         VertexArray modelVAO;
         Shader staticModelShader, modelUnlitShader;
-        Buffer<PerFrameMatrices> perFrameBuffer;
-        Buffer<PerObjectMatrices> perObjectBuffer;
+        Buffer perFrameBuffer;
+        Buffer perObjectBuffer;
         PerFrameMatrices perFrameData;
         PerObjectMatrices perObjectData;
 
@@ -205,7 +207,7 @@ namespace RIS
     private:
         GLRenderer &renderer;
 
-        Buffer<VertexType::UIVertex> fullscreenQuad;
+        Buffer fullscreenQuad;
         VertexArray postprocessVAO;
         Shader ppVertex, ppCopy;
 

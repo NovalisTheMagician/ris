@@ -2,7 +2,7 @@
 
 namespace RIS
 {
-    Mesh::Mesh(const Buffer<VertexType::ModelVertex> &vertexBuffer, const Buffer<uint16_t> &indexBuffer, int numIndices, bool isStatic)
+    Mesh::Mesh(const Buffer &vertexBuffer, const Buffer &indexBuffer, int numIndices, bool isStatic)
         : vertexBuffer(vertexBuffer), indexBuffer(indexBuffer), numIndices(numIndices), isStatic(isStatic)
     {
 
@@ -10,16 +10,16 @@ namespace RIS
 
     void Mesh::Bind(VertexArray &vao)
     {
-        vao.SetVertexBuffer(vertexBuffer, 0);
+        vao.SetVertexBuffer<VertexType::ModelVertex>(vertexBuffer);
         vao.SetIndexBuffer(indexBuffer);
     }
 
-    const Buffer<VertexType::ModelVertex>& Mesh::VertexBuffer() const
+    const Buffer& Mesh::VertexBuffer() const
     {
         return vertexBuffer;
     }
 
-    const Buffer<uint16_t>& Mesh::IndexBuffer() const
+    const Buffer& Mesh::IndexBuffer() const
     {
         return indexBuffer;
     }

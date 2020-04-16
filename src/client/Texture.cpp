@@ -127,4 +127,9 @@ namespace RIS
     {
         glBindTextureUnit(textureUnit, id);
     }
+
+    void Texture::SetBuffer(const Buffer &buffer, gl::GLenum format)
+    {
+        gl::glTextureBuffer(id, format, buffer.GetId());
+    }
 }

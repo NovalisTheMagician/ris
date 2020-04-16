@@ -36,12 +36,12 @@ namespace RIS
         vertices[3] = {{1, -1}, {1, 0}};
         vertices[4] = {{1, 1}, {1, 1}};
         vertices[5] = {{-1, -1}, {0, 0}};
-        fullscreenQuad = Buffer<VertexType::UIVertex>::CreateImmutable(vertices, GL_DYNAMIC_STORAGE_BIT);
+        fullscreenQuad = Buffer::Create(vertices, GL_DYNAMIC_STORAGE_BIT);
 
         postprocessVAO = VertexArray::Create();
         postprocessVAO.SetAttribFormat(0, 2, GL_FLOAT, offsetof(VertexType::UIVertex, position));
         postprocessVAO.SetAttribFormat(1, 2, GL_FLOAT, offsetof(VertexType::UIVertex, texCoords));
-        postprocessVAO.SetVertexBuffer(fullscreenQuad, 0);
+        postprocessVAO.SetVertexBuffer<VertexType::UIVertex>(fullscreenQuad);
 
         sampler = Sampler::Create(GL_LINEAR, GL_LINEAR, 0.0f);
     }

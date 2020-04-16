@@ -23,10 +23,11 @@ namespace RIS
         VertexArray(VertexArray &&other);
         VertexArray& operator=(VertexArray &&other);
 
+        void SetVertexBuffer(const Buffer &buffer, int bindingPoint = 0, size_t stride = 0, size_t offset = 0);
         template<typename T>
-        void SetVertexBuffer(const Buffer<T> &buffer, int bindingPoint);
-        template<typename T>
-        void SetIndexBuffer(const Buffer<T> &buffer);
+        void SetVertexBuffer(const Buffer &buffer, int bindingPoint = 0, size_t offset = 0);
+
+        void SetIndexBuffer(const Buffer &buffer);
         void SetAttribFormat(int attrib, int numComponents, gl::GLenum type, std::size_t offset, int bindingPoint = 0);
 
         void Bind();
@@ -37,14 +38,8 @@ namespace RIS
     };
 
     template<typename T>
-    void VertexArray::SetVertexBuffer(const Buffer<T> &buffer, int bindingPoint)
+    void VertexArray::SetVertexBuffer(const Buffer &buffer, int bindingPoint, size_t offset)
     {
-        gl::glVertexArrayVertexBuffer(id, bindingPoint, buffer.GetId(), 0, buffer.GetElementSize());
-    }
-
-    template<typename T>
-    void VertexArray::SetIndexBuffer(const Buffer<T> &buffer)
-    {
-        gl::glVertexArrayElementBuffer(id, buffer.GetId());
+        SetVertexBuffer(buffer, bindingPoint, sizeof T, offset);
     }
 }

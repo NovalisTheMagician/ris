@@ -12,7 +12,7 @@ namespace RIS
     class Mesh
     {
     public:
-        Mesh(const Buffer<VertexType::ModelVertex> &vertexBuffer, const Buffer<uint16_t> &indexBuffer, int numIndices, bool isStatic);
+        Mesh(const Buffer &vertexBuffer, const Buffer &indexBuffer, int numIndices, bool isStatic);
 
         Mesh(const Mesh &) = delete;
         Mesh(Mesh &&) = default;
@@ -21,13 +21,13 @@ namespace RIS
 
         void Bind(VertexArray &vao);
 
-        const Buffer<VertexType::ModelVertex>& VertexBuffer() const;
-        const Buffer<uint16_t>& IndexBuffer() const;
+        const Buffer& VertexBuffer() const;
+        const Buffer& IndexBuffer() const;
         int NumIndices() const;
 
     private:
-        const Buffer<VertexType::ModelVertex> &vertexBuffer;
-        const Buffer<uint16_t> &indexBuffer;
+        const Buffer &vertexBuffer;
+        const Buffer &indexBuffer;
         const int numIndices;
         const bool isStatic;
     };

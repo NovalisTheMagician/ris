@@ -4,106 +4,76 @@
 
 #include <stdexcept>
 
-#include <glbinding/gl46/gl.h>
+#include <glbinding/gl46core/gl.h>
+#include <glbinding/glbinding.h>
+
 #include <unordered_map>
 #include <vector>
 
 namespace RIS
 {
-    template<typename T>
     class Buffer : public GLObject
     {
     private:
-        Buffer(const T &data, gl::GLenum usage)
-            : elementSize(sizeof(T))
-        {
-            gl::glCreateBuffers(1, &id);
-            gl::glNamedBufferData(id, elementSize, reinterpret_cast<const T*>(&data), usage);
-        };
-
-        Buffer(const std::vector<T> &data, gl::GLenum usage)
-            : elementSize(sizeof(T))
-        {
-            gl::glCreateBuffers(1, &id);
-            std::size_t size = data.size() * elementSize;
-            gl::glNamedBufferData(id, size, data.data(), usage);
-        };
-
-        Buffer(std::size_t numElements, gl::GLenum usage)
-            : elementSize(sizeof(T))
-        {
-            gl::glCreateBuffers(1, &id);
-            gl::glNamedBufferData(id, numElements * elementSize, nullptr, usage);
-        };
-
-        Buffer(const T &data, gl::BufferStorageMask usage)
-            : elementSize(sizeof(T))
-        {
-            gl::glCreateBuffers(1, &id);
-            gl::glNamedBufferStorage(id, elementSize, reinterpret_cast<const T*>(&data), usage);
-        };
-
-        Buffer(const std::vector<T> &data, gl::BufferStorageMask usage)
-            : elementSize(sizeof(T))
-        {
-            gl::glCreateBuffers(1, &id);
-            std::size_t size = data.size() * elementSize;
-            gl::glNamedBufferStorage(id, size, data.data(), usage);
-        };
-
-        Buffer(std::size_t numElements, gl::BufferStorageMask usage)
-            : elementSize(sizeof(T))
-        {
-            gl::glCreateBuffers(1, &id);
-            gl::glNamedBufferStorage(id, numElements * elementSize, nullptr, usage);
-        };
+        Buffer(const void *data, size_t size, gl::BufferStorageMask usage);
+        Buffer(size_t size, gl::BufferStorageMask usage);
 
     public:
-        Buffer() : GLObject(0) {};
-        ~Buffer() { gl::glDeleteBuffers(1, &id); };
+        Buffer();
+        ~Buffer();
 
         Buffer(const Buffer &) = delete;
         Buffer& operator=(const Buffer &) = delete;
 
-        Buffer(Buffer &&other) 
-        {
-            std::swap(id, other.id);
-            elementSize = other.elementSize;
-        };
+        Buffer(Buffer &&other);
+        Buffer& operator=(Buffer &&other);
 
-        Buffer& operator=(Buffer &&other)
-        {
-            std::swap(id, other.id);
-            elementSize = other.elementSize;
-            return *this;
-        };
+        void UpdateData(const void *data, size_t size, size_t offset = 0);
 
-        void UpdateData(const std::vector<T> &data, std::size_t offset = 0)
-        {
-            std::size_t size = data.size() * elementSize;
-            glNamedBufferSubData(id, offset, size, data.data());
-        };
+        template<typename T>
+        void UpdateData(const T &data, size_t offset = 0);
+        template<typename T>
+        void UpdateData(const std::vector<T> &data, size_t offset = 0);
 
-        void UpdateData(const T &data, std::size_t offset = 0)
-        {
-            glNamedBufferSubData(id, offset, elementSize, reinterpret_cast<const T*>(&data));
-        };
+        void Bind(gl::GLenum target, int bindBase);
 
-        void Bind(gl::GLenum target, int bindBase) { gl::glBindBufferBase(target, bindBase, id); };
-
-        std::size_t GetElementSize() const { return elementSize; };
+        size_t GetSize() const;
 
     public:
-        static Buffer<T> Create(const T &data, gl::GLenum usage) { return Buffer<T>(data, usage); };
-        static Buffer<T> Create(const std::vector<T> &data, gl::GLenum usage) { return Buffer<T>(data, usage); };
-        static Buffer<T> Create(std::size_t numElements, gl::GLenum usage) { return Buffer<T>(numElements, usage); };
+        static Buffer Create(const void *data, size_t size, gl::BufferStorageMask usage);
+        static Buffer Create(size_t size, gl::BufferStorageMask usage);
 
-        static Buffer<T> CreateImmutable(const T &data, gl::BufferStorageMask usage) { return Buffer<T>(data, usage); };
-        static Buffer<T> CreateImmutable(const std::vector<T> &data, gl::BufferStorageMask usage) { return Buffer<T>(data, usage); };
-        static Buffer<T> CreateImmutable(std::size_t numElements, gl::BufferStorageMask usage) { return Buffer<T>(numElements, usage); };
+        template<typename T>
+        static Buffer Create(const T &data, gl::BufferStorageMask usage);
+        template<typename T>
+        static Buffer Create(const std::vector<T> &data, gl::BufferStorageMask usage);
 
     private:
-        std::size_t elementSize;
+        const size_t maxSize;
 
     };
+
+    template<typename T>
+    void Buffer::UpdateData(const T &data, size_t offset)
+    {
+        UpdateData(&data, sizeof T, offset);
+    }
+
+    template<typename T>
+    void Buffer::UpdateData(const std::vector<T> &data, size_t offset)
+    {
+        UpdateData(data.data(), data.size() * sizeof T, offset);
+    }
+
+    template<typename T>
+    Buffer Buffer::Create(const T &data, gl::BufferStorageMask usage)
+    {
+        return Buffer(&data, sizeof T, usage);
+    }
+
+    template<typename T>
+    Buffer Buffer::Create(const std::vector<T> &data, gl::BufferStorageMask usage)
+    {
+        return Buffer(data.data(), data.size() * sizeof T, usage);
+    }
 }

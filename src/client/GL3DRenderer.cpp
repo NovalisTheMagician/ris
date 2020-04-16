@@ -56,15 +56,15 @@ namespace RIS
         modelVAO.SetAttribFormat(3, 4, GL_INT, offsetof(VertexType::ModelVertex, joints));
         modelVAO.SetAttribFormat(4, 4, GL_FLOAT, offsetof(VertexType::ModelVertex, weights));
 
-        Buffer emptyVBO = Buffer<VertexType::ModelVertex>::CreateImmutable({glm::vec3(), glm::vec3(), glm::vec2()}, GL_DYNAMIC_STORAGE_BIT);
-        Buffer emptyIBO = Buffer<uint16_t>::CreateImmutable(static_cast<uint16_t>(0), GL_DYNAMIC_STORAGE_BIT);
+        Buffer emptyVBO = Buffer::Create(sizeof VertexType::ModelVertex, GL_DYNAMIC_STORAGE_BIT);
+        Buffer emptyIBO = Buffer::Create(sizeof uint16_t, GL_DYNAMIC_STORAGE_BIT);
         vertexBuffers.insert(vertexBuffers.begin(), std::move(emptyVBO));
         indexBuffers.insert(indexBuffers.begin(), std::move(emptyIBO));
 
         models.insert({MISSING_MODEL_ID, Mesh(vertexBuffers.front(), indexBuffers.front(), 1, true)});
 
-        perFrameBuffer = Buffer<PerFrameMatrices>::CreateImmutable(perFrameData, GL_DYNAMIC_STORAGE_BIT);
-        perObjectBuffer = Buffer<PerObjectMatrices>::CreateImmutable(perObjectData, GL_DYNAMIC_STORAGE_BIT);
+        perFrameBuffer = Buffer::Create(sizeof perFrameData, GL_DYNAMIC_STORAGE_BIT);
+        perObjectBuffer = Buffer::Create(sizeof perObjectData, GL_DYNAMIC_STORAGE_BIT);
 
         float maxAniso;
         glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &maxAniso);
@@ -244,8 +244,8 @@ namespace RIS
 
                 std::vector<VertexType::ModelVertex> vertices = zipToModelFormat(positions, normals, texcoords);
 
-                Buffer vertexBuffer = Buffer<VertexType::ModelVertex>::CreateImmutable(vertices, GL_DYNAMIC_STORAGE_BIT);
-                Buffer indexBuffer = Buffer<uint16_t>::CreateImmutable(indices, GL_DYNAMIC_STORAGE_BIT);
+                Buffer vertexBuffer = Buffer::Create(vertices, GL_DYNAMIC_STORAGE_BIT);
+                Buffer indexBuffer = Buffer::Create(indices, GL_DYNAMIC_STORAGE_BIT);
 
                 vertexBuffers.insert(vertexBuffers.end(), std::move(vertexBuffer));
                 indexBuffers.insert(indexBuffers.end(), std::move(indexBuffer));
@@ -274,6 +274,14 @@ namespace RIS
             models.erase(modelId);
             erase_if(loadedModels, [modelId](const std::pair<std::string, ResourceId> &elem){ return elem.second == modelId; });
         }
+    }
+
+    void GL3DRenderer::SetTexture(ResourceId textureId)
+    {
+        if(renderer.textures.count(textureId) != 1)
+            return;
+        auto &texture = renderer.textures.at(textureId);
+        texture.Bind(0);
     }
 
     void GL3DRenderer::Begin(const glm::mat4 &viewProjection)

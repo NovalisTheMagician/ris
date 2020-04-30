@@ -79,38 +79,4 @@ namespace RIS
 			configMap.clear();
 		}
 	}
-
-	int Config::GetValue(const std::string &key, const int &defValue) const
-	{
-		if (configMap.count(key) > 0)
-		{
-			auto value = configMap.at(key);
-			try 
-			{
-				return static_cast<int>(std::get<float>(value));
-			}
-			catch (const std::bad_variant_access&) 
-			{
-			}
-		}
-		return defValue;
-	}
-
-	int Config::GetValue(const std::string &key, const int &defValue)
-	{
-		if (configMap.count(key) > 0)
-		{
-			auto value = configMap.at(key);
-			try 
-			{
-				return static_cast<int>(std::get<float>(value));
-			}
-			catch (const std::bad_variant_access&) 
-			{
-			}
-		}
-		configMap[key] = static_cast<float>(defValue);
-		isDirty = true;
-		return defValue;
-	}
 }

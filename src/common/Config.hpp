@@ -19,15 +19,12 @@ namespace RIS
 		Config& operator=(Config&&) = default;
 
 		template<typename T>
-		const T& GetValue(const std::string &key, const T &defValue) const;
+		T GetValue(const std::string &key, T defValue) const;
 		template<typename T>
-		const T& GetValue(const std::string &key, const T &defValue);
-
-		int GetValue(const std::string &key, const int &defValue) const;
-		int GetValue(const std::string &key, const int &defValue);
+		T GetValue(const std::string &key, T defValue);
 
 		template<typename T>
-		void SetValue(const std::string &key, const T &value);
+		void SetValue(const std::string &key, T value);
 
 	private:
 		using VariantType = std::variant<std::string, float, bool>;
@@ -40,11 +37,11 @@ namespace RIS
 	};
 
 	template<typename T>
-	const T& Config::GetValue(const std::string &key, const T& defValue) const
+	T Config::GetValue(const std::string &key, T defValue) const
 	{
 		if (configMap.count(key) > 0)
 		{
-			auto value = configMap.at(key);
+			auto& value = configMap.at(key);
 			try 
 			{
 				return std::get<T>(value);
@@ -57,11 +54,11 @@ namespace RIS
 	}
 
 	template<typename T>
-	const T& Config::GetValue(const std::string &key, const T& defValue)
+	T Config::GetValue(const std::string &key, T defValue)
 	{
 		if (configMap.count(key) > 0)
 		{
-			auto value = configMap.at(key);
+			auto& value = configMap.at(key);
 			try 
 			{
 				return std::get<T>(value);
@@ -75,15 +72,51 @@ namespace RIS
 		return defValue;
 	}
 
+	template<>
+	inline int Config::GetValue(const std::string &key, int defValue) const
+	{
+		if (configMap.count(key) > 0)
+		{
+			auto& value = configMap.at(key);
+			try 
+			{
+				return std::get<float>(value);
+			}
+			catch (const std::bad_variant_access&) 
+			{
+			}
+		}
+		return defValue;
+	}
+
+	template<>
+	inline int Config::GetValue(const std::string &key, int defValue)
+	{
+		if (configMap.count(key) > 0)
+		{
+			auto& value = configMap.at(key);
+			try 
+			{
+				return std::get<float>(value);
+			}
+			catch (const std::bad_variant_access&) 
+			{
+			}
+		}
+		configMap[key] = static_cast<float>(defValue);
+		isDirty = true;
+		return defValue;
+	}
+
 	template<typename T>
-	void Config::SetValue(const std::string &key, const T &value)
+	void Config::SetValue(const std::string &key, T value)
 	{
 		configMap[key] = value;
 		isDirty = true;
 	}
 
 	template<>
-	inline void Config::SetValue<int>(const std::string &key, const int &value)
+	inline void Config::SetValue<int>(const std::string &key, int value)
 	{
 		configMap[key] = static_cast<float>(value);
 		isDirty = true;

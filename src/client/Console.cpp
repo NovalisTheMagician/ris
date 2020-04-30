@@ -27,7 +27,7 @@ namespace RIS
         maxY = viewSize.y * 0.5f;
         currentY = viewSize.y;
 
-        consoleFont = r2d.LoadFont("console");
+        consoleFont = r2d.LoadFont("fsex302");
         maxLineHeight = r2d.MaxHeightFont(consoleFont, consoleFontSize);
         maxLines = 512;
 
@@ -218,6 +218,22 @@ namespace RIS
             fontColor.g = std::stof(params[2]);
             fontColor.b = std::stof(params[3]);
             fontColor.a = std::stof(params[4]);
+        }
+        else if(params[0] == "font")
+        {
+            if(params.size() < 2)
+                return "no font specified";
+            
+            consoleFont = systems.GetRenderer().Get2DRenderer().LoadFont(params[1]);
+            maxLineHeight = systems.GetRenderer().Get2DRenderer().MaxHeightFont(consoleFont, consoleFontSize);
+        }
+        else if(params[0] == "fontsize")
+        {
+            if(params.size() < 2)
+                return "no size specified";
+            
+            consoleFontSize = std::stof(params[1]);
+            maxLineHeight = systems.GetRenderer().Get2DRenderer().MaxHeightFont(consoleFont, consoleFontSize);
         }
         else
         {

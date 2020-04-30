@@ -41,7 +41,10 @@ namespace RIS
         virtual ~I3DRenderer() = default;
 
         virtual ResourceId LoadMesh(const std::string &name) = 0;
-        virtual void DestroyMesh(ResourceId modelId) = 0;
+        virtual void DestroyMesh(ResourceId meshId) = 0;
+
+        virtual ResourceId LoadModel(const std::string &name) = 0;
+        virtual void DestroyModel(ResourceId modelId) = 0;
 
         virtual void SetTexture(ResourceId textureId) = 0;
 
@@ -72,7 +75,7 @@ namespace RIS
 
         virtual void PostInit() = 0;
 
-        virtual ResourceId LoadTexture(const std::string &name, bool flip = true) = 0;
+        virtual ResourceId LoadTexture(const std::string &name, bool flip = false) = 0;
         virtual void DestroyTexture(ResourceId texId) = 0;
 
         virtual ResourceId CreateFramebuffer(int width = -1, int height = -1, bool useDepth = true) = 0;

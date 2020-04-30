@@ -17,8 +17,8 @@ namespace RIS
             glm::vec3 position;
             glm::vec3 normal;
             glm::vec2 texCoords;
-            //glm::ivec4 joints;
-            //glm::vec4 weights;
+            glm::i8vec4 joints;
+            glm::vec4 weights;
         };
 
         struct TerrainVertex

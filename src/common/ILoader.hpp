@@ -12,6 +12,7 @@ namespace RIS
     {
         TEXTURE,
         MODEL,
+        MESH,
         SOUND,
         SHADER,
         SHADERSRC,

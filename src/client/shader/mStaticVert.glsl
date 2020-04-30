@@ -20,6 +20,7 @@ out gl_PerVertex
 void main()
 {
     gl_Position = perFrame.viewProjection * perObject.world * vec4(attribPos, 1.0);
+
     texCoords = attribTexCoords;
     normal = mat3(perObject.world) * attribNormal;
 }

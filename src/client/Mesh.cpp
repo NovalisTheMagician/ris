@@ -1,11 +1,15 @@
 #include "Mesh.hpp"
 
+#include <glbinding/gl46core/gl.h>
+#include <glbinding/glbinding.h>
+
+using namespace gl46core;
+
 namespace RIS
 {
-    Mesh::Mesh(const Buffer &vertexBuffer, const Buffer &indexBuffer, int numIndices, bool isStatic)
-        : vertexBuffer(vertexBuffer), indexBuffer(indexBuffer), numIndices(numIndices), isStatic(isStatic)
+    Mesh::Mesh(Buffer &&vertexBuffer, Buffer &&indexBuffer, int numIndices)
+        : vertexBuffer(std::move(vertexBuffer)), indexBuffer(std::move(indexBuffer)), numIndices(numIndices)
     {
-
     }
 
     void Mesh::Bind(VertexArray &vao)
@@ -27,5 +31,10 @@ namespace RIS
     int Mesh::NumIndices() const
     {
         return numIndices;
+    }
+
+    void Mesh::Draw() const
+    {
+        glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, nullptr);
     }
 }

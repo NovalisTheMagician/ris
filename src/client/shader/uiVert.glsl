@@ -19,5 +19,5 @@ void main()
     pos = ((pos / perFrame.viewSize) * vec2(2)) - vec2(1);
 
     gl_Position = vec4(pos, 0, 1);
-    texCoords = attribTexCoords;
+    texCoords = vec2(attribTexCoords.x, 1.0 - attribTexCoords.y);
 }

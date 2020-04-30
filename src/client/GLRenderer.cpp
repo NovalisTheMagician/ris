@@ -120,7 +120,7 @@ namespace RIS
         if(vendor.find("ATI") != std::string::npos || vendor.find("ati") != std::string::npos)
             useAmdFix = true;
 
-        if(static_cast<const Config&>(config).GetValue("g_ignoreamdfix", false))
+        if(const_cast<const Config&>(config).GetValue("g_ignoreamdfix", false))
             useAmdFix = false;
 
         log.Info("Using OpenGL version " + version + " from " + vendor + " with shaderversion " + shaderVersion + " on " + renderer);
@@ -172,7 +172,7 @@ namespace RIS
 
         scriptEngine.Register([this](const char *name){ return LoadTexture(name); }, "renderer", "loadTexture");
         scriptEngine.Register([this](const char *name){ return renderer2d.LoadFont(name); }, "renderer", "loadFont");
-        scriptEngine.Register([this](const char *name){ return renderer3d.LoadMesh(name); }, "renderer", "loadMesh");
+        scriptEngine.Register([this](const char *name){ return renderer3d.LoadModel(name); }, "renderer", "loadModel");
 
         renderer2d.LoadShaders();
         renderer3d.LoadShaders();

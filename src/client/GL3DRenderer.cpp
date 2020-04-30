@@ -22,6 +22,10 @@
 
 #include <experimental/unordered_map>
 
+#include <rapidjson/rapidjson.h>
+#include <rapidjson/error/en.h>
+#include <rapidjson/document.h>
+
 #include "VertexTypes.hpp"
 
 #include "common/Logger.hpp"
@@ -35,16 +39,11 @@ using namespace std::literals;
 namespace RIS
 {
     const ResourceId GL3DRenderer::MISSING_MODEL_ID = 0;
+    const ResourceId GL3DRenderer::MISSING_MESH_ID = 0;
 
     GL3DRenderer::GL3DRenderer(GLRenderer &renderer)
         : renderer(renderer)
     {
-
-    }
-
-    GL3DRenderer::~GL3DRenderer()
-    {
-        models.clear();
     }
 
     void GL3DRenderer::Setup()
@@ -53,15 +52,14 @@ namespace RIS
         modelVAO.SetAttribFormat(0, 3, GL_FLOAT, offsetof(VertexType::ModelVertex, position));
         modelVAO.SetAttribFormat(1, 3, GL_FLOAT, offsetof(VertexType::ModelVertex, normal));
         modelVAO.SetAttribFormat(2, 2, GL_FLOAT, offsetof(VertexType::ModelVertex, texCoords));
-        //modelVAO.SetAttribFormat(3, 4, GL_INT, offsetof(VertexType::ModelVertex, joints));
-        //modelVAO.SetAttribFormat(4, 4, GL_FLOAT, offsetof(VertexType::ModelVertex, weights));
+        modelVAO.SetAttribFormat(3, 4, GL_INT, offsetof(VertexType::ModelVertex, joints));
+        modelVAO.SetAttribFormat(4, 4, GL_FLOAT, offsetof(VertexType::ModelVertex, weights));
 
         Buffer emptyVBO = Buffer::Create(sizeof VertexType::ModelVertex, GL_DYNAMIC_STORAGE_BIT);
         Buffer emptyIBO = Buffer::Create(sizeof uint16_t, GL_DYNAMIC_STORAGE_BIT);
-        vertexBuffers.insert(vertexBuffers.begin(), std::move(emptyVBO));
-        indexBuffers.insert(indexBuffers.begin(), std::move(emptyIBO));
 
-        models.insert({MISSING_MODEL_ID, Mesh(vertexBuffers.front(), indexBuffers.front(), 1, true)});
+        meshes.insert({MISSING_MESH_ID, Mesh(std::move(emptyVBO), std::move(emptyIBO), 1)});
+        models.insert({MISSING_MODEL_ID, Model(0, 0, std::vector<Joint>())});
 
         perFrameBuffer = Buffer::Create(sizeof perFrameData, GL_DYNAMIC_STORAGE_BIT);
         perObjectBuffer = Buffer::Create(sizeof perObjectData, GL_DYNAMIC_STORAGE_BIT);
@@ -101,14 +99,14 @@ namespace RIS
 
     ResourceId GL3DRenderer::LoadMesh(const std::string &name)
     {
-        if(loadedModels.count(name) == 1)
-            return loadedModels.at(name);
+        if(loadedMeshes.count(name) == 1)
+            return loadedMeshes.at(name);
 
         Logger &logger = Logger::Instance();
         ILoader &loader = renderer.systems.GetLoader();
         try
         {
-            auto [data, size] = loader.LoadAsset(AssetType::MODEL, name).get();
+            auto [data, size] = loader.LoadAsset(AssetType::MESH, name).get();
 
             tinygltf::TinyGLTF gltfLoader;
             tinygltf::Model model;
@@ -149,7 +147,7 @@ namespace RIS
                     return buffer;
                 };
 
-                ResourceId id = highestUnusedModelId++;
+                ResourceId id = highestUnusedMeshId++;
                 const tinygltf::Mesh &mesh = model.meshes.at(0);
                 const tinygltf::Primitive &primitive = mesh.primitives.at(0);
 
@@ -174,26 +172,92 @@ namespace RIS
                 int positionIndex = primitive.attributes.at("POSITION");
                 int normalIndex = primitive.attributes.at("NORMAL");
                 int texcoordIndex = primitive.attributes.at("TEXCOORD_0");
+                int jointIndex;
+                int weightIndex;
 
                 size_t numElements = buffers.at(positionIndex).size() / sizeof glm::vec3;
 
+                if(primitive.attributes.count("JOINTS_0"))
+                {
+                    jointIndex = primitive.attributes.at("JOINTS_0");
+                    weightIndex = primitive.attributes.at("WEIGHTS_0");
+                }
+                else
+                {
+                    jointIndex = buffers.size();
+                    buffers.push_back(std::vector<unsigned char>(numElements * sizeof glm::i8vec4, 0));
+                    weightIndex = jointIndex+1;
+                    buffers.push_back(std::vector<unsigned char>(numElements * sizeof glm::vec4, 0));
+                }
+
                 Buffer vertexBuffer = Buffer::Create(interleave({{sizeof glm::vec3, buffers.at(positionIndex)}, 
                                                                 {sizeof glm::vec3, buffers.at(normalIndex)},
-                                                                {sizeof glm::vec2, buffers.at(texcoordIndex)}},
+                                                                {sizeof glm::vec2, buffers.at(texcoordIndex)},
+                                                                {sizeof glm::i8vec4, buffers.at(jointIndex)},
+                                                                {sizeof glm::vec4, buffers.at(weightIndex)}},
                                                                 numElements),
                                                     GL_DYNAMIC_STORAGE_BIT);
                 Buffer indexBuffer = Buffer::Create(buffers.at(indexBufferIndex), GL_DYNAMIC_STORAGE_BIT);
-
-                vertexBuffers.insert(vertexBuffers.end(), std::move(vertexBuffer));
-                indexBuffers.insert(indexBuffers.end(), std::move(indexBuffer));
                 
                 int numIndices = model.accessors.at(indexBufferIndex).count;
 
-                models.insert({id, Mesh(vertexBuffers.back(), indexBuffers.back(), numIndices, true)});
-                loadedModels.insert({name, id});
+                meshes.insert({id, Mesh(std::move(vertexBuffer), std::move(indexBuffer), numIndices)});
+                loadedMeshes.insert({name, id});
 
                 return id;
             }
+        }
+        catch(const std::exception &e)
+        {
+            Logger::Instance().Error("Failed to load mesh (" + name + "): "s + e.what());
+        }
+        return MISSING_MESH_ID;
+    }
+
+    void GL3DRenderer::DestroyMesh(ResourceId meshId)
+    {
+        using std::experimental::erase_if;
+
+        if(meshId >= 0 && meshes.count(meshId) > 0)
+        {
+            meshes.erase(meshId);
+            erase_if(loadedMeshes, [meshId](const std::pair<std::string, ResourceId> &elem){ return elem.second == meshId; });
+        }
+    }
+
+    ResourceId GL3DRenderer::LoadModel(const std::string &name)
+    {
+        if(loadedModels.count(name) == 1)
+            return loadedModels.at(name);
+
+        Logger &logger = Logger::Instance();
+        ILoader &loader = renderer.systems.GetLoader();
+        try
+        {
+            auto [data, size] = loader.LoadAsset(AssetType::MODEL, name).get();
+
+            std::string modelStr(reinterpret_cast<const char*>(data.get()), size);
+
+            rapidjson::Document modelJson;
+            rapidjson::ParseResult res = modelJson.Parse(modelStr.c_str()); 
+            if(res.IsError())
+            {
+                std::string errorMsg = rapidjson::GetParseError_En(res.Code());
+                Logger::Instance().Error("Failed to parse font ("s + name + "): "s + errorMsg + "(" + std::to_string(res.Offset()) + ")");
+                return MISSING_MODEL_ID;
+            }
+
+            std::string meshName = modelJson["mesh"].GetString();
+            std::string textureName = modelJson["texture"].GetString();
+
+            ResourceId textureId = renderer.LoadTexture(textureName);
+            ResourceId meshId = LoadMesh(meshName);
+
+            ResourceId id = highestUnusedModelId++;
+
+            models.insert({id, Model(meshId, textureId, std::vector<Joint>())});
+            loadedModels.insert({name, id});
+            return id;
         }
         catch(const std::exception &e)
         {
@@ -202,7 +266,7 @@ namespace RIS
         return MISSING_MODEL_ID;
     }
 
-    void GL3DRenderer::DestroyMesh(ResourceId modelId)
+    void GL3DRenderer::DestroyModel(ResourceId modelId)
     {
         using std::experimental::erase_if;
 
@@ -242,14 +306,18 @@ namespace RIS
         perFrameBuffer.Bind(GL_UNIFORM_BUFFER, 0);
         perObjectBuffer.Bind(GL_UNIFORM_BUFFER, 1);
 
-        Mesh &model = models.at(modelId);
-        model.Bind(modelVAO);
+        Model &model = models.at(modelId);
+
+        Mesh &mesh = meshes.at(model.GetMesh());
+        SetTexture(model.GetTexture());
+
+        mesh.Bind(modelVAO);
         modelVAO.Bind();
 
         renderer.pipeline.SetShader(staticModelShader);
         renderer.pipeline.SetShader(modelUnlitShader);
         renderer.pipeline.Use();
 
-        glDrawElements(GL_TRIANGLES, model.NumIndices(), GL_UNSIGNED_SHORT, nullptr);
+        mesh.Draw();
     }
 }

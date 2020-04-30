@@ -24,6 +24,7 @@
 #include "ProgramPipeline.hpp"
 
 #include "Mesh.hpp"
+#include "Model.hpp"
 
 namespace RIS
 {
@@ -139,13 +140,16 @@ namespace RIS
     {
     public:
         GL3DRenderer(GLRenderer &renderer);
-        ~GL3DRenderer();
+        ~GL3DRenderer() = default;
 
         void Setup();
         void LoadShaders();
 
         ResourceId LoadMesh(const std::string &name) override;
-        void DestroyMesh(ResourceId modelId) override;
+        void DestroyMesh(ResourceId meshId) override;
+
+        ResourceId LoadModel(const std::string &name) override;
+        void DestroyModel(ResourceId modelId) override;
 
         void SetTexture(ResourceId textureId) override;
 
@@ -156,6 +160,7 @@ namespace RIS
 
     public:
         static const ResourceId MISSING_MODEL_ID;
+        static const ResourceId MISSING_MESH_ID;
 
     private:
         struct PerFrameMatrices
@@ -171,16 +176,17 @@ namespace RIS
     private:
         GLRenderer &renderer;
 
+        ResourceId highestUnusedMeshId = 1;
+        std::unordered_map<ResourceId, Mesh> meshes;
+        std::unordered_map<std::string, ResourceId> loadedMeshes;
+
         ResourceId highestUnusedModelId = 1;
-        std::unordered_map<ResourceId, Mesh> models;
+        std::unordered_map<ResourceId, Model> models;
         std::unordered_map<std::string, ResourceId> loadedModels;
-        std::vector<Buffer> vertexBuffers;
-        std::vector<Buffer> indexBuffers;
 
         VertexArray modelVAO;
         Shader staticModelShader, modelUnlitShader;
-        Buffer perFrameBuffer;
-        Buffer perObjectBuffer;
+        Buffer perFrameBuffer, perObjectBuffer, skeletonBuffer;
         PerFrameMatrices perFrameData;
         PerObjectMatrices perObjectData;
 
@@ -227,7 +233,7 @@ namespace RIS
 
         void PostInit() override;
 
-        ResourceId LoadTexture(const std::string &name, bool flip = true) override;
+        ResourceId LoadTexture(const std::string &name, bool flip = false) override;
         void DestroyTexture(ResourceId texId) override;
 
         ResourceId CreateFramebuffer(int width = -1, int height = -1, bool useDepth = true) override;

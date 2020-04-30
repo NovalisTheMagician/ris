@@ -93,7 +93,7 @@ namespace RIS
         ILoader &loader = renderer.systems.GetLoader();
 
         auto [data, size] = loader.LoadAsset(AssetType::FONT, fontName).get();
-        string fontStr(reinterpret_cast<const char*>(data.get()), size);
+        std::string fontStr(reinterpret_cast<const char*>(data.get()), size);
 
         rapidjson::Document fontJson;
         rapidjson::ParseResult res = fontJson.Parse(fontStr.c_str()); 

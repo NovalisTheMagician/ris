@@ -68,6 +68,7 @@
         "xtree": "cpp",
         "xutility": "cpp",
         "SConstruct": "python",
+        "SConscript": "python",
         "filesystem": "cpp",
         "regex": "cpp",
         "*.glsli": "glsl",
@@ -75,8 +76,12 @@
         "variant": "cpp",
         "condition_variable": "cpp",
         "future": "cpp",
-        "numeric": "cpp"
+        "numeric": "cpp",
+        "any": "cpp",
+        "optional": "cpp",
+        "typeindex": "cpp"
     },
     "python.linting.enabled": false,
     "python.pythonPath": "D:\\Python38-32\\python.exe",
+    "workbench.colorTheme": "Tomorrow Night Blue",
 }

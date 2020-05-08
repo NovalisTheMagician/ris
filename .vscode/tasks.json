@@ -66,5 +66,12 @@
             "problemMatcher": [],
             "group": "build"
         },
+        {
+            "label": "install",
+            "type": "shell",
+            "command": "",
+            "problemMatcher": [],
+            "group": "build"
+        }
     ]
 }

@@ -1,3 +1,4 @@
+#build files
 *.obj
 *.exe
 *.pdb
@@ -5,7 +6,14 @@
 *.res
 *.spv
 *.amd.src
+
+#build directories
+build/
 bin/
+
+#exclude dll files from libraries
 !libs/*/bin/
+
+#scons related files
 powershell.exe
 .sconsign.dblite

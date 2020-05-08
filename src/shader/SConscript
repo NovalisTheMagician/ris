@@ -1,0 +1,9 @@
+Import('env')
+
+files = Glob('*.glsl')
+
+env.Shader(files)
+env.ShaderSrc(files)
+
+objs = []
+Return('objs')

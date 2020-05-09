@@ -1,7 +1,6 @@
 #include "graphics/Renderer.hpp"
 
-#include <glbinding/gl46core/gl.h>
-#include <glbinding/glbinding.h>
+#include <glad/glad.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -26,7 +25,6 @@
 #include <rapidjson/error/en.h>
 #include <rapidjson/document.h>
 
-using namespace gl46core;
 using namespace std::literals;
 
 // Windows "hack" to force some laptops to use the highperformance GPU
@@ -48,7 +46,20 @@ namespace RIS
         {
             auto &log = Logger::Instance();
 
-            glbinding::initialize(glfwGetProcAddress);
+            if(!gladLoadGL())
+            {
+                //throw
+            }
+
+            if(!GLAD_GL_VERSION_4_6)
+            {
+                //throw
+            }
+
+            if(!GLAD_GL_ARB_shading_language_include)
+            {
+                //throw
+            }
 
 #ifdef _DEBUG
             glEnable(GL_DEBUG_OUTPUT);
@@ -130,6 +141,7 @@ namespace RIS
 
             loadedTextures.insert({"__DEFAULT_TEX", std::make_shared<Texture>(glm::vec4(1, 1, 1, 1))});
             loadedTextures.insert({"__MISSING_TEX", std::make_shared<Texture>(glm::vec4(1, 0, 1, 1))});
+
         }
 
         void Renderer::PostInit()
@@ -158,12 +170,12 @@ namespace RIS
                     return loadedShaders.at(name);
                 }
 
-                gl::GLenum shaderType;
+                GLenum shaderType;
                 auto shaderParam = std::any_cast<ShaderType>(param);
                 if(shaderParam == ShaderType::VERTEX)
-                    gl::GLenum shaderType = GL_VERTEX_SHADER;
+                    shaderType = GL_VERTEX_SHADER;
                 else if(shaderParam == ShaderType::FRAGMENT)
-                    gl::GLenum shaderType = GL_FRAGMENT_SHADER;
+                    shaderType = GL_FRAGMENT_SHADER;
 
                 std::shared_ptr<Shader> shader;
                 if(useAmdFix)
@@ -212,7 +224,8 @@ namespace RIS
                 float size = fontJson["size"].GetFloat();
                 float spaceAdvance = fontJson["space_advance"].GetFloat();
 
-                auto fontTexture = loader.Load<Texture>("ui/" + fontName + ".dds");
+                std::string fontTexturePath = "fonts/" + fontName + ".dds";
+                auto fontTexture = loader.Load<Texture>(fontTexturePath);
 
                 std::unordered_map<char, Glyph> glyphs;
 

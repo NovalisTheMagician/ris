@@ -1,9 +1,6 @@
 #include "graphics/Mesh.hpp"
 
-#include <glbinding/gl46core/gl.h>
-#include <glbinding/glbinding.h>
-
-using namespace gl46core;
+#include <glad/glad.h>
 
 namespace RIS
 {

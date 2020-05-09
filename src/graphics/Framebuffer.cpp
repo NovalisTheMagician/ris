@@ -1,11 +1,9 @@
 #include "graphics/Framebuffer.hpp"
 
-#include <glbinding/gl46core/gl.h>
+#include <glad/glad.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
-using namespace gl46core;
 
 namespace RIS
 {

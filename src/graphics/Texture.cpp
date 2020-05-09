@@ -1,13 +1,11 @@
 #include "graphics/Texture.hpp"
 
-#include <glbinding/gl46core/gl.h>
+#include <glad/glad.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 #include <gli/gli.hpp>
-
-using namespace gl46core;
 
 namespace RIS
 {
@@ -69,7 +67,7 @@ namespace RIS
             }
         }
 
-        Texture::Texture(gl::GLenum format, int width, int height)
+        Texture::Texture(GLenum format, int width, int height)
         {
             glCreateTextures(GL_TEXTURE_2D, 1, &id);
             glTextureStorage2D(id, 1, format, width, height);
@@ -84,7 +82,7 @@ namespace RIS
             glTextureSubImage2D(id, 0, 0, 0, 1, 1, GL_RGBA, GL_FLOAT, glm::value_ptr(color));
         }
 
-        Texture::Texture(gl::GLenum type)
+        Texture::Texture(GLenum type)
         {
             glCreateTextures(type, 1, &id);
         }
@@ -110,7 +108,7 @@ namespace RIS
             glBindTextureUnit(textureUnit, id);
         }
 
-        void Texture::SetBuffer(const Buffer &buffer, gl::GLenum format)
+        void Texture::SetBuffer(const Buffer &buffer, GLenum format)
         {
             glTextureBuffer(id, format, buffer.GetId());
         }

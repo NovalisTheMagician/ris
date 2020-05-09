@@ -1,12 +1,9 @@
 #include "graphics/VertexArray.hpp"
 
-#include <glbinding/gl46core/gl.h>
+#include <glad/glad.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
-using namespace gl46core;
-
 namespace RIS
 {
     namespace Graphics
@@ -33,7 +30,7 @@ namespace RIS
             return *this;
         }
 
-        void VertexArray::SetAttribFormat(int attrib, int numComponents, gl::GLenum type, std::size_t offset, int bindingPoint)
+        void VertexArray::SetAttribFormat(int attrib, int numComponents, GLenum type, std::size_t offset, int bindingPoint)
         {
             glEnableVertexArrayAttrib(id, attrib);
             glVertexArrayAttribFormat(id, attrib, numComponents, type, GL_FALSE, offset);

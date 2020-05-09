@@ -1,22 +1,19 @@
 #include "graphics/Buffer.hpp"
 
-#include <glbinding/gl46core/gl.h>
-#include <glbinding/glbinding.h>
-
-using namespace gl46core;
+#include <glad/glad.h>
 
 namespace RIS
 {
     namespace Graphics
     {
-        Buffer::Buffer(const void *data, size_t size, gl::BufferStorageMask usage)
+        Buffer::Buffer(const void *data, size_t size, GLenum usage)
             : maxSize(size)
         {
             glCreateBuffers(1, &id);
             glNamedBufferStorage(id, size, data, usage);
         }
 
-        Buffer::Buffer(size_t size, gl::BufferStorageMask usage)
+        Buffer::Buffer(size_t size, GLenum usage)
             : maxSize(size)
         {
             glCreateBuffers(1, &id);
@@ -50,7 +47,7 @@ namespace RIS
             glNamedBufferSubData(id, offset, size, data);
         }
 
-        void Buffer::Bind(gl::GLenum target, int bindBase) 
+        void Buffer::Bind(GLenum target, int bindBase) 
         { 
             glBindBufferBase(target, bindBase, id); 
         }
@@ -60,7 +57,7 @@ namespace RIS
             return maxSize;
         }
 
-        void* Buffer::Map(gl::BufferAccessMask access, size_t size, size_t offset)
+        void* Buffer::Map(GLenum access, size_t size, size_t offset)
         {
             return glMapNamedBufferRange(id, offset, size == 0 ? maxSize : size, access);
         }

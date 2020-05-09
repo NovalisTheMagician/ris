@@ -2,8 +2,7 @@
 
 #include "graphics/Buffer.hpp"
 
-#include <glbinding/gl46core/gl.h>
-#include <glbinding/glbinding.h>
+#include <glad/glad.h>
 
 #include <vector>
 
@@ -17,15 +16,15 @@ namespace RIS
         public:
             UniformBuffer()
             {
-                buffer = Buffer::Create(data, gl::GL_MAP_PERSISTENT_BIT | gl::GL_MAP_COHERENT_BIT | gl::GL_MAP_WRITE_BIT);
-                bufferPtr = buffer.Map(gl::GL_MAP_WRITE_BIT | gl::GL_MAP_PERSISTENT_BIT | gl::GL_MAP_COHERENT_BIT | gl::GL_MAP_INVALIDATE_BUFFER_BIT);
+                buffer = Buffer(data, GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT | GL_MAP_WRITE_BIT | GL_DYNAMIC_STORAGE_BIT);
+                bufferPtr = buffer.Map(GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
             };
 
             UniformBuffer(const T &data)
                 : data(data)
             {
-                buffer = Buffer::Create(data, gl::GL_MAP_PERSISTENT_BIT | gl::GL_MAP_COHERENT_BIT | gl::GL_MAP_WRITE_BIT);
-                bufferPtr = buffer.Map(gl::GL_MAP_WRITE_BIT | gl::GL_MAP_PERSISTENT_BIT | gl::GL_MAP_COHERENT_BIT | gl::GL_MAP_INVALIDATE_BUFFER_BIT);
+                buffer = Buffer(data, GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT | GL_MAP_WRITE_BIT | GL_DYNAMIC_STORAGE_BIT);
+                bufferPtr = buffer.Map(GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
             }
 
             ~UniformBuffer()
@@ -40,7 +39,7 @@ namespace RIS
 
             void Bind(int bindBase)
             {
-                buffer.Bind(gl::GL_UNIFORM_BUFFER, bindBase);
+                buffer.Bind(GL_UNIFORM_BUFFER, bindBase);
             }
 
             T& Get()
@@ -73,8 +72,8 @@ namespace RIS
             UniformBuffer(const std::vector<T> &data)
                 : data(data)
             {
-                buffer = Buffer::Create(data, gl::GL_MAP_PERSISTENT_BIT | gl::GL_MAP_COHERENT_BIT | gl::GL_MAP_WRITE_BIT);
-                bufferPtr = buffer.Map(gl::GL_MAP_WRITE_BIT | gl::GL_MAP_PERSISTENT_BIT | gl::GL_MAP_COHERENT_BIT | gl::GL_MAP_INVALIDATE_BUFFER_BIT);
+                buffer = Buffer(data, GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT | GL_MAP_WRITE_BIT);
+                bufferPtr = buffer.Map(GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
             }
 
             ~UniformBuffer()
@@ -89,7 +88,7 @@ namespace RIS
 
             void Bind(int bindBase)
             {
-                buffer.Bind(gl::GL_UNIFORM_BUFFER, bindBase);
+                buffer.Bind(GL_UNIFORM_BUFFER, bindBase);
             }
 
             std::vector<T>& Get()

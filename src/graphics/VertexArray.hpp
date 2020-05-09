@@ -2,7 +2,7 @@
 
 #include "graphics/GLObject.hpp"
 
-#include <glbinding/gl46core/gl.h>
+#include <glad/glad.h>
 
 #include "graphics/Buffer.hpp"
 
@@ -27,7 +27,7 @@ namespace RIS
             void SetVertexBuffer(const Buffer &buffer, int bindingPoint = 0, size_t offset = 0);
 
             void SetIndexBuffer(const Buffer &buffer);
-            void SetAttribFormat(int attrib, int numComponents, gl::GLenum type, std::size_t offset, int bindingPoint = 0);
+            void SetAttribFormat(int attrib, int numComponents, GLenum type, std::size_t offset, int bindingPoint = 0);
 
             void Bind();
 

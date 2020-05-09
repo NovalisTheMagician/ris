@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glbinding/gl46/gl.h>
+#include <glad/glad.h>
 
 namespace RIS
 {
@@ -10,16 +10,16 @@ namespace RIS
         {
         public:
             GLObject() : id(0) {};
-            GLObject(gl::GLuint id) : id(id) {};
+            GLObject(GLuint id) : id(id) {};
             virtual ~GLObject() = default;
 
-            gl::GLuint GetId() const { return id; };
+            GLuint GetId() const { return id; };
 
             bool operator==(const GLObject &other) const { return id == other.id; };
             bool operator!=(const GLObject &other) const { return !(*this == other); };
 
         protected:
-            gl::GLuint id;
+            GLuint id;
 
         };
     }

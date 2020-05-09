@@ -5,7 +5,7 @@
             "includePath": [
                 "${workspaceFolder}/src/*",
                 "${workspaceFolder}/libs/glfw/include/*",
-                "${workspaceFolder}/libs/glbinding/include/*",
+                "${workspaceFolder}/libs/glad/include/*",
                 "${workspaceFolder}/libs/glm/include/*",
                 "${workspaceFolder}/libs/gli/include/*",
                 "${workspaceFolder}/libs/soloud/include/*",

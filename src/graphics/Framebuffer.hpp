@@ -4,7 +4,7 @@
 
 #include <glm/glm.hpp>
 
-#include <glbinding/gl46core/gl.h>
+#include <glad/glad.h>
 
 #include "graphics/Texture.hpp"
 
@@ -15,9 +15,9 @@ namespace RIS
         class Framebuffer : public GLObject
         {
         public:
-            Framebuffer(int width, int height, gl::GLenum textureFormat, bool useDepth);
+            Framebuffer(int width, int height, GLenum textureFormat, bool useDepth);
             Framebuffer();
-            Framebuffer(gl::GLuint frambufId);
+            Framebuffer(GLuint frambufId);
             ~Framebuffer();
 
             Framebuffer(const Framebuffer &) = delete;
@@ -37,7 +37,7 @@ namespace RIS
             Texture colorTexture;
             Texture depthTexture;
             bool useDepth;
-            gl::GLenum colorFormat;
+            GLenum colorFormat;
 
         };
     }

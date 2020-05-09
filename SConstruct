@@ -15,12 +15,12 @@ lk_flags = ['/nologo', '/INCREMENTAL:NO', '/LTCG:NOSTATUS', '/MACHINE:X64']
 
 shader_flags = ['-c', '--target-env=opengl', '-Werror']
 
-dyn_libs = ['libs/glbinding/bin/glbinding.dll', 'libs/glbinding/bin/glbinding-aux.dll', 'libs/glfw/bin/glfw3.dll']
+dyn_libs = ['libs/glfw/bin/glfw3.dll']
 
-inc_path = ['#src', '#libs/glm/include', '#libs/gli/include', '#libs/glbinding/include', '#libs/glfw/include', '#libs/soloud/include', '#libs/rapidjson/include', 
+inc_path = ['#src', '#libs/glm/include', '#libs/gli/include', '#libs/glad/include', '#libs/glfw/include', '#libs/soloud/include', '#libs/rapidjson/include', 
             '#libs/libzip/include', '#libs/libzippp/include', '#libs/lua/include', '#libs/luastate/include', '#libs/tiny_gltf/include']
-lib_path = ['libs/glbinding/lib', 'libs/glfw/lib', 'libs/soloud/lib', 'libs/libzip/lib', 'libs/lua/lib']
-libs = ['user32', 'kernel32', 'gdi32', 'opengl32', 'glbinding', 'glbinding-aux', 'glfw3dll', 'soloud_static', 'ws2_32', 'advapi32', 'libz-static', 'libzip-static', 'lua5.3.0-static']
+lib_path = ['libs/glad/lib', 'libs/glfw/lib', 'libs/soloud/lib', 'libs/libzip/lib', 'libs/lua/lib']
+libs = ['user32', 'kernel32', 'gdi32', 'opengl32', 'glad', 'glfw3dll', 'soloud_static', 'ws2_32', 'advapi32', 'libz-static', 'libzip-static', 'lua5.3.0-static']
 
 defines = ['ZIP_STATIC']
 

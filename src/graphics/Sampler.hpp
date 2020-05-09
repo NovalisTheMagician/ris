@@ -2,7 +2,7 @@
 
 #include "graphics/GLObject.hpp"
 
-#include <glbinding/gl46core/gl.h>
+#include <glad/glad.h>
 
 namespace RIS
 {
@@ -11,7 +11,7 @@ namespace RIS
         class Sampler : GLObject
         {
         public:
-            Sampler(gl::GLenum minFilter, gl::GLenum magFilter, float maxAniso);
+            Sampler(GLenum minFilter, GLenum magFilter, float maxAniso);
             Sampler();
             ~Sampler();
 
@@ -21,8 +21,8 @@ namespace RIS
             Sampler(Sampler &&other);
             Sampler& operator=(Sampler &&other);
 
-            void SetMinFilter(gl::GLenum minFilter);
-            void SetMagFilter(gl::GLenum magFilter);
+            void SetMinFilter(GLenum minFilter);
+            void SetMagFilter(GLenum magFilter);
             void SetMaxAnisotropy(float maxAniso);
 
             void Bind(int textureUnit);

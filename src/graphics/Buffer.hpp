@@ -4,8 +4,7 @@
 
 #include <stdexcept>
 
-#include <glbinding/gl46core/gl.h>
-#include <glbinding/glbinding.h>
+#include <glad/glad.h>
 
 #include <unordered_map>
 #include <vector>
@@ -17,12 +16,12 @@ namespace RIS
         class Buffer : public GLObject
         {
         public:
-            Buffer(const void *data, size_t size, gl::BufferStorageMask usage);
-            Buffer(size_t size, gl::BufferStorageMask usage);
+            Buffer(const void *data, size_t size, GLenum usage);
+            Buffer(size_t size, GLenum usage);
             template<typename T>
-            Buffer(const T &data, gl::BufferStorageMask usage);
+            Buffer(const T &data, GLenum usage);
             template<typename T>
-            Buffer(const std::vector<T> &data, gl::BufferStorageMask usage);
+            Buffer(const std::vector<T> &data, GLenum usage);
 
             Buffer();
             ~Buffer();
@@ -40,9 +39,9 @@ namespace RIS
             template<typename T>
             void UpdateData(const std::vector<T> &data, size_t offset = 0);
 
-            void Bind(gl::GLenum target, int bindBase);
+            void Bind(GLenum target, int bindBase);
 
-            void* Map(gl::BufferAccessMask access, size_t size = 0, size_t offset = 0);
+            void* Map(GLenum access, size_t size = 0, size_t offset = 0);
             void UnMap();
             void Flush(size_t size = 0, size_t offset = 0);
 
@@ -66,12 +65,12 @@ namespace RIS
         }
 
         template<typename T>
-        Buffer::Buffer(const T &data, gl::BufferStorageMask usage)
+        Buffer::Buffer(const T &data, GLenum usage)
             : Buffer(&data, sizeof T, usage)
         {}
 
         template<typename T>
-        Buffer::Buffer(const std::vector<T> &data, gl::BufferStorageMask usage)
+        Buffer::Buffer(const std::vector<T> &data, GLenum usage)
             : Buffer(data.data(), data.size() * sizeof T, usage)
         {}
     }

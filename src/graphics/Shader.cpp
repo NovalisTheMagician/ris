@@ -2,12 +2,10 @@
 
 #include "misc/Logger.hpp"
 
-#include <glbinding/gl46core/gl.h>
+#include <glad/glad.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
-using namespace gl46core;
 
 namespace RIS
 {
@@ -60,12 +58,12 @@ namespace RIS
             glDeleteProgram(id);
         }
 
-        gl::UseProgramStageMask Shader::GetType() const
+        GLenum Shader::GetType() const
         {
             return type;
         }
 
-        BinaryShader::BinaryShader(const std::vector<std::byte> &shaderBinary, gl::GLenum type)
+        BinaryShader::BinaryShader(const std::vector<std::byte> &shaderBinary, GLenum type)
         {
             id = glCreateProgram();
             glProgramParameteri(id, GL_PROGRAM_SEPARABLE, GL_TRUE);
@@ -74,7 +72,7 @@ namespace RIS
             glShaderBinary(1, &shader, GL_SHADER_BINARY_FORMAT_SPIR_V, shaderBinary.data(), shaderBinary.size());
             glSpecializeShader(shader, "main", 0, nullptr, nullptr);
 
-            GLboolean status;
+            GLint status;
             glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
             if(!status)
             {
@@ -93,7 +91,7 @@ namespace RIS
             glAttachShader(id, shader);
             glLinkProgram(id);
 
-            GLboolean isSeperable = GL_TRUE;
+            GLint isSeperable = GL_TRUE;
             glGetProgramiv(id, GL_PROGRAM_SEPARABLE, &isSeperable);
             if(!isSeperable)
             {
@@ -129,7 +127,7 @@ namespace RIS
             }
         }
 
-        TextShader::TextShader(const std::vector<std::byte> &shaderText, gl::GLenum type)
+        TextShader::TextShader(const std::vector<std::byte> &shaderText, GLenum type)
         {
             id = glCreateProgram();
             glProgramParameteri(id, GL_PROGRAM_SEPARABLE, GL_TRUE);
@@ -144,7 +142,7 @@ namespace RIS
             glShaderSource(shader, 1, &str, nullptr);
             glCompileShader(shader);
 
-            GLboolean status;
+            GLint status;
             glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
             if(!status)
             {
@@ -163,7 +161,7 @@ namespace RIS
             glAttachShader(id, shader);
             glLinkProgram(id);
 
-            GLboolean isSeperable = GL_TRUE;
+            GLint isSeperable = GL_TRUE;
             glGetProgramiv(id, GL_PROGRAM_SEPARABLE, &isSeperable);
             if(!isSeperable)
             {

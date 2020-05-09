@@ -2,9 +2,11 @@
 
 #include "graphics/GLObject.hpp"
 
-#include <glbinding/gl46core/gl.h>
+#include <glad/glad.h>
 
 #include <stdexcept>
+
+#include <vector>
 
 namespace RIS
 {
@@ -33,23 +35,23 @@ namespace RIS
             Shader(Shader &&other);
             Shader& operator=(Shader &&other);
 
-            gl::UseProgramStageMask GetType() const;
+            GLenum GetType() const;
 
         protected:
-            gl::UseProgramStageMask type;
+            GLenum type;
 
         };
 
         class BinaryShader : public Shader
         {
         public:
-            BinaryShader(const std::vector<std::byte> &bytes, gl::GLenum shaderType);
+            BinaryShader(const std::vector<std::byte> &bytes, GLenum shaderType);
         };
 
         class TextShader : public Shader
         {
         public:
-            TextShader(const std::vector<std::byte> &bytes, gl::GLenum shaderType);
+            TextShader(const std::vector<std::byte> &bytes, GLenum shaderType);
         };
     }
 }

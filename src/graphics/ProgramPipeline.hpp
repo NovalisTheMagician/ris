@@ -2,8 +2,6 @@
 
 #include "graphics/GLObject.hpp"
 
-#include <glbinding/gl46core/gl.h>
-
 #include "graphics/Shader.hpp"
 
 namespace RIS

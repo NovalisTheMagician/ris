@@ -1,10 +1,5 @@
 #include "graphics/Model.hpp"
 
-#include <glbinding/gl46core/gl.h>
-#include <glbinding/glbinding.h>
-
-using namespace gl46core;
-
 namespace RIS
 {
     namespace Graphics

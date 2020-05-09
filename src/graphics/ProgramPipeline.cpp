@@ -1,8 +1,6 @@
 #include "graphics/ProgramPipeline.hpp"
 
-#include <glbinding/gl46core/gl.h>
-
-using namespace gl46core;
+#include <glad/glad.h>
 
 namespace RIS
 {

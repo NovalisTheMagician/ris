@@ -1,8 +1,8 @@
 #include "graphics/Sampler.hpp"
 
-#include <glbinding/gl46core/gl.h>
+#include <glad/glad.h>
 
-using namespace gl46core;
+#include <utility>
 
 namespace RIS
 {
@@ -13,7 +13,7 @@ namespace RIS
         {
         }
 
-        Sampler::Sampler(gl::GLenum minFilter, gl::GLenum magFilter, float maxAniso)
+        Sampler::Sampler(GLenum minFilter, GLenum magFilter, float maxAniso)
         {
             glGenSamplers(1, &id);
             glSamplerParameteri(id, GL_TEXTURE_MIN_FILTER, minFilter);

@@ -1,13 +1,20 @@
 #include "game/GameLoop.hpp"
 
+#include "RIS.hpp"
+#include "window/Window.hpp"
+#include "graphics/Renderer.hpp"
+#include "audio/AudioEngine.hpp"
+#include "ui/Userinterface.hpp"
+#include "input/Input.hpp"
+#include "script/ScriptEngine.hpp"
+#include "loader/Loader.hpp"
+
 #include "misc/Timer.hpp"
 #include "misc/Logger.hpp"
 
 #include "graphics/Framebuffer.hpp"
 
 #include "misc/StringSupport.hpp"
-
-#include "RIS.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -21,18 +28,18 @@ namespace RIS
     {
         int GameLoop::Start()
         {
-            auto &window = GetSystems().GetWindow();
-            auto &renderer = GetSystems().GetRenderer();
-            auto &input = GetSystems().GetInput();
-            auto &interface = GetSystems().GetUserinterface();
-            auto &audio = GetSystems().GetAudio();
-            auto &scriptEngine = GetSystems().GetScriptEngine();
-            auto &loader = GetSystems().GetLoader();
+            auto &window = GetWindow();
+            auto &renderer = GetRenderer();
+            auto &input = GetInput();
+            auto &interface = GetUserinterface();
+            auto &audio = GetAudioEngine();
+            auto &scriptEngine = GetScriptEngine();
+            auto &loader = GetLoader();
 
             bool god = false;
             interface.GetConsole().BindFunc("god", UI::Helpers::BoolFunc(god, "Godmode ON", "Godmode OFF"));
 
-            scriptEngine.LoadScript("main");
+            scriptEngine.LoadScript("scripts/main.lua");
             scriptEngine.Register([](const char *msg){ Logger::Instance().Info("{lua}"s + msg); }, "logger", "info");
             scriptEngine.Register([](const char *msg){ Logger::Instance().Warning("{lua}"s + msg); }, "logger", "warning");
             scriptEngine.Register([](const char *msg){ Logger::Instance().Error("{lua}"s + msg); }, "logger", "error");

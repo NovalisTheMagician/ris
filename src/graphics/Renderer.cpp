@@ -1,9 +1,12 @@
 #include "graphics/Renderer.hpp"
 
+#include "RIS.hpp"
+
+#include "loader/Loader.hpp"
+
 #include <glad/glad.h>
 
 #include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 #include <gli/gli.hpp>
 
@@ -17,9 +20,7 @@
 
 #include "graphics/VertexTypes.hpp"
 
-#include "RIS.hpp"
-
-#include "loader/Loader.hpp"
+#include "graphics/Image.hpp"
 
 #include <rapidjson/rapidjson.h>
 #include <rapidjson/error/en.h>
@@ -146,7 +147,7 @@ namespace RIS
 
         void Renderer::PostInit()
         {
-            auto &loader = GetSystems().GetLoader();
+            auto &loader = GetLoader();
 
             loader.RegisterLoadFunction<Texture>([this](const std::vector<std::byte> &data, const std::string &name, bool cache, std::any param)
             {

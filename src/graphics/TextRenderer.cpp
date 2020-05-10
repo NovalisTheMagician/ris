@@ -1,13 +1,16 @@
 #include "graphics/TextRenderer.hpp"
 
+#include "RIS.hpp"
+
+#include "loader/Loader.hpp"
+
 #include "graphics/VertexTypes.hpp"
 
 #include <vector>
 
-#include <glbinding/gl46core/gl.h>
-using namespace gl46core;
+#include <glad/glad.h>
 
-#include "RIS.hpp"
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace RIS
 {
@@ -16,21 +19,49 @@ namespace RIS
         const int TextRenderer::MAX_STRING_LEN = 1024;
 
         TextRenderer::TextRenderer()
-            : sampler(GL_LINEAR, GL_LINEAR, 1.0f), pipeline(), vertexLayout(), vertexBuffer(MAX_STRING_LEN * 6 * sizeof VertexType::UIVertex, GL_DYNAMIC_STORAGE_BIT)
+            : sampler(GL_LINEAR, GL_LINEAR, 1.0f), pipeline(), vertexLayout(), vertexBuffer(MAX_STRING_LEN * 6 * sizeof VertexType::TextVertex, GL_DYNAMIC_STORAGE_BIT), viewProjectionbuffer(), worldBuffer(),
+              vpb(glm::mat4(), GL_DYNAMIC_STORAGE_BIT), wb(glm::mat4(), GL_DYNAMIC_STORAGE_BIT)
         {
-            vertexLayout.SetAttribFormat(0, 2, GL_FLOAT, offsetof(VertexType::UIVertex, position));
-            vertexLayout.SetAttribFormat(1, 2, GL_FLOAT, offsetof(VertexType::UIVertex, texCoords));
+            vertexLayout.SetAttribFormat(0, 2, GL_FLOAT, offsetof(VertexType::TextVertex, position));
+            vertexLayout.SetAttribFormat(1, 2, GL_FLOAT, offsetof(VertexType::TextVertex, texCoords));
+            vertexLayout.SetAttribFormat(2, 4, GL_FLOAT, offsetof(VertexType::TextVertex, color));
+            vertexLayout.SetVertexBuffer<VertexType::TextVertex>(vertexBuffer);
 
-            auto &loader = GetSystems().GetLoader();
+            auto &loader = GetLoader();
 
-            vertexShader = loader.Load<Shader>("shaders/textVertex.spv", ShaderType::VERTEX);
-            fragmentShader = loader.Load<Shader>("shaders/textFragment.spv", ShaderType::FRAGMENT);
+            vertexShader = loader.Load<Shader>("shaders/textVertex.src", ShaderType::VERTEX);
+            fragmentShader = loader.Load<Shader>("shaders/textFragment.src", ShaderType::FRAGMENT);
 
             pipeline.SetShader(*vertexShader.get());
             pipeline.SetShader(*fragmentShader.get());
         }
 
-        void TextRenderer::DrawString(const std::string &string, const Font &font, float size, const glm::vec2 &position)
+        void TextRenderer::Begin(float viewWidth, float viewHeight)
+        {
+            glDisable(GL_CULL_FACE);
+            glDisable(GL_DEPTH_TEST);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+            sampler.Bind(0);
+
+            vertexLayout.Bind();
+
+            //viewProjectionbuffer.Update(glm::ortho(0.0f, viewWidth, viewHeight, 0.0f, -1.0f, 1.0f));
+            //viewProjectionbuffer.Bind(0);
+
+            vpb.UpdateData(glm::ortho(0.0f, viewWidth, viewHeight, 0.0f, -1.0f, 1.0f));
+            vpb.Bind(GL_UNIFORM_BUFFER, 0);
+        }
+
+        void TextRenderer::End()
+        {
+            glDisable(GL_BLEND);
+            glEnable(GL_CULL_FACE);
+            glEnable(GL_DEPTH_TEST);
+        }
+
+        void TextRenderer::DrawString(const std::string &string, const Font &font, float size, const glm::vec2 &position, const glm::vec4 &color)
         {
             float penX = 0.0f;
             float penY = 0.0f;
@@ -38,7 +69,7 @@ namespace RIS
             if(fontSize == -1)
                 fontSize = font.GetSize();
 
-            std::vector<VertexType::UIVertex> vertices;
+            std::vector<VertexType::TextVertex> vertices;
             for(int i = 0; i < string.length(); ++i)
             {
                 char c = string[i];
@@ -75,13 +106,13 @@ namespace RIS
                     float s1 = glyph.s1;
                     float t1 = glyph.t1;
 
-                    vertices.push_back({ {x, y-h}, {s0, t1} });
-                    vertices.push_back({ {x, y}, {s0, t0} });
-                    vertices.push_back({ {x+w, y}, {s1, t0} });
+                    vertices.push_back({ {x, y-h}, {s0, t1}, color });
+                    vertices.push_back({ {x, y}, {s0, t0}, color });
+                    vertices.push_back({ {x+w, y}, {s1, t0}, color });
 
-                    vertices.push_back({ {x, y-h}, {s0, t1} });
-                    vertices.push_back({ {x+w, y}, {s1, t0} });
-                    vertices.push_back({ {x+w, y-h}, {s1, t1} });
+                    vertices.push_back({ {x, y-h}, {s0, t1}, color });
+                    vertices.push_back({ {x+w, y}, {s1, t0}, color });
+                    vertices.push_back({ {x+w, y-h}, {s1, t1}, color });
 
                     penX += glyphAdvanceX;
                 }
@@ -91,7 +122,16 @@ namespace RIS
                 }
             }
 
+            font.GetTexture()->Bind(0);
+
+            //worldBuffer.Update(glm::translate(glm::mat4(1.0f), glm::vec3(position, 0.0f)));
+            //worldBuffer.Bind(1);
+            wb.UpdateData(glm::translate(glm::mat4(1.0f), glm::vec3(position, 0.0f)));
+            wb.Bind(GL_UNIFORM_BUFFER, 1);
+
             vertexBuffer.UpdateData(vertices);
+            std::size_t numVertices = vertices.size();
+            glDrawArrays(GL_TRIANGLES, 0, numVertices);
         }
     }
 }

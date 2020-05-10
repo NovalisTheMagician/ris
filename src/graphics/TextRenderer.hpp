@@ -7,6 +7,7 @@
 #include "graphics/Sampler.hpp"
 #include "graphics/ProgramPipeline.hpp"
 #include "graphics/VertexArray.hpp"
+#include "graphics/UniformBuffer.hpp"
 
 #include <memory>
 #include <string>
@@ -27,7 +28,10 @@ namespace RIS
             TextRenderer(TextRenderer&&) = default;
             TextRenderer& operator=(TextRenderer&&) = default;
 
-            void DrawString(const std::string &string, const Font &font, float size, const glm::vec2 &position);
+            void Begin(float viewWidth, float viewHeight);
+            void End();
+
+            void DrawString(const std::string &string, const Font &font, float size, const glm::vec2 &position = {}, const glm::vec4 &color = {1, 1, 1, 1});
 
         private:
             static const int MAX_STRING_LEN;
@@ -38,6 +42,9 @@ namespace RIS
             std::shared_ptr<Shader> vertexShader, fragmentShader;
             ProgramPipeline pipeline;
             VertexArray vertexLayout;
+            UniformBuffer<glm::mat4> viewProjectionbuffer, worldBuffer;
+
+            Buffer vpb, wb;
 
         };
     }

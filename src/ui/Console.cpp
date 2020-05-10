@@ -1,3 +1,7 @@
+#include "RIS.hpp"
+#include "loader/Loader.hpp"
+#include "window/Window.hpp"
+
 #include "ui/Console.hpp"
 
 #include <string>
@@ -8,26 +12,23 @@
 #include "misc/StringSupport.hpp"
 #include "misc/MathHelper.hpp"
 
-#include "RIS.hpp"
-
 namespace RIS
 {
     namespace UI
     {
         void Console::InitLimits(const glm::vec2 &viewSize)
         {
-            //auto &r2d = GetSystems().GetRenderer().Get2DRenderer();
+            auto &loader = GetLoader();
 
             this->viewSize = viewSize;
             maxY = viewSize.y * 0.5f;
             currentY = viewSize.y;
 
-            //consoleFont = r2d.LoadFont("fsex302");
-            //maxLineHeight = r2d.MaxHeightFont(consoleFont, consoleFontSize);
+            consoleFont = loader.Load<Graphics::Font>("fonts/fsex302.json");
+            maxLineHeight = consoleFont->GetMaxHeight(consoleFontSize);
             maxLines = 512;
 
-            auto& wnd = GetSystems().GetWindow();
-
+            auto& wnd = GetWindow();
             BindFunc("con", [this](std::vector<std::string> params){ return SetParam(params); });
             BindFunc("exit", [&wnd](std::vector<std::string> params){ wnd.Exit(0); return ""; });
         }
@@ -101,7 +102,7 @@ namespace RIS
             }
         }
 
-        void Console::Draw()
+        void Console::Draw(Graphics::TextRenderer &textRenderer)
         {
             if(isOpen || isMoving)
             {
@@ -113,9 +114,9 @@ namespace RIS
                 {
                     const std::string &msg = *it;
                     glm::vec2 pos = {0, (currentY + i * maxLineHeight) + offsetY};
-                    //renderer.DrawText(msg, consoleFont, pos, consoleFontSize, fontColor);
+                    textRenderer.DrawString(msg, *consoleFont.get(), consoleFontSize, pos, fontColor);
                 }
-                //renderer.DrawText(">" + inputLine + "_", consoleFont, {0, currentY + offsetY}, consoleFontSize, fontColor);
+                textRenderer.DrawString(">" + inputLine + "_", *consoleFont.get(), consoleFontSize, {0, currentY + offsetY}, fontColor);
             }
         }
 

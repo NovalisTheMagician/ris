@@ -1,9 +1,10 @@
 #include "window/Window.hpp"
 
+#include "RIS.hpp"
+
 #include "misc/Logger.hpp"
 #include "script/ScriptEngine.hpp"
-
-#include "RIS.hpp"
+#include "graphics/Renderer.hpp"
 
 #include <exception>
 
@@ -95,7 +96,7 @@ namespace RIS
 
         void Window::PostInit()
         {
-            auto &scriptEngine = GetSystems().GetScriptEngine();
+            auto &scriptEngine = GetScriptEngine();
             scriptEngine.Register([this](){ Exit(0); }, "window", "exit");
             scriptEngine.Register([this](bool relative){ SetRelativeMouse(relative); }, "window", "setRelativeMouse");
         }
@@ -159,7 +160,7 @@ namespace RIS
         void Window::FramebufferResize(GLFWwindow *window, int width, int height)
         {
             Window *wnd = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
-            auto &renderer = GetSystems().GetRenderer();
+            auto &renderer = GetRenderer();
             renderer.Resize(width, height);
         }
 

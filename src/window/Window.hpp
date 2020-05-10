@@ -1,10 +1,14 @@
 #pragma once
 
+#ifdef _WIN32
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#endif
+
 #define GLFW_DLL
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
-
-#undef APIENTRY
 
 #include <stdexcept>
 #include <string>

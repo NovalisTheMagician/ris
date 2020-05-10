@@ -1,5 +1,7 @@
 #include "audio/AudioEngine.hpp"
 
+#include "RIS.hpp"
+
 #include "loader/Loader.hpp"
 
 namespace RIS

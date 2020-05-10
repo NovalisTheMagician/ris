@@ -1,14 +1,13 @@
-#include "ui/Userinterface.hpp"
-
+#include "RIS.hpp"
 #include "loader/Loader.hpp"
 #include "input/Input.hpp"
 #include "script/ScriptEngine.hpp"
 
+#include "ui/Userinterface.hpp"
+
 #include "misc/Timer.hpp"
 
 #include "misc/Logger.hpp"
-
-#include "RIS.hpp"
 
 #include <algorithm>
 
@@ -28,35 +27,36 @@ namespace RIS
             rootContainer = std::make_shared<Panel>();
         }
 
-        Userinterface::~Userinterface()
-        {
-        }
-
         void Userinterface::PostInit()
         {
+            textRenderer = std::make_unique<Graphics::TextRenderer>();
+
             console.InitLimits(glm::vec2(uiWidth, uiHeight));
+
+            auto &loader = GetLoader();
+            defaultFont = loader.Load<Graphics::Font>("fonts/unispace.json");
 
             Config &config = GetConfig();
             uiWidth = config.GetValue("r_width", 800);
             uiHeight = config.GetValue("r_height", 600);
 
-            fpsLabel = std::make_shared<Label>();
+            fpsLabel = std::make_shared<Label>(defaultFont);
             fpsLabel->SetPosition({0, uiHeight - 22});
             fpsLabel->SetText("0");
             fpsLabel->SetTextColor({1, 1, 1, 1});
-            fpsLabel->SetFont(1, 16);
+            fpsLabel->SetFont(defaultFont, 16);
 
             console.BindFunc("fps", Helpers::BoolFunc(showFps, "Show FPS", "Hide FPS"));
             console.BindFunc("frametime", Helpers::BoolFunc(showFrametime, "Show Frametime", "Hide Frametime"));
 
-            auto &input = GetSystems().GetInput();
+            auto &input = GetInput();
             input.RegisterChar("ui", [this](char ch){ OnChar(ch); });
             input.RegisterMouse("ui", [this](float x, float y){ OnMouseMove(x, y); });
             input.RegisterButtonDown("ui", [this](Input::InputButton button){ OnMouseDown(button); });
             input.RegisterButtonUp("ui", [this](Input::InputButton button){ OnMouseUp(button); });
             input.RegisterKeyDown("ui", [this](Input::InputKey key){ OnKeyDown(key); });
 
-            auto &scriptEngine = GetSystems().GetScriptEngine();
+            auto &scriptEngine = GetScriptEngine();
 
             scriptEngine.Register([this](const char *str){ console.Print(str); }, "print");
             scriptEngine.Register([this](){ console.Toggle(); }, "console", "toggle");
@@ -85,14 +85,14 @@ namespace RIS
                     Script::LValue& btn = state["btntmp"];
                     btn.set("name", name);
 
-                    ButtonPtr button = std::make_shared<Button>();
+                    ButtonPtr button = std::make_shared<Button>(defaultFont);
                     button->SetName(name);
                     container->Add(button);
 
                     btn.set("setText",          [button](const char *text){ button->SetText(text); });
                     btn.set("setPosition",      [button](float x, float y){ button->SetPosition({x, y}); });
                     btn.set("setSize",          [button](float w, float h){ button->SetSize({w, h}); });
-                    btn.set("setFont",          [button](int fontId, float size){ button->SetFont(fontId, size); });
+                    //btn.set("setFont",          [button](int fontId, float size){ button->SetFont(fontId, size); });
                     btn.set("setTextColor",     [button](float r, float g, float b, float a){ button->SetTextColor({r, g, b, a}); });
                     btn.set("setNormalColor",   [button](float r, float g, float b, float a){ button->SetNormalColor({r, g, b, a}); });
                     btn.set("setNormalImage",   [button](int imageId){ button->SetNormalImage(imageId); });
@@ -128,7 +128,7 @@ namespace RIS
                     Script::LValue &lbl = state["lbltmp"];
                     lbl.set("name", name);
 
-                    LabelPtr label = std::make_shared<Label>();
+                    LabelPtr label = std::make_shared<Label>(defaultFont);
                     label->SetName(name);
                     container->Add(label);
 
@@ -136,7 +136,7 @@ namespace RIS
                     lbl.set("setPosition",  [label](float x, float y){ label->SetPosition({ x, y }); });
                     lbl.set("setVisible",   [label](bool visible){ label->SetVisible(visible); });
                     lbl.set("setTextColor", [label](float r, float g, float b, float a){ label->SetTextColor({ r, g, b, a }); });
-                    lbl.set("setFont",      [label](int fontId, float size){ label->SetFont(fontId, size); });
+                    //lbl.set("setFont",      [label](int fontId, float size){ label->SetFont(fontId, size); });
 
                     return lbl;
                 });
@@ -182,10 +182,12 @@ namespace RIS
 
         void Userinterface::Draw()
         {
+            textRenderer->Begin(static_cast<float>(uiWidth), static_cast<float>(uiHeight));
             if(showFps)
-                fpsLabel->Draw(glm::vec2());
-            rootContainer->Draw(glm::vec2());
-            console.Draw();
+                fpsLabel->Draw(*textRenderer.get(), glm::vec2());
+            rootContainer->Draw(*textRenderer.get(), glm::vec2());
+            console.Draw(*textRenderer.get());
+            textRenderer->End();
         }
 
         void Userinterface::Update(const Timer &timer)

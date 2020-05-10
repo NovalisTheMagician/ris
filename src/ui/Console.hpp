@@ -4,10 +4,12 @@
 #include <string>
 #include <functional>
 #include <vector>
+#include <memory>
 
 #include "input/KeyDefs.hpp"
 
-#include "graphics/Renderer.hpp"
+#include "graphics/TextRenderer.hpp"
+#include "graphics/Font.hpp"
 
 #include "misc/Timer.hpp"
 
@@ -60,7 +62,7 @@ namespace RIS
             bool IsOpen();
 
             void Update(const Timer &timer);
-            void Draw();
+            void Draw(Graphics::TextRenderer &textRenderer);
 
             bool ProcessLine(const std::string &lineToProcess);
 
@@ -79,7 +81,7 @@ namespace RIS
             float maxY;
             float offsetY = 7.5f;
 
-            int consoleFont;
+            std::shared_ptr<Graphics::Font> consoleFont;
             float consoleFontSize = 22.0f;
             glm::vec4 backgroundColor = glm::vec4(0, 0, 0, 0.95f);
             glm::vec4 fontColor = glm::vec4(0.7f, 0.7f, 0.7f, 1);

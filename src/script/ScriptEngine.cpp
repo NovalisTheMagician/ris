@@ -1,6 +1,11 @@
 #include "script/ScriptEngine.hpp"
 
+#include "RIS.hpp"
+
+#include "ui/Userinterface.hpp"
 #include "ui/Console.hpp"
+
+#include "loader/Loader.hpp"
 
 #include "misc/Logger.hpp"
 
@@ -8,8 +13,6 @@
 #include <vector>
 #include <algorithm>
 #include <numeric>
-
-#include "RIS.hpp"
 
 using namespace std::literals;
 
@@ -19,7 +22,7 @@ namespace RIS
     {
         void ScriptEngine::LoadScript(const std::string &scriptName, const std::string &module)
         {
-            auto &loader = GetSystems().GetLoader();
+            auto &loader = GetLoader();
             try
             {
                 std::string scriptContent = *loader.Load<std::string>(scriptName).get();
@@ -28,13 +31,13 @@ namespace RIS
             }
             catch(const lua::LoadError &e)
             {
-                UI::Console &console = GetSystems().GetUserinterface().GetConsole();
+                UI::Console &console = GetUserinterface().GetConsole();
                 console.Print("Lua load error: "s + e.what());
                 Logger::Instance().Error("Lua load error: "s + e.what());
             }
             catch(const std::exception &e)
             {
-                UI::Console &console = GetSystems().GetUserinterface().GetConsole();
+                UI::Console &console = GetUserinterface().GetConsole();
                 console.Print("Script load error: "s + e.what());
                 Logger::Instance().Error("Script load error: "s + e.what());
             }
@@ -42,7 +45,7 @@ namespace RIS
 
         void ScriptEngine::PostInit()
         {
-            UI::Console &console = GetSystems().GetUserinterface().GetConsole();
+            UI::Console &console = GetUserinterface().GetConsole();
 
             auto execFunc = [this](std::vector<std::string> params)
             { 
@@ -77,7 +80,7 @@ namespace RIS
                 return "";
             });
 
-            auto &loader = GetSystems().GetLoader();
+            auto &loader = GetLoader();
         }
 
         void ScriptEngine::Reload(const std::string &script)

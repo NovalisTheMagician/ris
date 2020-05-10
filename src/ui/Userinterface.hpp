@@ -1,6 +1,7 @@
 #pragma once
 
-#include "graphics/Renderer.hpp"
+#include "graphics/TextRenderer.hpp"
+#include "graphics/Font.hpp"
 
 #include "ui/Console.hpp"
 
@@ -15,6 +16,7 @@
 #include <unordered_map>
 #include <string>
 #include <variant>
+#include <memory>
 
 #include "ui/Component.hpp"
 #include "ui/Container.hpp"
@@ -32,7 +34,7 @@ namespace RIS
         {
         public:
             Userinterface();
-            ~Userinterface();
+            ~Userinterface() = default;
 
             void PostInit();
 
@@ -52,6 +54,9 @@ namespace RIS
 
         private:
             Console console;
+            std::unique_ptr<Graphics::TextRenderer> textRenderer;
+
+            std::shared_ptr<Graphics::Font> defaultFont;
 
             int uiWidth, uiHeight;
             ContainerPtr rootContainer;

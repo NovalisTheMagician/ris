@@ -77,6 +77,9 @@ int main(int argc, char *argv[])
             assetFolder = "assets";
     }
 
+    ::globalConfig = std::move(config);
+    ::globalArgs = args;
+
     logger.Info("Using config " + configPath);
 
     std::unique_ptr<Window::Window> window;
@@ -117,7 +120,6 @@ int main(int argc, char *argv[])
             });
         }
 
-        //::globalSystemLocator = std::move(locator);
         ::globalWindow = window.get();
         ::globalRenderer = renderer.get();
         ::globalLoader = loader.get();
@@ -125,8 +127,6 @@ int main(int argc, char *argv[])
         ::globalInput = input.get();
         ::globalScriptEngine = scriptEngine.get();
         ::globalUserinterface = userinterface.get();
-        ::globalConfig = std::move(config);
-        ::globalArgs = std::move(args);
 
         loader->PostInit();
         window->PostInit();

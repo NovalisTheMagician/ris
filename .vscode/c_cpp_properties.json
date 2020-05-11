@@ -15,7 +15,8 @@
                 "${workspaceFolder}/libs/lua/include/*",
                 "${workspaceFolder}/libs/luastate/include/*",
                 "${workspaceFolder}/libs/tiny_gltf/include/*",
-                "${workspaceFolder}/libs/libtcc/include/*"
+                "${workspaceFolder}/libs/libtcc/include/*",
+                "${workspaceFolder}/libs/ctre/include/*"
             ],
             "defines": [
                 "_DEBUG",

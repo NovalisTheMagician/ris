@@ -26,7 +26,7 @@ namespace RIS
         class Shader : public GLObject
         {
         public:
-            Shader();
+            Shader(const std::string &src, GLenum shaderType);
             virtual ~Shader();
 
             Shader(const Shader &) = delete;
@@ -40,18 +40,6 @@ namespace RIS
         protected:
             GLenum type;
 
-        };
-
-        class BinaryShader : public Shader
-        {
-        public:
-            BinaryShader(const std::vector<std::byte> &bytes, GLenum shaderType);
-        };
-
-        class TextShader : public Shader
-        {
-        public:
-            TextShader(const std::vector<std::byte> &bytes, GLenum shaderType);
         };
     }
 }

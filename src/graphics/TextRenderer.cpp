@@ -29,11 +29,11 @@ namespace RIS
 
             auto &loader = GetLoader();
 
-            vertexShader = loader.Load<Shader>("shaders/textVertex.src", ShaderType::VERTEX);
-            fragmentShader = loader.Load<Shader>("shaders/textFragment.src", ShaderType::FRAGMENT);
+            vertexShader = loader.Load<Shader>("shaders/textVertex.glsl", ShaderType::VERTEX);
+            fragmentShader = loader.Load<Shader>("shaders/textFragment.glsl", ShaderType::FRAGMENT);
 
-            pipeline.SetShader(*vertexShader.get());
-            pipeline.SetShader(*fragmentShader.get());
+            pipeline.SetShader(*vertexShader);
+            pipeline.SetShader(*fragmentShader);
         }
 
         void TextRenderer::Begin(float viewWidth, float viewHeight)

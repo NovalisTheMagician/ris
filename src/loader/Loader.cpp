@@ -98,7 +98,8 @@ namespace RIS
 
         std::vector<std::byte> Loader::LoadBytesFromFilesystem(const std::string &name)
         {
-            std::filesystem::path filePath = name;
+            std::filesystem::path filePath  = assetRoot;
+            filePath /= name;
 
             if(!std::filesystem::exists(filePath))
                 throw LoaderException("Asset (" + filePath.generic_string() + ") not found");

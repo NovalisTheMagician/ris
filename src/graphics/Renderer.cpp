@@ -13,14 +13,15 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <filesystem>
 
 #include <experimental/unordered_map>
 
 #include "misc/Logger.hpp"
 
 #include "graphics/VertexTypes.hpp"
-
 #include "graphics/Image.hpp"
+#include "graphics/ShaderSourceBuilder.hpp"
 
 #include <rapidjson/rapidjson.h>
 #include <rapidjson/error/en.h>
@@ -39,6 +40,9 @@ extern "C"
 }
 #endif
 
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
+
 namespace RIS
 {
     namespace Graphics
@@ -47,19 +51,14 @@ namespace RIS
         {
             auto &log = Logger::Instance();
 
-            if(!gladLoadGL())
+            if(!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
             {
                 //throw
             }
 
-            if(!GLAD_GL_VERSION_4_6)
+            if(!GLAD_GL_VERSION_4_5)
             {
-                //throw
-            }
-
-            if(!GLAD_GL_ARB_shading_language_include)
-            {
-                //throw
+                log.Error("OpenGL version 4.5 not supported");
             }
 
 #ifdef _DEBUG
@@ -164,7 +163,7 @@ namespace RIS
                 return loadedTextures.at("__MISSING_TEX");
             });
 
-            loader.RegisterLoadFunction<Shader>([this](const std::vector<std::byte> &data, const std::string &name, bool cache, std::any param)
+            loader.RegisterLoadFunction<Shader>([this, &loader](const std::vector<std::byte> &data, const std::string &name, bool cache, std::any param)
             {
                 if(loadedShaders.count(name) > 0)
                 {
@@ -178,15 +177,20 @@ namespace RIS
                 else if(shaderParam == ShaderType::FRAGMENT)
                     shaderType = GL_FRAGMENT_SHADER;
 
+                std::string path = std::filesystem::path(name).remove_filename().generic_string();
+
+                ShaderSourceBuilder builder;
+
+                std::string shaderSrc(reinterpret_cast<const char*>(data.data()), data.size());
+                std::string shaderSrcProcessed = builder.BuildSource(shaderSrc, name, [&loader, &path](const std::string &fileName)
+                {
+                    std::string file = path + fileName;
+                    return *loader.Load<std::string>(file);
+                });
+
                 std::shared_ptr<Shader> shader;
-                if(useAmdFix)
-                {
-                    shader = std::make_shared<TextShader>(data, shaderType);
-                }
-                else
-                {
-                    shader = std::make_shared<BinaryShader>(data, shaderType);
-                }
+                shader = std::make_shared<Shader>(shaderSrcProcessed, shaderType);
+
                 if(cache)
                     loadedShaders.insert_or_assign(name, shader);
                 return shader;

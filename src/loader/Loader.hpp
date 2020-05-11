@@ -68,7 +68,7 @@ namespace RIS
             loadFuncs.insert_or_assign(typeid(T), function);
             if(defaultFunc.has_value())
             {
-                defaultFuncs.insert_or_assign(typeid(T), defaultFunc);
+                defaultFuncs.insert_or_assign(typeid(T), defaultFunc.value());
             }
         }
 

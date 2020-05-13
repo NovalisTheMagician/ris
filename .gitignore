@@ -11,6 +11,11 @@
 build/
 bin/
 
+#asset related stuff
+assets/
+assets_build/
+tools/
+
 #exclude dll files from libraries
 !libs/*/bin/
 

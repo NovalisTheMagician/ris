@@ -6,7 +6,7 @@ rc_files = Glob('*.rc')
 objs = env.Object(files)
 objs.append(env.RES(rc_files))
 
-for subdir in ['loader', 'game', 'graphics', 'misc', 'network', 'physics', 'audio', 'shader', 'window', 'ui', 'script', 'input']:
+for subdir in ['loader', 'game', 'graphics', 'misc', 'network', 'physics', 'audio', 'window', 'ui', 'script', 'input']:
     objs.append(SConscript('%s/SConscript' % subdir))
 
 Return('objs')

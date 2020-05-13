@@ -19,10 +19,10 @@
             "name": "Client",
             "type": "cppvsdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/game.exe",
+            "program": "${workspaceFolder}/bin/game.exe",
             "args": ["-debug"],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/build",
+            "cwd": "${workspaceFolder}/bin",
             "environment": [],
             "externalConsole": false
         },

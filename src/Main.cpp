@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
 
         if(args.IsSet("-file"))
         {
-            const auto &params = args.GetParameters("-base");
+            const auto &params = args.GetParameters("-file");
             std::for_each(params.begin(), params.end(), [&](const std::string &archiveFile)
             {
                 loader->AddOverlay(archiveFile);

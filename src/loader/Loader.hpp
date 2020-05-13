@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 #include <typeinfo>
 #include <typeindex>
 #include <functional>
@@ -44,15 +45,18 @@ namespace RIS
 
             void PostInit();
 
+            std::unordered_set<std::string> GetContentsOfFolder(const std::filesystem::path &folder);
+
             template<typename T>
             void RegisterLoadFunction(LoadFunc<T> function, std::optional<DefaultFunc<T>> defaultFunc = {});
 
             template<typename T>
             std::shared_ptr<T> Load(const std::string &assetName, std::any param = {}, bool cacheAsset = true);
 
+            std::vector<std::byte> LoadBytes(const std::string &name);
+
         private:
             std::vector<std::byte> LoadBytesFromFilesystem(const std::string &name);
-            std::vector<std::byte> LoadBytes(const std::string &name);
 
         private:
             std::string assetRoot;

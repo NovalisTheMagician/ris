@@ -36,13 +36,13 @@ using namespace RIS;
 
 namespace
 {
-    static Graphics::Renderer *globalRenderer;
-    static Window::Window *globalWindow;
-    static Audio::AudioEngine *globalAudio;
-    static Loader::Loader *globalLoader;
-    static Input::Input *globalInput;
-    static UI::Userinterface *globalUserinterface;
-    static Script::ScriptEngine *globalScriptEngine;
+    static Graphics::Renderer       *globalRenderer;
+    static Window::Window           *globalWindow;
+    static Audio::AudioEngine       *globalAudio;
+    static Loader::Loader           *globalLoader;
+    static Input::Input             *globalInput;
+    static UI::Userinterface        *globalUserinterface;
+    static Script::ScriptEngine     *globalScriptEngine;
     
     static Config globalConfig;
     static Args globalArgs;
@@ -134,6 +134,8 @@ int main(int argc, char *argv[])
         audio->PostInit();
         userinterface->PostInit();
         scriptEngine->PostInit();
+
+        scriptEngine->LoadScripts();
     }
     catch(const std::exception& e)
     {
@@ -186,6 +188,11 @@ namespace RIS
     UI::Userinterface& GetUserinterface()
     {
         return *::globalUserinterface;
+    }
+
+    UI::Console& GetConsole()
+    {
+        return ::globalUserinterface->GetConsole();
     }
 
     Audio::AudioEngine& GetAudioEngine()

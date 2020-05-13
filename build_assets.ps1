@@ -8,13 +8,14 @@ param (
     [switch]$silent = $false,
     [switch]$restore = $false,
     [switch]$clear = $false,
+    [switch]$skipFonts = $false,
     [string]$backupPath = "G:/",
     [string]$toolsPath = "tools/"
 )
 
 $imageFileFilter = "*.png", "*.jpg", "*.jfif", "*.jpeg"
 $shaderFileFilter = "*.glsl", "*.glsli"
-$scriptFileFilter = "*.lua"
+$scriptFileFilter = "*.c", "*.h", "*.a"
 $modelFileFilter = "*.json"
 $meshFileFilter = "*.glb"
 $fontFileFilter = "*.ttf"
@@ -131,23 +132,25 @@ if($build) {
     }
     if(!$silent) { Write-Host }
 
-    if(!$silent) { Write-Host "Fonts" -NoNewline }
-    $subDir = "fonts/"
-    $fileFilter = $fontFileFilter
-    $workingDir = "$assetPath$subDir"
-    $targetDir = "$buildPath$subDir"
-    if(!(Test-Path -Path $targetDir)) {
-        New-Item -Path $targetDir -ItemType Directory -Force | Out-Null
+    if(!$skipFonts) {
+        if(!$silent) { Write-Host "Fonts" -NoNewline }
+        $subDir = "fonts/"
+        $fileFilter = $fontFileFilter
+        $workingDir = "$assetPath$subDir"
+        $targetDir = "$buildPath$subDir"
+        if(!(Test-Path -Path $targetDir)) {
+            New-Item -Path $targetDir -ItemType Directory -Force | Out-Null
+        }
+        $files = Get-ChildItem -File -Path "$workingDir*" -Include $fileFilter
+        foreach($file in $files) {
+            if(!$silent) { Write-Host "." -NoNewline }
+            Start-Process -FilePath "$toolsPath$fontTool" -Wait -NoNewWindow -ArgumentList $file.Name, $fontMapSize -WorkingDirectory $workingDir -RedirectStandardOutput ".\NUL"
+            Start-Process -FilePath "$toolsPath$textureTool" -Wait -NoNewWindow -ArgumentList $textureArgs, "-f $fontTextureFormat", "$($file.BaseName).png" -WorkingDirectory $workingDir -RedirectStandardOutput ".\NUL"
+            Move-Item -Path "$workingDir$($file.BaseName).json" -Destination $targetDir -Force
+            Move-Item -Path "$workingDir$($file.BaseName).dds" -Destination $targetDir -Force
+        }
+        if(!$silent) { Write-Host }
     }
-    $files = Get-ChildItem -File -Path "$workingDir*" -Include $fileFilter
-    foreach($file in $files) {
-        if(!$silent) { Write-Host "." -NoNewline }
-        Start-Process -FilePath "$toolsPath$fontTool" -Wait -NoNewWindow -ArgumentList $file.Name, $fontMapSize -WorkingDirectory $workingDir -RedirectStandardOutput ".\NUL"
-        Start-Process -FilePath "$toolsPath$textureTool" -Wait -NoNewWindow -ArgumentList $textureArgs, "-f $fontTextureFormat", "$($file.BaseName).png" -WorkingDirectory $workingDir -RedirectStandardOutput ".\NUL"
-        Move-Item -Path "$workingDir$($file.BaseName).json" -Destination $targetDir -Force
-        Move-Item -Path "$workingDir$($file.BaseName).dds" -Destination $targetDir -Force
-    }
-    if(!$silent) { Write-Host }
 }
 
 if($package) {

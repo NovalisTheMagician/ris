@@ -1,8 +1,10 @@
+#include "window/Window.hpp"
 #include "script/ScriptEngine.hpp"
 
 #include "RIS.hpp"
 
-#include "ui/Userinterface.hpp"
+#include "misc/Version.hpp"
+
 #include "ui/Console.hpp"
 
 #include "loader/Loader.hpp"
@@ -14,98 +16,112 @@
 #include <algorithm>
 #include <numeric>
 
+#include <unordered_set>
+#include <filesystem>
+#include <fstream>
+
+#include <iostream>
+
 using namespace std::literals;
 
 namespace RIS
 {
     namespace Script
     {
-        void ScriptEngine::LoadScript(const std::string &scriptName, const std::string &module)
+        ScriptEngine::ScriptEngine()
+            : state(tcc_new())
         {
-            auto &loader = GetLoader();
-            try
-            {
-                std::string scriptContent = *loader.Load<std::string>(scriptName).get();
-                luaState.doString(scriptContent);
-                loadedScripts.insert(loadedScripts.end(), scriptName);
-            }
-            catch(const lua::LoadError &e)
-            {
-                UI::Console &console = GetUserinterface().GetConsole();
-                console.Print("Lua load error: "s + e.what());
-                Logger::Instance().Error("Lua load error: "s + e.what());
-            }
-            catch(const std::exception &e)
-            {
-                UI::Console &console = GetUserinterface().GetConsole();
-                console.Print("Script load error: "s + e.what());
-                Logger::Instance().Error("Script load error: "s + e.what());
-            }
+
+        }
+
+        ScriptEngine::~ScriptEngine()
+        {
+            tcc_delete(state);
         }
 
         void ScriptEngine::PostInit()
         {
-            UI::Console &console = GetUserinterface().GetConsole();
+            UI::Console &console = GetConsole();
 
-            auto execFunc = [this](std::vector<std::string> params)
-            { 
-                if(params.size() == 0) return std::string();
-                try
-                {
-                    std::string script;
-                    for (const auto &elem : params) script += elem + " ";
-                    auto ret = luaState.doString(script);
-                    //if(ret) return ret.toString();
-                    return std::string();
-                }
-                catch(const std::exception &e)
-                {
-                    return std::string(e.what());
-                }
-            };
-
-            console.BindFunc("execute", execFunc);
-            console.BindFunc("exec", execFunc);
             console.BindFunc("reload", [this](std::vector<std::string> params)
             {
-                if(params.size() == 0)
-                {
-                    Reload("");
-                } 
-                else
-                {
-                    std::string script = params.at(0);
-                    Reload(script);
-                }
+                Reload();
                 return "";
             });
 
             auto &loader = GetLoader();
         }
 
-        void ScriptEngine::Reload(const std::string &script)
+        void ScriptEngine::LoadScripts()
         {
-            if(script.empty())
+            auto &loader = GetLoader();
+            auto files = loader.GetContentsOfFolder(std::string("scripts/"));
+            auto tmpPath = std::filesystem::temp_directory_path();
+            tmpPath = tmpPath / Version::GAME_NAME;
+            auto tmpScriptsPath = tmpPath / "scripts";
+            if(!std::filesystem::exists(tmpScriptsPath))
             {
-                std::vector<std::string> scripts = loadedScripts;
-                loadedScripts.clear();
-                std::for_each(scripts.begin(), scripts.end(), [this](const std::string &script)
-                { 
-                    LoadScript(script);
-                });
+                if(!std::filesystem::exists(tmpPath))
+                    std::filesystem::create_directory(tmpPath);
+                std::filesystem::create_directory(tmpScriptsPath);
             }
-            else
+
+            //do defines here
+
+            tcc_add_sysinclude_path(state, tmpScriptsPath.generic_string().c_str());
+            tcc_add_include_path(state, tmpScriptsPath.generic_string().c_str());
+            tcc_add_library_path(state, tmpScriptsPath.generic_string().c_str());
+            tcc_set_output_type(state, TCC_OUTPUT_MEMORY);
+
+            tcc_set_error_func(state, nullptr, [](void* err_opaque, const char* msg)
             {
-                auto elem = std::find(loadedScripts.begin(), loadedScripts.end(), script);
-                if(elem != loadedScripts.end())
-                    loadedScripts.erase(elem);
-                LoadScript(script);
+                auto &console = GetConsole();
+                console.Print(msg);
+                std::cout << msg << std::endl;
+            });
+
+            for(const auto &file : files)
+            {
+                std::filesystem::path filePath(file);
+                std::string extension = filePath.extension().generic_string();
+                if(extension == ".h" || extension == ".a")
+                {
+                    auto fileContents = loader.LoadBytes(file);
+                    std::fstream stream(tmpPath / file, std::fstream::out | std::fstream::binary | std::fstream::trunc);
+                    if (!stream) {
+                        std::cerr << "file open failed: " << std::strerror(errno) << "\n";
+                    }
+                    stream.write(reinterpret_cast<char*>(fileContents.data()), fileContents.size());
+                }
+            }
+
+            for(const auto &file : files)
+            {
+                std::filesystem::path filePath(file);
+                if(filePath.extension().generic_string() == ".c")
+                {
+                    auto fileContents = loader.Load<std::string>(file);
+                    tcc_compile_string(state, (*fileContents).c_str());
+                }
+            }
+
+            //do external funcs here
+            auto &window = GetWindow();
+            window.RegisterScriptFunctions();
+
+            if(tcc_relocate(state, TCC_RELOCATE_AUTO) != -1)
+            {
+                tcc_list_symbols(state, &symbols, [](void *ctx, const char *name, const void *val)
+                {
+                    std::unordered_map<std::string, void*> *symbols = static_cast<std::unordered_map<std::string, void*>*>(ctx);
+                    symbols->insert_or_assign(name, const_cast<void*>(val));
+                });
             }
         }
 
-        LState& ScriptEngine::GetState()
+        void ScriptEngine::Reload()
         {
-            return luaState;
+            
         }
     }
 }

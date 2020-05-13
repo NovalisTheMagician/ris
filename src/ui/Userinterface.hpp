@@ -38,8 +38,6 @@ namespace RIS
 
             void PostInit();
 
-            void LoadLayout(const std::string &layout);
-
             Console& GetConsole();
 
             void Draw();

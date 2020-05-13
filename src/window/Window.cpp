@@ -14,6 +14,8 @@
 using std::string;
 using namespace std::literals::string_literals;
 
+#include <iostream>
+
 namespace RIS
 {
     namespace Window
@@ -96,9 +98,28 @@ namespace RIS
 
         void Window::PostInit()
         {
+            
+        }
+
+        void Window::RegisterScriptFunctions()
+        {
             auto &scriptEngine = GetScriptEngine();
-            scriptEngine.Register([this](){ Exit(0); }, "window", "exit");
-            scriptEngine.Register([this](bool relative){ SetRelativeMouse(relative); }, "window", "setRelativeMouse");
+
+            scriptEngine.Register<void(), 0>("G_Exit", [this]()
+            {
+                Exit(0);
+            });
+            scriptEngine.Register<void(int, const char*), 1>("G_Log", [](int severity, const char *msg)
+            {
+                if(severity == 0)
+                    Logger::Instance().Info(msg);
+                else if(severity == 1)
+                    Logger::Instance().Warning(msg);
+                else
+                    Logger::Instance().Error(msg);
+            });
+
+            scriptEngine.Register<void(bool)>("G_SetRelativeMouse", [this](bool relative){ SetRelativeMouse(relative); });
         }
 
         void  Window::SetRelativeMouse(bool setRelative)

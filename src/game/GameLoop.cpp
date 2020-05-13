@@ -39,12 +39,7 @@ namespace RIS
             bool god = false;
             interface.GetConsole().BindFunc("god", UI::Helpers::BoolFunc(god, "Godmode ON", "Godmode OFF"));
 
-            scriptEngine.LoadScript("scripts/main.lua");
-            scriptEngine.Register([](const char *msg){ Logger::Instance().Info("{lua}"s + msg); }, "logger", "info");
-            scriptEngine.Register([](const char *msg){ Logger::Instance().Warning("{lua}"s + msg); }, "logger", "warning");
-            scriptEngine.Register([](const char *msg){ Logger::Instance().Error("{lua}"s + msg); }, "logger", "error");
-
-            scriptEngine.CallFunction("", "main");
+            scriptEngine.CallFunction<void>("mainTest");
 
             //std::shared_ptr<Graphics::Model> cubeModel = loader.Load<Graphics::Model>("models/john.glb");
             //ResourceId catTexture = renderer.LoadTexture("john");

@@ -58,6 +58,7 @@ namespace RIS
 
             auto &scriptEngine = GetScriptEngine();
 
+            /*
             scriptEngine.Register([this](const char *str){ console.Print(str); }, "print");
             scriptEngine.Register([this](){ console.Toggle(); }, "console", "toggle");
             scriptEngine.Register([this](){ console.Open(); }, "console", "open");
@@ -168,6 +169,7 @@ namespace RIS
                 ContainerPtr container = layouts.at(id);
                 rootContainer = container;
             }, "ui", "setLayout");
+            */
         }
 
         Console &Userinterface::GetConsole()
@@ -175,18 +177,13 @@ namespace RIS
             return console;
         }
 
-        void Userinterface::LoadLayout(const std::string &layout)
-        {
-            
-        }
-
         void Userinterface::Draw()
         {
             textRenderer->Begin(static_cast<float>(uiWidth), static_cast<float>(uiHeight));
             if(showFps)
-                fpsLabel->Draw(*textRenderer.get(), glm::vec2());
-            rootContainer->Draw(*textRenderer.get(), glm::vec2());
-            console.Draw(*textRenderer.get());
+                fpsLabel->Draw(*textRenderer, glm::vec2());
+            rootContainer->Draw(*textRenderer, glm::vec2());
+            console.Draw(*textRenderer);
             textRenderer->End();
         }
 

@@ -57,6 +57,38 @@ namespace RIS
             });
         }
 
+        std::unordered_set<std::string> Loader::GetContentsOfFolder(const std::filesystem::path &folder)
+        {
+            std::unordered_set<std::string> contents;
+            if(!assetRoot.empty())
+            {
+                auto path = assetRoot / folder;
+                if(std::filesystem::is_directory(path))
+                {
+                    for(const auto &file : std::filesystem::directory_iterator(path))
+                    {
+                        if(file.is_regular_file())
+                        {
+                            std::filesystem::path filePath = folder / file.path().filename();
+                            contents.insert(filePath.generic_string());
+                        }
+                    }
+                }
+            }
+
+            for(auto it = archives.rbegin(); it != archives.rend(); ++it)
+            {
+                auto &archive = *it;
+                for(auto ait = archive.cbegin(); ait != archive.cend(); ++ait)
+                {
+                    
+                }
+                
+            }
+
+            return contents;
+        }
+
         std::vector<std::byte> Loader::LoadBytes(const std::string &name)
         {
             if(!assetRoot.empty())

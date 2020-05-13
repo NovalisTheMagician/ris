@@ -44,6 +44,8 @@ namespace RIS
 
             void Exit(int exitCode);
 
+            void RegisterScriptFunctions();
+
             bool HandleMessages();
             void Present();
 

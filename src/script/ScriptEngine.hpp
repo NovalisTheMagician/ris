@@ -1,127 +1,115 @@
 #pragma once
 
 #include "misc/Logger.hpp"
-#include "ui/Userinterface.hpp"
 
-//#include "RIS.hpp"
+#include "RIS.hpp"
 
-#include <LuaState.h>
-#include <LuaPrimitives.h>
+#include "ui/Console.hpp"
 
 #include <string>
 #include <vector>
 #include <stdexcept>
+#include <functional>
+#include <any>
+#include <unordered_map>
+
+#include <utility>
+#include <type_traits>
+
+#include <libtcc.h>
 
 namespace RIS
 {
     namespace Script
     {
+        //https://stackoverflow.com/a/45365798
+        template<typename Callable>
+        struct storage
+        {
+            storage() {}
+            std::decay_t<Callable> callable;
+        };
+
+        template<int, typename Callable, typename Ret, typename... Args>
+        auto fnptr_(Callable&& c, Ret (*)(Args...))
+        {
+            static bool used = false;
+            static storage<Callable> s;
+            using type = decltype(s.callable);
+
+            if(used)
+                s.callable.~type();
+            new (&s.callable) type(std::forward<Callable>(c));
+            used = true;
+
+            return [](Args... args) -> Ret {
+                return Ret(s.callable(std::forward<Args>(args)...));
+            };
+        }
+
+        template<typename Fn, int N = 0, typename Callable>
+        Fn* fnptr(Callable&& c)
+        {
+            return fnptr_<N>(std::forward<Callable>(c), (Fn*)nullptr);
+        }
+
         struct ScriptException : public std::runtime_error
         {
             ScriptException(std::string reason) : std::runtime_error(reason.c_str()) {}
         };
 
-        using LTable = lua::Table;
-        using LValue = lua::Value;
-        using LState = lua::State;
-
         class ScriptEngine
         {
         public:
-            ScriptEngine() = default;
-            ~ScriptEngine() = default;
+            ScriptEngine();
+            ~ScriptEngine();
             ScriptEngine(const ScriptEngine&) = delete;
             ScriptEngine& operator=(const ScriptEngine&) = delete;
             ScriptEngine(ScriptEngine&&) = default;
             ScriptEngine& operator=(ScriptEngine&&) = default;
 
-            void LoadScript(const std::string &scriptName, const std::string &module = "");
-
+            void LoadScripts();
             void PostInit();
-            void Reload(const std::string &script);
+            void Reload();
 
-            LState& GetState();
-
-            template<typename T>
-            void Register(T fun, const std::string &name);
-            template<typename T>
-            void Register(T fun, const std::string &table, const std::string &name);
+            template<typename Func, int Slot = 0>
+            void Register(const std::string &name, std::function<Func> func);
 
             template<typename Ret, typename... Args>
-            Ret CallFunction(const std::string &table, const std::string &name, Args...);
-            template<typename... Args>
-            void CallFunction(const std::string &table, const std::string &name, Args...);
+            Ret CallFunction(const std::string &name, Args...);
 
         private:
-            std::vector<std::string> loadedScripts;
+            TCCState* state;
 
-            lua::State luaState;
+            std::unordered_map<std::string, void*> symbols;
+            std::unordered_map<std::string, std::any> registerdSymbols;
 
         };
 
-        template<typename T>
-        void ScriptEngine::Register(T fun, const std::string &table, const std::string &name)
+        template<typename Func, int Slot>
+        void ScriptEngine::Register(const std::string &name, std::function<Func> func)
         {
-            if(!luaState[table.c_str()])
-                luaState.set(table.c_str(), lua::Table());
-            luaState[table.c_str()].set(name.c_str(), fun);
-        }
+            auto fn = fnptr<Func, Slot>(func);
+            registerdSymbols.insert_or_assign(name, std::move(fn));
 
-        template<typename T>
-        void ScriptEngine::Register(T fun, const std::string &name)
-        {
-            luaState.set(name.c_str(), fun);
+            auto f = std::any_cast<decltype(fn)>(registerdSymbols.at(name));
+
+            tcc_add_symbol(state, name.c_str(), f);
         }
 
         template<typename Ret, typename... Args>
-        Ret ScriptEngine::CallFunction(const std::string &table, const std::string &name, Args... args)
+        Ret ScriptEngine::CallFunction(const std::string &name, Args... args)
         {
-            lua::Value luaVal;
-            if(!table.empty())
-                luaVal = luaState[table.c_str()][name.c_str()];
+            using FuncPtr = Ret(*)(Args...);
+            if(symbols.count(name) > 0)
+            {
+                void *rawFunc = symbols.at(name);
+                FuncPtr func = static_cast<FuncPtr>(rawFunc);
+                return func(args...);
+            }
             else
-                luaVal = luaState[name.c_str()];
-            if(!luaVal.is<lua::Callable>())
             {
-                std::string msg = "function \"" + table + "." + name + "\" not found";
-                //GetSystems().GetUserinterface().GetConsole().Print(msg);
-                Logger::Instance().Error(msg);
-            }
-            
-            try
-            {
-                return luaVal.call(args...);
-            }
-            catch(const std::exception &e)
-            {
-                //GetSystems().GetUserinterface().GetConsole().Print(e.what());
-                Logger::Instance().Error(e.what());
-            }
-        }
-
-        template<typename... Args>
-        void ScriptEngine::CallFunction(const std::string &table, const std::string &name, Args... args)
-        {
-            lua::Value luaVal;
-            if(!table.empty())
-                luaVal = luaState[table.c_str()][name.c_str()];
-            else
-                luaVal = luaState[name.c_str()];
-            if(!luaVal.is<lua::Callable>())
-            {
-                std::string msg = "function \"" + table + "." + name + "\" not found";
-                //GetSystems().GetUserinterface().GetConsole().Print(msg);
-                Logger::Instance().Error(msg);
-            }
-
-            try
-            {
-                luaVal.call(args...);
-            }
-            catch(const std::exception &e)
-            {
-                //GetSystems().GetUserinterface().GetConsole().Print(e.what());
-                Logger::Instance().Error(e.what());
+                GetConsole().Print("Function \"" + name + "\" not found");
             }
         }
     }

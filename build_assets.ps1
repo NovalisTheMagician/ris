@@ -35,6 +35,9 @@ if($clear) {
     if(Test-Path -Path $buildPath) {
         Remove-Item -Path $buildPath -Recurse
     }
+    if(Test-Path -Path $packageName) {
+        Remove-Item -Path $packageName
+    }
 }
 
 if($build) {

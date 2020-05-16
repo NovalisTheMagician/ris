@@ -6,7 +6,7 @@ namespace RIS
 {
     namespace VertexType
     {
-        struct UIVertex
+        struct SpriteVertex
         {
             glm::vec2 position;
             glm::vec2 texCoords;

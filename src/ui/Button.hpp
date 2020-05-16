@@ -2,6 +2,9 @@
 
 #include "ui/Component.hpp"
 
+#include "graphics/Font.hpp"
+#include "graphics/Texture.hpp"
+
 #include <glm/glm.hpp>
 
 #include <string>
@@ -18,7 +21,7 @@ namespace RIS
         class Button : public Component
         {
         public:
-            Button();
+            Button(std::shared_ptr<Graphics::Font> defaultFont);
             virtual ~Button() = default;
             Button(const Button&) = default;
             Button& operator=(const Button&) = default;
@@ -29,23 +32,24 @@ namespace RIS
             void SetSize(const glm::vec2 &size);
 
             void SetText(const std::string &text);
-            void SetFont(int font, float size);
+            void SetFont(std::shared_ptr<Graphics::Font> font);
+            void SetFontSize(float size);
             void SetTextColor(const glm::vec4 &color);
 
             void SetColors(const glm::vec4 &normal, const glm::vec4 &hover, const glm::vec4 &down);
-            void SetImages(int normal, int hover, int down);
+            void SetImages(std::shared_ptr<Graphics::Texture> normal, std::shared_ptr<Graphics::Texture> hover, std::shared_ptr<Graphics::Texture> down);
 
             void SetNormalColor(const glm::vec4 &color);
-            void SetNormalImage(int image);
+            void SetNormalImage(std::shared_ptr<Graphics::Texture> image);
             void SetHoverColor(const glm::vec4 &color);
-            void SetHoverImage(int image);
+            void SetHoverImage(std::shared_ptr<Graphics::Texture> image);
             void SetDownColor(const glm::vec4 &color);
-            void SetDownImage(int image);
+            void SetDownImage(std::shared_ptr<Graphics::Texture> image);
 
             void SetCallback(ButtonFunc func);
 
             void Update() override;
-            void Draw(const glm::vec2 &parentPosition) override;
+            void Draw(Graphics::SpriteRenderer &renderer, const glm::vec2 &parentPosition) override;
 
             void OnMouseMove(float x, float y) override;
             void OnMouseDown(Input::InputButton button) override;
@@ -54,7 +58,7 @@ namespace RIS
         private:
             std::string text = "";
 
-            int font = 1;
+            std::shared_ptr<Graphics::Font> font;
             float fontSize = -1;
             glm::vec4 textColor = glm::vec4(0, 0, 0, 1);
 
@@ -63,7 +67,7 @@ namespace RIS
             glm::vec4 normalColor = glm::vec4(1, 1, 1, 1);
             glm::vec4 hoverColor = glm::vec4(0.7f, 0.7f, 0.7f, 1);
             glm::vec4 downColor = glm::vec4(0.5f, 0.5f, 0.5f, 1);
-            int normalImage = 1, hoverImage = 1, downImage = 1;
+            std::shared_ptr<Graphics::Texture> normalImage, hoverImage, downImage;
 
             glm::vec2 parentPos;
 

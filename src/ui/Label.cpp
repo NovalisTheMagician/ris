@@ -8,7 +8,11 @@ namespace RIS
 {
     namespace UI
     {
-        void Label::SetFont(int font, float fontSize)
+        Label::Label(std::shared_ptr<Graphics::Font> defaultFont)
+            : font(defaultFont)
+        {}
+
+        void Label::SetFont(std::shared_ptr<Graphics::Font> font, float fontSize)
         {
             this->font = font;
             this->fontSize = fontSize;
@@ -39,9 +43,9 @@ namespace RIS
 
         }
 
-        void Label::Draw(const glm::vec2 &parentPosition)
+        void Label::Draw(Graphics::SpriteRenderer &renderer, const glm::vec2 &parentPosition)
         {
-            //renderer.DrawText(text, font, parentPosition + position, fontSize, fontColor);
+            renderer.DrawString(text, *font.get(), fontSize, parentPosition + position, fontColor);
         }
     }
 }

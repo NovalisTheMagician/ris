@@ -9,7 +9,7 @@ namespace RIS
 
         }
 
-        void InputBox::Draw(const glm::vec2 &parentPosition)
+        void InputBox::Draw(Graphics::SpriteRenderer &renderer, const glm::vec2 &parentPosition)
         {
 
         }

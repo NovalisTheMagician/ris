@@ -26,7 +26,7 @@ namespace RIS
                 throw WindowException("GLFW could't initialize");
 
             glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
             glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 #ifdef _DEBUG
@@ -105,24 +105,20 @@ namespace RIS
         {
             auto &scriptEngine = GetScriptEngine();
 
-            scriptEngine.Register<void(), 0>("G_Exit", [this]()
-            {
-                Exit(0);
-            });
-            scriptEngine.Register<void(int, const char*), 1>("G_Log", [](int severity, const char *msg)
+            scriptEngine.Register<void()>("W_Exit", [this](){ Exit(0); });
+            scriptEngine.Register<void(int, const char*)>("W_Log", [](int severity, const char *msg)
             {
                 if(severity == 0)
                     Logger::Instance().Info(msg);
                 else if(severity == 1)
                     Logger::Instance().Warning(msg);
-                else
+                else if(severity == 2)
                     Logger::Instance().Error(msg);
             });
-
-            scriptEngine.Register<void(bool)>("G_SetRelativeMouse", [this](bool relative){ SetRelativeMouse(relative); });
+            scriptEngine.Register<void(int)>("W_SetRelativeMouse", [this](int relative){ SetRelativeMouse(relative); });
         }
 
-        void  Window::SetRelativeMouse(bool setRelative)
+        void Window::SetRelativeMouse(bool setRelative)
         {
             if(setRelative)
             {

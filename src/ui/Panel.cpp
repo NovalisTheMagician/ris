@@ -21,7 +21,7 @@ namespace RIS
             this->size = size;
         }
 
-        void Panel::SetImage(int image)
+        void Panel::SetImage(std::shared_ptr<Graphics::Texture> image)
         {
             backgroundImage = image;
         }
@@ -109,13 +109,16 @@ namespace RIS
             std::for_each(components.begin(), components.end(), [](auto component){ component->Update(); });
         }
 
-        void Panel::Draw(const glm::vec2 &parentPosition)
+        void Panel::Draw(Graphics::SpriteRenderer &renderer, const glm::vec2 &parentPosition)
         {
             glm::vec2 pos = parentPosition + position;
 
-            //renderer.SetTexture(backgroundImage, 0);
-            //renderer.DrawQuad(pos, size, color);
-            //std::for_each(components.begin(), components.end(), [&renderer, &pos](auto component){ component->Draw(renderer, pos); });
+            if(backgroundImage)
+                renderer.DrawTexture(*backgroundImage, pos, size, color);
+            else
+                renderer.DrawRect(pos, size, color);
+            
+            std::for_each(components.begin(), components.end(), [&renderer, &pos](auto component){ component->Draw(renderer, pos); });
         }
     }
 }

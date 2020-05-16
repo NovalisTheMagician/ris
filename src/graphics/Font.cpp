@@ -74,6 +74,11 @@ namespace RIS
             return spaceAdvance;
         }
 
+        float Font::GetMaxHeight(float size) const
+        {
+            return height * size;
+        }
+
         size_t Font::NumGlyphs() const
         {
             return glyphs.size();

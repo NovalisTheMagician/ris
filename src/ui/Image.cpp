@@ -4,7 +4,7 @@ namespace RIS
 {
     namespace UI
     {
-        void Image::SetImage(int image)
+        void Image::SetImage(std::shared_ptr<Graphics::Texture> image)
         {
             this->image = image;
         }
@@ -29,11 +29,11 @@ namespace RIS
 
         }
 
-        void Image::Draw(const glm::vec2 &parentPosition)
+        void Image::Draw(Graphics::SpriteRenderer &renderer, const glm::vec2 &parentPosition)
         {
             glm::vec2 pos = parentPosition + position;
-            //renderer.SetTexture(image, 0);
-            //renderer.DrawQuad(position, size, {1, 1, 1, 1});
+            if(image)
+                renderer.DrawTexture(*image, position, size, {1, 1, 1, 1});
         }
     }
 }

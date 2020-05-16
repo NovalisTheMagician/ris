@@ -2,6 +2,8 @@
 
 #include "ui/Container.hpp"
 
+#include "graphics/Texture.hpp"
+
 #include <glm/glm.hpp>
 
 #include <string>
@@ -25,7 +27,7 @@ namespace RIS
 
             void SetColor(const glm::vec4 &color);
             void SetPosition(const glm::vec2 &position);
-            void SetImage(int image);
+            void SetImage(std::shared_ptr<Graphics::Texture> image);
             void SetSize(const glm::vec2 &size);
 
             void Add(ComponentPtr component) override;
@@ -42,7 +44,7 @@ namespace RIS
             void OnKeyUp(Input::InputKey keyCode) override;
 
             void Update() override;
-            void Draw(const glm::vec2 &parentPosition) override;
+            void Draw(Graphics::SpriteRenderer &renderer, const glm::vec2 &parentPosition) override;
 
         private:
             std::vector<ComponentPtr> components;
@@ -50,7 +52,7 @@ namespace RIS
             glm::vec4 color;
             glm::vec2 position, size;
 
-            int backgroundImage = 1;
+            std::shared_ptr<Graphics::Texture> backgroundImage;
 
         };
         using PanelPtr = std::shared_ptr<Panel>;

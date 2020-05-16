@@ -7,6 +7,8 @@
 
 #include "input/KeyDefs.hpp"
 
+#include "graphics/SpriteRenderer.hpp"
+
 namespace RIS
 {
     namespace UI
@@ -29,7 +31,7 @@ namespace RIS
             virtual std::string GetName() const { return name; };
 
             virtual void Update() = 0;
-            virtual void Draw(const glm::vec2 &parentPosition) = 0;
+            virtual void Draw(Graphics::SpriteRenderer &renderer, const glm::vec2 &parentPosition) = 0;
 
         protected:
             std::string name;

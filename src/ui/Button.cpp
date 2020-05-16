@@ -8,8 +8,8 @@ namespace RIS
 {
     namespace UI
     {
-        Button::Button()
-            : callback([](){})
+        Button::Button(std::shared_ptr<Graphics::Font> defaultFont)
+            : callback([](){}), font(defaultFont)
         {
         }
 
@@ -28,9 +28,13 @@ namespace RIS
             this->text = text;
         }
 
-        void Button::SetFont(int font, float size)
+        void Button::SetFont(std::shared_ptr<Graphics::Font> font)
         {
             this->font = font;
+        }
+
+        void Button::SetFontSize(float size)
+        {
             this->fontSize = size;
         }
 
@@ -46,7 +50,7 @@ namespace RIS
             downColor = down;
         }
 
-        void Button::SetImages(int normal, int hover, int down)
+        void Button::SetImages(std::shared_ptr<Graphics::Texture> normal, std::shared_ptr<Graphics::Texture> hover, std::shared_ptr<Graphics::Texture> down)
         {
             normalImage = normal;
             hoverImage = hover;
@@ -58,7 +62,7 @@ namespace RIS
             normalColor = color;
         }
 
-        void Button::SetNormalImage(int image)
+        void Button::SetNormalImage(std::shared_ptr<Graphics::Texture> image)
         {
             normalImage = image;
         }
@@ -68,7 +72,7 @@ namespace RIS
             hoverColor = color;
         }
 
-        void Button::SetHoverImage(int image)
+        void Button::SetHoverImage(std::shared_ptr<Graphics::Texture> image)
         {
             hoverImage = image;
         }
@@ -78,7 +82,7 @@ namespace RIS
             downColor = color;
         }
 
-        void Button::SetDownImage(int image)
+        void Button::SetDownImage(std::shared_ptr<Graphics::Texture> image)
         {
             downImage = image;
         }
@@ -93,16 +97,16 @@ namespace RIS
             
         }
 
-        void Button::Draw(const glm::vec2 &parentPosition)
+        void Button::Draw(Graphics::SpriteRenderer &renderer, const glm::vec2 &parentPosition)
         {
             parentPos = parentPosition;
 
             glm::vec2 pos = parentPosition + position;
-            //TextMetrics metrics = renderer.MeasureText(text, font, fontSize);
-            //glm::vec2 textPos = pos + ((size / glm::vec2(2)) - (glm::vec2(metrics.width, metrics.height) / glm::vec2(2)));
+            Graphics::TextMetrics metrics = font->MeasureString(text, fontSize);
+            glm::vec2 textPos = pos + ((size / glm::vec2(2)) - (glm::vec2(metrics.width, metrics.height) / glm::vec2(2)));
 
             glm::vec4 color = normalColor;
-            int image = normalImage;
+            std::shared_ptr<Graphics::Texture> image = normalImage;
 
             if(isClickedDown)
             {
@@ -115,9 +119,11 @@ namespace RIS
                 image = hoverImage;
             }
 
-            //renderer.SetTexture(image, 0);
-            //renderer.DrawQuad(pos, size, color);
-            //renderer.DrawText(text, font, textPos, fontSize, textColor);
+            if(image)
+                renderer.DrawTexture(*image, pos, size, color);
+            else
+                renderer.DrawRect(pos, size, color);
+            renderer.DrawString(text, *font.get(), fontSize, textPos, textColor);
         }
 
         void Button::OnMouseMove(float x, float y)

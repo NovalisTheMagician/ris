@@ -1,4 +1,5 @@
 #include "window/Window.hpp"
+#include "ui/Userinterface.hpp"
 #include "script/ScriptEngine.hpp"
 
 #include "RIS.hpp"
@@ -30,9 +31,7 @@ namespace RIS
     {
         ScriptEngine::ScriptEngine()
             : state(tcc_new())
-        {
-
-        }
+        {}
 
         ScriptEngine::~ScriptEngine()
         {
@@ -55,7 +54,7 @@ namespace RIS
         void ScriptEngine::LoadScripts()
         {
             auto &loader = GetLoader();
-            auto files = loader.GetContentsOfFolder(std::string("scripts/"));
+            auto files = loader.GetFilesFromFolder(std::string("scripts"));
             auto tmpPath = std::filesystem::temp_directory_path();
             tmpPath = tmpPath / Version::GAME_NAME;
             auto tmpScriptsPath = tmpPath / "scripts";
@@ -80,6 +79,7 @@ namespace RIS
                 std::cout << msg << std::endl;
             });
 
+            //extract the static libraries and headers into tmp
             for(const auto &file : files)
             {
                 std::filesystem::path filePath(file);
@@ -90,11 +90,13 @@ namespace RIS
                     std::fstream stream(tmpPath / file, std::fstream::out | std::fstream::binary | std::fstream::trunc);
                     if (!stream) {
                         std::cerr << "file open failed: " << std::strerror(errno) << "\n";
+                        continue;
                     }
                     stream.write(reinterpret_cast<char*>(fileContents.data()), fileContents.size());
                 }
             }
 
+            //compile the source scripts
             for(const auto &file : files)
             {
                 std::filesystem::path filePath(file);
@@ -107,21 +109,31 @@ namespace RIS
 
             //do external funcs here
             auto &window = GetWindow();
+            auto &interface = GetUserinterface();
             window.RegisterScriptFunctions();
+            interface.RegisterScriptFunctions();
 
             if(tcc_relocate(state, TCC_RELOCATE_AUTO) != -1)
             {
                 tcc_list_symbols(state, &symbols, [](void *ctx, const char *name, const void *val)
                 {
                     std::unordered_map<std::string, void*> *symbols = static_cast<std::unordered_map<std::string, void*>*>(ctx);
-                    symbols->insert_or_assign(name, const_cast<void*>(val));
+                    if(name[0] != '_') // only add symbols which are not library symbols
+                    {
+                        symbols->insert_or_assign(name, const_cast<void*>(val));
+                    }
                 });
             }
         }
 
         void ScriptEngine::Reload()
         {
-            
+            tcc_delete(state);
+            state = tcc_new();
+
+            symbols.clear();
+
+            LoadScripts();
         }
     }
 }

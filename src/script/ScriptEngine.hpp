@@ -10,9 +10,8 @@
 #include <vector>
 #include <stdexcept>
 #include <functional>
-#include <any>
 #include <unordered_map>
-
+#include <optional>
 #include <utility>
 #include <type_traits>
 
@@ -75,6 +74,9 @@ namespace RIS
             template<typename Func, int Slot = 0>
             void Register(const std::string &name, std::function<Func> func);
 
+            template<typename T>
+            std::optional<T> GetSymbol(const std::string &name);
+
             template<typename Ret, typename... Args>
             Ret CallFunction(const std::string &name, Args...);
 
@@ -82,7 +84,6 @@ namespace RIS
             TCCState* state;
 
             std::unordered_map<std::string, void*> symbols;
-            std::unordered_map<std::string, std::any> registerdSymbols;
 
         };
 
@@ -90,11 +91,20 @@ namespace RIS
         void ScriptEngine::Register(const std::string &name, std::function<Func> func)
         {
             auto fn = fnptr<Func, Slot>(func);
-            registerdSymbols.insert_or_assign(name, std::move(fn));
+            tcc_add_symbol(state, name.c_str(), fn);
+        }
 
-            auto f = std::any_cast<decltype(fn)>(registerdSymbols.at(name));
-
-            tcc_add_symbol(state, name.c_str(), f);
+        template<typename T>
+        std::optional<T> ScriptEngine::GetSymbol(const std::string &name)
+        {
+            if(symbols.count(name) > 0)
+            {
+                T* val = static_cast<T*>(symbols.at(name));
+                return *val;
+            }
+            
+            GetConsole().Print("Symbol \"" + name + "\" not found");
+            return std::nullopt;
         }
 
         template<typename Ret, typename... Args>
@@ -110,6 +120,7 @@ namespace RIS
             else
             {
                 GetConsole().Print("Function \"" + name + "\" not found");
+                return Ret();
             }
         }
     }

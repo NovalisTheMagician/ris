@@ -45,6 +45,7 @@ namespace RIS
             float GetSize() const;
             float GetMaxAdvance() const;
             float GetSpaceAdvance() const;
+            float GetMaxHeight(float size) const;
 
             size_t NumGlyphs() const;
             bool HasGlyph(char character) const;

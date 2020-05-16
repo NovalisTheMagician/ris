@@ -8,7 +8,7 @@
 
 #include "input/KeyDefs.hpp"
 
-#include "graphics/TextRenderer.hpp"
+#include "graphics/SpriteRenderer.hpp"
 #include "graphics/Font.hpp"
 
 #include "misc/Timer.hpp"
@@ -62,7 +62,7 @@ namespace RIS
             bool IsOpen();
 
             void Update(const Timer &timer);
-            void Draw(Graphics::TextRenderer &textRenderer);
+            void Draw(Graphics::SpriteRenderer &renderer);
 
             bool ProcessLine(const std::string &lineToProcess);
 
@@ -71,6 +71,7 @@ namespace RIS
 
         private:
             std::string SetParam(std::vector<std::string> params);
+            glm::vec2 GetPosForLine(int lineNr);
 
         private:
             bool isOpen = false;
@@ -86,6 +87,8 @@ namespace RIS
             glm::vec4 backgroundColor = glm::vec4(0, 0, 0, 0.95f);
             glm::vec4 fontColor = glm::vec4(0.7f, 0.7f, 0.7f, 1);
 
+            std::string cursor = "_";
+
             int maxLines;
             float maxLineHeight;
             std::vector<std::string> lines;
@@ -94,7 +97,7 @@ namespace RIS
             int historyIndex;
             std::vector<std::string> inputHistory;
 
-            float openSpeed = 1000;
+            float openSpeed = 2000;
 
             std::unordered_map<std::string, ConsoleFunc> funcVars;
 

@@ -2,6 +2,8 @@
 
 #include "ui/Component.hpp"
 
+#include "graphics/Texture.hpp"
+
 #include <glm/glm.hpp>
 
 #include <string>
@@ -21,16 +23,16 @@ namespace RIS
             Image(Image&&) = default;
             Image& operator=(Image&&) = default;
 
-            void SetImage(int image);
+            void SetImage(std::shared_ptr<Graphics::Texture> image);
             void SetPosition(const glm::vec2 &position);
             void SetSize(const glm::vec2 &size);
             void SetColor(const glm::vec4 &color);
 
             void Update() override;
-            void Draw(const glm::vec2 &parentPosition) override;
+            void Draw(Graphics::SpriteRenderer &renderer, const glm::vec2 &parentPosition) override;
 
         private:
-            int image = 1;
+            std::shared_ptr<Graphics::Texture> image;
             glm::vec4 color = glm::vec4(1, 1, 1, 1);
             glm::vec2 position, size;
 

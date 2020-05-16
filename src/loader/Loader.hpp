@@ -45,7 +45,7 @@ namespace RIS
 
             void PostInit();
 
-            std::unordered_set<std::string> GetContentsOfFolder(const std::filesystem::path &folder);
+            std::unordered_set<std::string> GetFilesFromFolder(const std::filesystem::path &folder);
 
             template<typename T>
             void RegisterLoadFunction(LoadFunc<T> function, std::optional<DefaultFunc<T>> defaultFunc = {});

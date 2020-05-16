@@ -29,9 +29,7 @@ namespace RIS
 
         void Userinterface::PostInit()
         {
-            textRenderer = std::make_unique<Graphics::TextRenderer>();
-
-            console.InitLimits(glm::vec2(uiWidth, uiHeight));
+            renderer = std::make_unique<Graphics::SpriteRenderer>();
 
             auto &loader = GetLoader();
             defaultFont = loader.Load<Graphics::Font>("fonts/unispace.json");
@@ -40,8 +38,10 @@ namespace RIS
             uiWidth = config.GetValue("r_width", 800);
             uiHeight = config.GetValue("r_height", 600);
 
+            console.InitLimits(glm::vec2(uiWidth, uiHeight));
+
             fpsLabel = std::make_shared<Label>(defaultFont);
-            fpsLabel->SetPosition({0, uiHeight - 22});
+            fpsLabel->SetPosition({0, 0});
             fpsLabel->SetText("0");
             fpsLabel->SetTextColor({1, 1, 1, 1});
             fpsLabel->SetFont(defaultFont, 16);
@@ -55,8 +55,6 @@ namespace RIS
             input.RegisterButtonDown("ui", [this](Input::InputButton button){ OnMouseDown(button); });
             input.RegisterButtonUp("ui", [this](Input::InputButton button){ OnMouseUp(button); });
             input.RegisterKeyDown("ui", [this](Input::InputKey key){ OnKeyDown(key); });
-
-            auto &scriptEngine = GetScriptEngine();
 
             /*
             scriptEngine.Register([this](const char *str){ console.Print(str); }, "print");
@@ -172,6 +170,108 @@ namespace RIS
             */
         }
 
+        void Userinterface::RegisterScriptFunctions()
+        {
+            auto &scriptEngine = GetScriptEngine();
+            auto &loader = GetLoader();
+
+            scriptEngine.Register<void(const char*), 2>("C_Print", [this](const char *msg){ console.Print(msg); });
+            scriptEngine.Register<void(), 1>("C_OpenConsole", [this](){ console.Open(); });
+            scriptEngine.Register<void(), 2>("C_CloseConsole", [this](){ console.Close(); });
+            scriptEngine.Register<void(), 3>("C_ToggleConsole", [this](){ console.Toggle(); });
+
+            scriptEngine.Register<float(), -2>("UI_GetWidth", [this](){ return static_cast<float>(uiWidth); });
+            scriptEngine.Register<float(), -3>("UI_GetHeight", [this](){ return static_cast<float>(uiHeight); });
+
+            scriptEngine.Register<void(), -1>("UI_ClearRoot", [this]()
+            {
+                rootContainer->RemoveAll();
+            });
+
+            scriptEngine.Register<void(void*), 0>("UI_AddToRoot", [this](void *component)
+            {
+                auto comp = std::find_if(std::begin(components), std::end(components), 
+                    [&component](const ComponentPtr &elem) { return static_cast<Component*>(component) == elem.get(); });
+                if(comp != std::end(components))
+                    rootContainer->Add(*comp);
+            });
+
+            scriptEngine.Register<void*(const char*), 1>("UI_CreateImage", [this](const char *name)
+            {
+                ImagePtr image = std::make_shared<Image>();
+                image->SetName(name);
+                components.push_back(image);
+                return image.get();
+            });
+
+            scriptEngine.Register<void(void*, float, float), 2>("UI_ImageSetPosition", [this](void *image, float x, float y)
+            {
+                Image *i = static_cast<Image*>(image);
+                i->SetPosition({x, y});
+            });
+
+            scriptEngine.Register<void(void*, float, float), 3>("UI_ImageSetSize", [this](void *image, float w, float h)
+            {
+                Image *i = static_cast<Image*>(image);
+                i->SetSize({w, h});
+            });
+
+            scriptEngine.Register<void(void*, const char*), 4>("UI_ImageSetImage", [this, &loader](void *image, const char *textureName)
+            {
+                Image *i = static_cast<Image*>(image);
+                auto texture = loader.Load<Graphics::Texture>(textureName);
+                i->SetImage(texture);
+            });
+
+            scriptEngine.Register<void*(const char*), 5>("UI_CreateButton", [this](const char *name)
+            {
+                ButtonPtr button = std::make_shared<Button>(defaultFont);
+                button->SetName(name);
+                components.push_back(button);
+                return button.get();
+            });
+
+            scriptEngine.Register<void(void*, float, float), 6>("UI_ButtonSetPosition", [this](void *button, float x, float y)
+            {
+                Button *b = static_cast<Button*>(button);
+                b->SetPosition({x, y});
+            });
+
+            scriptEngine.Register<void(void*, float, float), 7>("UI_ButtonSetSize", [this](void *button, float w, float h)
+            {
+                Button *b = static_cast<Button*>(button);
+                b->SetSize({w, h});
+            });
+
+            scriptEngine.Register<void(void*, const char*), 8>("UI_ButtonSetText", [this](void *button, const char *text)
+            {
+                Button *b = static_cast<Button*>(button);
+                b->SetText(text);
+            });
+
+            scriptEngine.Register<void(void*, const char*), 9>("UI_ButtonSetFont", [this, &loader](void *button, const char *fontName)
+            {
+                Button *b = static_cast<Button*>(button);
+                auto font = loader.Load<Graphics::Font>(fontName);
+                if(font)
+                {
+                    b->SetFont(font);
+                }
+            });
+
+            scriptEngine.Register<void(void*, float), 10>("UI_ButtonSetFontSize", [this](void *button, float fontSize)
+            {
+                Button *b = static_cast<Button*>(button);
+                b->SetFontSize(fontSize);
+            });
+
+            scriptEngine.Register<void(void*, void(*)()), 11>("UI_ButtonSetCallback", [this](void *button, void(*btnCallback)())
+            {
+                Button *b = static_cast<Button*>(button);
+                b->SetCallback(btnCallback);
+            });
+        }
+
         Console &Userinterface::GetConsole()
         {
             return console;
@@ -179,12 +279,12 @@ namespace RIS
 
         void Userinterface::Draw()
         {
-            textRenderer->Begin(static_cast<float>(uiWidth), static_cast<float>(uiHeight));
+            renderer->Begin(static_cast<float>(uiWidth), static_cast<float>(uiHeight));
             if(showFps)
-                fpsLabel->Draw(*textRenderer, glm::vec2());
-            rootContainer->Draw(*textRenderer, glm::vec2());
-            console.Draw(*textRenderer);
-            textRenderer->End();
+                fpsLabel->Draw(*renderer, glm::vec2());
+            rootContainer->Draw(*renderer, glm::vec2());
+            console.Draw(*renderer);
+            renderer->End();
         }
 
         void Userinterface::Update(const Timer &timer)
@@ -206,7 +306,6 @@ namespace RIS
 
         void Userinterface::OnMouseMove(float x, float y)
         {
-            y = uiHeight - y;
             rootContainer->OnMouseMove(x, y);
         }
 

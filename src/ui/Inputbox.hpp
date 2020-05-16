@@ -33,7 +33,7 @@ namespace RIS
             std::string GetText() const;
 
             void Update() override;
-            void Draw(const glm::vec2 &parentPosition) override;
+            void Draw(Graphics::SpriteRenderer &renderer, const glm::vec2 &parentPosition) override;
 
         private:
             std::string previewText, text;

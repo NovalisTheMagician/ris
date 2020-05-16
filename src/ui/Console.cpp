@@ -12,6 +12,8 @@
 #include "misc/StringSupport.hpp"
 #include "misc/MathHelper.hpp"
 
+#include <cmath>
+
 namespace RIS
 {
     namespace UI
@@ -21,8 +23,8 @@ namespace RIS
             auto &loader = GetLoader();
 
             this->viewSize = viewSize;
-            maxY = viewSize.y * 0.5f;
-            currentY = viewSize.y;
+            maxY = 0;
+            currentY = -(viewSize.y * 0.5f);
 
             consoleFont = loader.Load<Graphics::Font>("fonts/fsex302.json");
             maxLineHeight = consoleFont->GetMaxHeight(consoleFontSize);
@@ -77,11 +79,25 @@ namespace RIS
             return isOpen;
         }
 
+        int roundHalf(float f)
+        {
+            return static_cast<int>(std::floorf(f + 0.5f));
+        }
+
         void Console::Update(const Timer &timer)
         {
+            if(roundHalf(timer.Total()) % 2)
+            {
+                cursor = "_";
+            }
+            else
+            {
+                cursor = "";
+            }
+
             if(isMoving)
             {
-                float dir = -1;
+                float dir = 1;
                 if(!isOpen)
                 {
                     dir = -dir;
@@ -89,34 +105,39 @@ namespace RIS
 
                 currentY += dir * openSpeed * timer.Delta();
 
-                if(isOpen && currentY <= maxY)
+                if(isOpen && currentY >= maxY)
                 {
                     isMoving = false;
                     currentY = maxY;
                 }
-                else if(!isOpen && currentY >= viewSize.y)
+                else if(!isOpen && currentY <= -(viewSize.y * 0.5f))
                 {
                     isMoving = false;
-                    currentY = viewSize.y;
+                    currentY = -(viewSize.y * 0.5f);
                 }
             }
         }
 
-        void Console::Draw(Graphics::TextRenderer &textRenderer)
+        glm::vec2 Console::GetPosForLine(int lineNr)
+        {
+            float maxHeight = viewSize.y * 0.5f;
+            return {0, currentY + (maxHeight - maxLineHeight - (lineNr * maxLineHeight) - offsetY)};
+        }
+
+        void Console::Draw(Graphics::SpriteRenderer &renderer)
         {
             if(isOpen || isMoving)
             {
-                //renderer.SetTexture(1, 0);
-                //renderer.DrawQuad({0, currentY}, {viewSize.x, maxY}, backgroundColor);
+                renderer.DrawRect({0, currentY}, {viewSize.x, viewSize.y * 0.5f}, backgroundColor);
 
                 auto it = lines.begin();
                 for(int i = 1; it != lines.end(); ++it, ++i)
                 {
                     const std::string &msg = *it;
-                    glm::vec2 pos = {0, (currentY + i * maxLineHeight) + offsetY};
-                    textRenderer.DrawString(msg, *consoleFont.get(), consoleFontSize, pos, fontColor);
+                    glm::vec2 pos = GetPosForLine(i);
+                    renderer.DrawString(msg, *consoleFont.get(), consoleFontSize, pos, fontColor);
                 }
-                textRenderer.DrawString(">" + inputLine + "_", *consoleFont.get(), consoleFontSize, {0, currentY + offsetY}, fontColor);
+                renderer.DrawString(">" + inputLine + cursor, *consoleFont.get(), consoleFontSize, GetPosForLine(0), fontColor);
             }
         }
 

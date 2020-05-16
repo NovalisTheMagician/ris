@@ -2,6 +2,8 @@
 
 #include "ui/Component.hpp"
 
+#include "graphics/Font.hpp"
+
 #include <glm/glm.hpp>
 
 #include <string>
@@ -14,27 +16,27 @@ namespace RIS
         class Label : public Component
         {
         public:
-            Label() = default;
+            Label(std::shared_ptr<Graphics::Font> defaultFont);
             virtual ~Label() = default;
             Label(const Label&) = default;
             Label& operator=(const Label&) = default;
             Label(Label&&) = default;
             Label& operator=(Label&&) = default;
 
-            void SetFont(int font, float fontSize);
+            void SetFont(std::shared_ptr<Graphics::Font> font, float fontSize);
             void SetTextColor(const glm::vec4 &color);
             void SetPosition(const glm::vec2 &position);
             void SetVisible(bool visible);
             void SetText(const std::string &text);
 
             void Update() override;
-            void Draw(const glm::vec2 &parentPosition) override;
+            void Draw(Graphics::SpriteRenderer &renderer, const glm::vec2 &parentPosition) override;
 
         private:
             glm::vec2 position;
             std::string text = "";
 
-            int font = 1;
+            std::shared_ptr<Graphics::Font> font;
             float fontSize = -1;
             glm::vec4 fontColor = glm::vec4(1, 1, 1, 1);
             bool isVisible = true;

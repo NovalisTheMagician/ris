@@ -57,7 +57,7 @@ namespace RIS
             });
         }
 
-        std::unordered_set<std::string> Loader::GetContentsOfFolder(const std::filesystem::path &folder)
+        std::unordered_set<std::string> Loader::GetFilesFromFolder(const std::filesystem::path &folder)
         {
             std::unordered_set<std::string> contents;
             if(!assetRoot.empty())
@@ -81,9 +81,11 @@ namespace RIS
                 auto &archive = *it;
                 for(auto ait = archive.cbegin(); ait != archive.cend(); ++ait)
                 {
-                    
+                    std::filesystem::path file(ait->name);
+                    auto path = file.parent_path();
+                    if(path == folder)
+                        contents.insert(file.generic_string());
                 }
-                
             }
 
             return contents;

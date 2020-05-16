@@ -20,6 +20,10 @@
 
 #include <memory>
 
+#include <iostream>
+
+#include "graphics/SpriteRenderer.hpp"
+
 using namespace std::literals;
 
 namespace RIS
@@ -41,6 +45,10 @@ namespace RIS
 
             scriptEngine.CallFunction<void>("mainTest");
 
+            std::cout << scriptEngine.GetSymbol<int>("truth").value() << std::endl;
+
+            std::shared_ptr<Graphics::Texture> catTexture = loader.Load<Graphics::Texture>("textures/meow.dds");
+            std::shared_ptr<Graphics::Font> font = loader.Load<Graphics::Font>("fonts/immortal.json");
             //std::shared_ptr<Graphics::Model> cubeModel = loader.Load<Graphics::Model>("models/john.glb");
             //ResourceId catTexture = renderer.LoadTexture("john");
             glm::mat4 projection = glm::perspective(glm::radians(60.0f), 4.0f / 3.0f, 0.1f, 1000.0f);
@@ -49,6 +57,8 @@ namespace RIS
 
             glm::vec3 camPos(std::cosf(0), 5, std::sinf(0));
             float x = 0;
+
+            Graphics::SpriteRenderer rend;
 
             glm::vec4 clearColor(0.392f, 0.584f, 0.929f, 1.0f);
 
@@ -69,6 +79,12 @@ namespace RIS
                 interface.Update(timer);
 
                 defaultFramebuffer.Clear(clearColor, 1.0f);
+
+                /*
+                rend.Begin(800, 600);
+                rend.DrawRect({0, 0}, {800, 200}, {0, 0, 0, 0.2f});
+                rend.End();
+                */
 
                 //renderer3d.Begin(projection * view);
                 //renderer3d.Draw(cubeModel, world);

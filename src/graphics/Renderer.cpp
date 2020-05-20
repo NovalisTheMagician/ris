@@ -1,3 +1,13 @@
+#define TINYGLTF_IMPLEMENTATION
+#define TINYGLTF_NO_EXTERNAL_IMAGE
+#define TINYGLTF_USE_RAPIDJSON
+#define TINYGLTF_USE_CPP14
+#define TINYGLTF_NO_INCLUDE_STB_IMAGE
+#define TINYGLTF_NO_INCLUDE_STB_IMAGE_WRITE
+#define TINYGLTF_NO_STB_IMAGE_WRITE
+#define TINYGLTF_NO_STB_IMAGE
+#include <tiny_gltf.h>
+
 #include "graphics/Renderer.hpp"
 
 #include "RIS.hpp"
@@ -30,7 +40,7 @@
 using namespace std::literals;
 
 // Windows "hack" to force some laptops to use the highperformance GPU
-// some intel integrated gpus don't support opengl 4.6
+// some intel integrated gpus don't support opengl 4.5
 // I might, in the future, reduce the required opengl version
 #ifdef _WIN32
 extern "C" 
@@ -142,6 +152,7 @@ namespace RIS
             loadedTextures.insert({"__DEFAULT_TEX", std::make_shared<Texture>(glm::vec4(1, 1, 1, 1))});
             loadedTextures.insert({"__MISSING_TEX", std::make_shared<Texture>(glm::vec4(1, 0, 1, 1))});
 
+            loadedMeshes.insert({"__MISSING_MESH", std::make_shared<Mesh>(Buffer(VertexType::ModelVertex(), GL_DYNAMIC_STORAGE_BIT), Buffer((uint16_t)0, GL_DYNAMIC_STORAGE_BIT), 1)});
         }
 
         void Renderer::PostInit()
@@ -265,6 +276,146 @@ namespace RIS
                 if(cache)
                     loadedFonts.insert_or_assign(name, font);
                 return font;
+            });
+
+            Logger &logger = Logger::Instance();
+
+            loader.RegisterLoadFunction<Mesh>([this, &loader, &logger](const std::vector<std::byte> &data, const std::string &name, bool cache, std::any param)
+            {
+                if(loadedMeshes.count(name) > 0)
+                {
+                    return loadedMeshes.at(name);
+                }
+
+                tinygltf::TinyGLTF gltfLoader;
+                tinygltf::Model model;
+                std::string err, warn;
+
+                bool result = gltfLoader.LoadBinaryFromMemory(&model, &err, &warn, reinterpret_cast<const unsigned char*>(data.data()), data.size());
+                if(!warn.empty()) logger.Warning(warn);
+                if(result)
+                {
+                    auto checkAttribs = [](const std::map<std::string, int> &attribs)
+                    {
+                        int hasAll = 0;
+                        std::for_each(attribs.begin(), attribs.end(), [&hasAll](const std::pair<std::string, int> attrib)
+                        {
+                            if(attrib.first.compare("POSITION") == 0) hasAll++;
+                            else if(attrib.first.compare("NORMAL") == 0) hasAll++;
+                            else if(attrib.first.compare("TEXCOORD_0") == 0) hasAll++;
+                        });
+                        return hasAll == 3;
+                    };
+
+                    auto interleave = [](const std::vector<std::pair<size_t, std::vector<unsigned char>>> &buffers, size_t numElements)
+                    {
+                        std::vector<unsigned char> buffer;
+
+                        for(size_t i = 0; i < numElements; ++i)
+                        {
+                            for(const auto &buf : buffers)
+                            {
+                                size_t stride = buf.first;
+                                size_t offset = stride * i;
+                                const auto &b = buf.second;
+                                buffer.insert(buffer.end(), b.begin() + offset, b.begin() + offset + stride);
+                            }
+                        }
+
+                        return buffer;
+                    };
+
+                    const tinygltf::Mesh &mesh = model.meshes.at(0);
+                    const tinygltf::Primitive &primitive = mesh.primitives.at(0);
+
+                    if(!checkAttribs(primitive.attributes))
+                        throw std::exception("model in wrong format");
+
+                    std::vector<std::vector<unsigned char>> buffers;
+
+                    size_t index = 0;
+                    for(const tinygltf::BufferView &bufferView : model.bufferViews)
+                    {
+                        const tinygltf::Buffer &buffer = model.buffers.at(bufferView.buffer);
+                        auto begin = buffer.data.begin() + bufferView.byteOffset;
+                        auto end = buffer.data.begin() + bufferView.byteOffset + bufferView.byteLength;
+
+                        buffers.push_back(std::vector(begin, end));
+
+                        index++;
+                    }
+
+                    int indexBufferIndex = primitive.indices;
+                    int positionIndex = primitive.attributes.at("POSITION");
+                    int normalIndex = primitive.attributes.at("NORMAL");
+                    int texcoordIndex = primitive.attributes.at("TEXCOORD_0");
+                    int jointIndex;
+                    int weightIndex;
+
+                    size_t numElements = buffers.at(positionIndex).size() / sizeof glm::vec3;
+
+                    if(primitive.attributes.count("JOINTS_0"))
+                    {
+                        jointIndex = primitive.attributes.at("JOINTS_0");
+                        weightIndex = primitive.attributes.at("WEIGHTS_0");
+                    }
+                    else
+                    {
+                        jointIndex = buffers.size();
+                        buffers.push_back(std::vector<unsigned char>(numElements * sizeof glm::i8vec4, 0));
+                        weightIndex = jointIndex+1;
+                        buffers.push_back(std::vector<unsigned char>(numElements * sizeof glm::vec4, 0));
+                    }
+
+                    Buffer vertexBuffer(interleave({{sizeof glm::vec3, buffers.at(positionIndex)}, 
+                                                    {sizeof glm::vec3, buffers.at(normalIndex)},
+                                                    {sizeof glm::vec2, buffers.at(texcoordIndex)},
+                                                    {sizeof glm::i8vec4, buffers.at(jointIndex)},
+                                                    {sizeof glm::vec4, buffers.at(weightIndex)}},
+                                                    numElements),
+                                        GL_DYNAMIC_STORAGE_BIT);
+                    Buffer indexBuffer(buffers.at(indexBufferIndex), GL_DYNAMIC_STORAGE_BIT);
+                    
+                    int numIndices = model.accessors.at(indexBufferIndex).count;
+
+                    std::shared_ptr<Mesh> m = std::make_shared<Mesh>(std::move(vertexBuffer), std::move(indexBuffer), numIndices);
+                    if(cache)
+                        loadedMeshes.insert_or_assign(name, m);
+                    return m;
+                }
+                else
+                {
+                    if(!err.empty()) logger.Error(err);
+                    throw std::runtime_error("mesh error"); // make better error
+                }
+            }, [this]()
+            {
+                return loadedMeshes.at("__MISSING_MESH");
+            });
+
+            loader.RegisterLoadFunction<Model>([this, &loader](const std::vector<std::byte> &data, const std::string &name, bool cache, std::any param)
+            {
+                std::string modelStr(reinterpret_cast<const char*>(data.data()), data.size());
+
+                rapidjson::Document modelJson;
+                rapidjson::ParseResult res = modelJson.Parse(modelStr.c_str()); 
+                if(res.IsError())
+                {
+                    std::string errorMsg = rapidjson::GetParseError_En(res.Code());
+                    Logger::Instance().Error("Failed to parse font ("s + name + "): "s + errorMsg + "(" + std::to_string(res.Offset()) + ")");
+                    throw std::runtime_error("model error"); // make better error
+                }
+
+                std::string meshName = modelJson["mesh"].GetString();
+                std::string textureName = modelJson["texture"].GetString();
+
+                auto textureId = loader.Load<Texture>(textureName);
+                auto meshId = loader.Load<Mesh>(meshName);
+
+                std::shared_ptr<Model> model = std::make_shared<Model>(meshId, textureId);
+                if(cache)
+                    loadedModels.insert_or_assign(name, model);
+                return model;
             });
         }
 

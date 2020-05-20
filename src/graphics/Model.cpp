@@ -4,11 +4,11 @@ namespace RIS
 {
     namespace Graphics
     {
-        Model::Model(Mesh &mesh, Texture &texture)
+        Model::Model(std::shared_ptr<Mesh> mesh, std::shared_ptr<Texture> texture)
             : mesh(mesh), texture(texture)
         {}
 
-        Model::Model(Mesh &mesh, Texture &texture, std::vector<Joint> &&joints)
+        Model::Model(std::shared_ptr<Mesh> mesh, std::shared_ptr<Texture> texture, std::vector<Joint> &&joints)
             : mesh(mesh), texture(texture), joints(std::move(joints))
         {
             jointTransforms.resize(joints.size());
@@ -18,12 +18,12 @@ namespace RIS
             }
         }
 
-        Mesh& Model::GetMesh()
+        std::shared_ptr<Mesh> Model::GetMesh()
         {
             return mesh;
         }
 
-        Texture& Model::GetTexture()
+        std::shared_ptr<Texture> Model::GetTexture()
         {
             return texture;
         }

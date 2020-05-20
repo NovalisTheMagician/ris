@@ -5,6 +5,7 @@
 #include "graphics/Texture.hpp"
 
 #include <vector>
+#include <memory>
 
 namespace RIS
 {
@@ -13,8 +14,8 @@ namespace RIS
         class Model
         {
         public:
-            Model(Mesh &mesh, Texture &texture);
-            Model(Mesh &mesh, Texture &texture, std::vector<Joint> &&joints);
+            Model(std::shared_ptr<Mesh> mesh, std::shared_ptr<Texture> texture);
+            Model(std::shared_ptr<Mesh> mesh, std::shared_ptr<Texture> texture, std::vector<Joint> &&joints);
 
             ~Model() = default;
             Model(const Model&) = delete;
@@ -22,8 +23,8 @@ namespace RIS
             Model(Model&&) = default;
             Model& operator=(Model&&) = default;
 
-            Mesh& GetMesh();
-            Texture& GetTexture();
+            std::shared_ptr<Mesh> GetMesh();
+            std::shared_ptr<Texture> GetTexture();
 
             bool IsAnimated() const;
             Animator& GetAnimator();
@@ -31,8 +32,8 @@ namespace RIS
             std::vector<glm::mat4>& GetJointTransforms();
 
         private:
-            Mesh &mesh;
-            Texture &texture;
+            std::shared_ptr<Mesh> mesh;
+            std::shared_ptr<Texture> texture;
 
             Animator animator;
             std::vector<Joint> joints;

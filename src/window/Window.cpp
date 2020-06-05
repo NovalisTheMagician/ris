@@ -16,6 +16,8 @@ using namespace std::literals::string_literals;
 
 #include <iostream>
 
+#include <fameta/counter.hpp>
+
 namespace RIS
 {
     namespace Window
@@ -103,10 +105,12 @@ namespace RIS
 
         void Window::RegisterScriptFunctions()
         {
+            constexpr fameta::counter<__COUNTER__, 100> c;
+
             auto &scriptEngine = GetScriptEngine();
 
-            scriptEngine.Register<void()>("W_Exit", [this](){ Exit(0); });
-            scriptEngine.Register<void(int, const char*)>("W_Log", [](int severity, const char *msg)
+            scriptEngine.Register<void(), c.next<__COUNTER__>()>("W_Exit", [this](){ Exit(0); });
+            scriptEngine.Register<void(int, const char*), c.next<__COUNTER__>()>("W_Log", [](int severity, const char *msg)
             {
                 if(severity == 0)
                     Logger::Instance().Info(msg);
@@ -115,7 +119,7 @@ namespace RIS
                 else if(severity == 2)
                     Logger::Instance().Error(msg);
             });
-            scriptEngine.Register<void(int)>("W_SetRelativeMouse", [this](int relative){ SetRelativeMouse(relative); });
+            scriptEngine.Register<void(int), c.next<__COUNTER__>()>("W_SetRelativeMouse", [this](int relative){ SetRelativeMouse(relative); });
         }
 
         void Window::SetRelativeMouse(bool setRelative)

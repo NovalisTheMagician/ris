@@ -6,9 +6,10 @@
 
 #include "ui/Console.hpp"
 
+#include "RisExcept.hpp"
+
 #include <string>
 #include <vector>
-#include <stdexcept>
 #include <functional>
 #include <unordered_map>
 #include <optional>
@@ -52,9 +53,9 @@ namespace RIS
             return fnptr_<N>(std::forward<Callable>(c), (Fn*)nullptr);
         }
 
-        struct ScriptException : public std::runtime_error
+        struct ScriptException : public RISException
         {
-            ScriptException(std::string reason) : std::runtime_error(reason.c_str()) {}
+            ScriptException(const std::string &reason) : RISException(reason) {}
         };
 
         class ScriptEngine

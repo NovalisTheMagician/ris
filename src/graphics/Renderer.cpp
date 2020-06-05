@@ -63,12 +63,13 @@ namespace RIS
 
             if(!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
             {
-                //throw
+                throw RendererException("Couldn't load GL functions");
             }
 
             if(!GLAD_GL_VERSION_4_5)
             {
                 log.Error("OpenGL version 4.5 not supported");
+                throw RendererException("OpenGL version 4.5 or higher not supported");
             }
 
 #ifdef _DEBUG
@@ -227,7 +228,7 @@ namespace RIS
                 {
                     std::string errorMsg = rapidjson::GetParseError_En(res.Code());
                     Logger::Instance().Error("Failed to parse font ("s + name + "): "s + errorMsg + "(" + std::to_string(res.Offset()) + ")");
-                    throw std::runtime_error("font error"); //make better error
+                    throw RISException("font error"); //make better error
                 }
 
                 float ascender = fontJson["ascender"].GetFloat();
@@ -368,10 +369,10 @@ namespace RIS
                     }
 
                     Buffer vertexBuffer(interleave({{sizeof glm::vec3, buffers.at(positionIndex)}, 
-                                                    {sizeof glm::vec3, buffers.at(normalIndex)},
+                                                    {sizeof glm::vec3, buffers.at(normalIndex)  },
                                                     {sizeof glm::vec2, buffers.at(texcoordIndex)},
-                                                    {sizeof glm::i8vec4, buffers.at(jointIndex)},
-                                                    {sizeof glm::vec4, buffers.at(weightIndex)}},
+                                                    {sizeof glm::i8vec4, buffers.at(jointIndex) },
+                                                    {sizeof glm::vec4, buffers.at(weightIndex)  }},
                                                     numElements),
                                         GL_DYNAMIC_STORAGE_BIT);
                     Buffer indexBuffer(buffers.at(indexBufferIndex), GL_DYNAMIC_STORAGE_BIT);
@@ -386,7 +387,7 @@ namespace RIS
                 else
                 {
                     if(!err.empty()) logger.Error(err);
-                    throw std::runtime_error("mesh error"); // make better error
+                    throw RISException("mesh error"); // make better error
                 }
             }, [this]()
             {
@@ -402,8 +403,8 @@ namespace RIS
                 if(res.IsError())
                 {
                     std::string errorMsg = rapidjson::GetParseError_En(res.Code());
-                    Logger::Instance().Error("Failed to parse font ("s + name + "): "s + errorMsg + "(" + std::to_string(res.Offset()) + ")");
-                    throw std::runtime_error("model error"); // make better error
+                    Logger::Instance().Error("Failed to parse font (" + name + "): " + errorMsg + "(" + std::to_string(res.Offset()) + ")");
+                    throw RISException("model error"); // make better error
                 }
 
                 std::string meshName = modelJson["mesh"].GetString();

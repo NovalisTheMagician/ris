@@ -15,7 +15,8 @@
                 "${workspaceFolder}/libs/tiny_gltf/include/*",
                 "${workspaceFolder}/libs/libtcc/include/*",
                 "${workspaceFolder}/libs/ctre/include/*",
-                "${workspaceFolder}/libs/gsl/include/*"
+                "${workspaceFolder}/libs/gsl/include/*",
+                "${workspaceFolder}/libs/fameta-counter/include/*"
             ],
             "defines": [
                 "_DEBUG",

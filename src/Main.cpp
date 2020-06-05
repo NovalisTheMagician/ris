@@ -3,6 +3,8 @@
 #include <string>
 #include <algorithm>
 
+#include "RisExcept.hpp"
+
 #ifdef _WIN32
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
@@ -137,7 +139,7 @@ int main(int argc, char *argv[])
 
         scriptEngine->LoadScripts();
     }
-    catch(const std::exception& e)
+    catch(const RISException& e)
     {
         logger.Error("Failed to init system: "s + e.what());
         Logger::Destroy();
@@ -159,13 +161,24 @@ int main(int argc, char *argv[])
     }
     catch(const std::runtime_error &e)
     {
-
+        logger.Warning(e.what());
     }
 
     logger.Info("System init OK");
 
     Game::GameLoop loop;
-    int res = loop.Start();
+    int res = 0;
+    try
+    {
+        res = loop.Start();
+    }
+    catch(const RISException &e)
+    {
+        //logger.Error(e.what());
+#ifdef WIN32
+        MessageBoxA(nullptr, e.what(), "Game Error", MB_OK | MB_ICONERROR);
+#endif
+    }
 
     logger.Info("Exit game");
 

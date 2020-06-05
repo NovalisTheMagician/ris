@@ -1,10 +1,10 @@
 #pragma once
 
+#include "RisExcept.hpp"
+
 #include "graphics/GLObject.hpp"
 
 #include <glad/glad.h>
-
-#include <stdexcept>
 
 #include <vector>
 
@@ -18,9 +18,9 @@ namespace RIS
             FRAGMENT
         };
 
-        struct ShaderException : public std::runtime_error
+        struct ShaderException : public RISException
         {
-            ShaderException(std::string reason) : std::runtime_error(reason.c_str()) {}
+            ShaderException(const std::string &reason) : RISException(reason) {}
         };
 
         class Shader : public GLObject

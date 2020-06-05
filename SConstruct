@@ -10,7 +10,8 @@ lk_flags = ['/nologo', '/INCREMENTAL:NO', '/LTCG:NOSTATUS', '/MACHINE:X64']
 dyn_libs = []
 
 inc_path = ['#src', '#libs/glm/include', '#libs/gli/include', '#libs/glad/include', '#libs/glfw/include', '#libs/soloud/include', '#libs/rapidjson/include', 
-            '#libs/libzip/include', '#libs/libzippp/include', '#libs/libtcc/include', '#libs/tiny_gltf/include', '#libs/ctre/include', '#libs/gsl/include']
+            '#libs/libzip/include', '#libs/libzippp/include', '#libs/libtcc/include', '#libs/tiny_gltf/include', '#libs/ctre/include', '#libs/gsl/include',
+            '#libs/fameta-counter/include']
 lib_path = ['libs/glad/lib', 'libs/glfw/lib', 'libs/soloud/lib', 'libs/libzip/lib', 'libs/libtcc/lib']
 libs = ['user32', 'kernel32', 'gdi32', 'shell32', 'opengl32', 'glad', 'glfw3', 'soloud_static', 'ws2_32', 'advapi32', 'libz-static', 'libzip-static', 'libtcc']
 
@@ -24,6 +25,7 @@ if int(debug):
     defines.append(['_DEBUG'])
 else:
     cl_flags.append(['/O2', '/MT'])
+    defines.append(['NDEBUG'])
 
 if not int(verbose):
     env['CXXCOMSTR'] = 'Compiling $TARGET'

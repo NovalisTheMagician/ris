@@ -61,21 +61,21 @@ namespace RIS
             std::shared_ptr<Graphics::Shader> modelVertexShader = loader.Load<Graphics::Shader>("shaders/mStatic.glsl", Graphics::ShaderType::VERTEX);
             std::shared_ptr<Graphics::Shader> modelFragmentShader = loader.Load<Graphics::Shader>("shaders/mUnlit.glsl", Graphics::ShaderType::FRAGMENT);
 
-            Graphics::VertexArray modelLayout{};
+            Graphics::VertexArray modelLayout;
             modelLayout.SetAttribFormat(0, 3, GL_FLOAT, offsetof(VertexType::ModelVertex, position));
             modelLayout.SetAttribFormat(1, 3, GL_FLOAT, offsetof(VertexType::ModelVertex, normal));
             modelLayout.SetAttribFormat(2, 2, GL_FLOAT, offsetof(VertexType::ModelVertex, texCoords));
             modelLayout.SetAttribFormat(3, 4, GL_BYTE, offsetof(VertexType::ModelVertex, joints));
             modelLayout.SetAttribFormat(4, 4, GL_FLOAT, offsetof(VertexType::ModelVertex, weights));
 
-            Graphics::ProgramPipeline pipeline{};
+            Graphics::ProgramPipeline pipeline;
             pipeline.SetShader(*modelVertexShader);
             pipeline.SetShader(*modelFragmentShader);
 
             Graphics::Sampler sampler(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, 16.0f);
 
-            Graphics::Buffer viewProjBuffer{glm::mat4(), GL_DYNAMIC_STORAGE_BIT};
-            Graphics::Buffer worldBuffer{glm::mat4(), GL_DYNAMIC_STORAGE_BIT};
+            Graphics::Buffer viewProjBuffer(glm::mat4(), GL_DYNAMIC_STORAGE_BIT);
+            Graphics::Buffer worldBuffer(glm::mat4(), GL_DYNAMIC_STORAGE_BIT);
 
             glm::mat4 projection = glm::perspective(glm::radians(60.0f), 4.0f / 3.0f, 0.1f, 1000.0f);
             glm::mat4 view = glm::lookAt(glm::vec3(5, 5, 5), glm::vec3(), glm::vec3(0, 1, 0));
@@ -115,10 +115,6 @@ namespace RIS
                 cubeModel->GetTexture()->Bind(0);
                 sampler.Bind(0);
                 cubeModel->GetMesh()->Draw();
-
-                //renderer3d.Begin(projection * view);
-                //renderer3d.Draw(cubeModel, world);
-                //renderer3d.End();
 
                 interface.Draw();
                 

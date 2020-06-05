@@ -39,6 +39,8 @@ namespace RIS
             void PostInit();
             void RegisterScriptFunctions();
 
+            void Invalidate();
+
             Console& GetConsole();
 
             void Draw();
@@ -67,8 +69,7 @@ namespace RIS
 
             int currentId = 0;
 
-            std::unordered_map<std::string, int> namedLayouts;
-            std::unordered_map<int, ContainerPtr> layouts;
+            std::unordered_map<std::string, ContainerPtr> layouts;
             std::vector<ComponentPtr> components;
         };
     }

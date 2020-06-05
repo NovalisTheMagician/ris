@@ -1,7 +1,8 @@
 #pragma once
 
+#include "RisExcept.hpp"
+
 #include <string>
-#include <stdexcept>
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
@@ -25,9 +26,9 @@ namespace RIS
         template<typename T>
         using DefaultFunc = std::function<std::shared_ptr<T>()>;
 
-        struct LoaderException : public std::runtime_error
+        struct LoaderException : public RISException
         {
-            LoaderException(std::string reason) : std::runtime_error(reason.c_str()) {}
+            LoaderException(const std::string &reason) : RISException(reason) {}
         };
 
         class Loader

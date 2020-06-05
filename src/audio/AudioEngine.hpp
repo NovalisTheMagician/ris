@@ -1,7 +1,8 @@
 #pragma once
 
+#include "RisExcept.hpp"
+
 #include <string>
-#include <stdexcept>
 
 #include <soloud.h>
 
@@ -9,9 +10,9 @@ namespace RIS
 {
     namespace Audio
     {
-        struct AudioException : public std::runtime_error
+        struct AudioException : public RISException
         {
-            AudioException(std::string reason) : std::runtime_error(reason.c_str()) {}
+            AudioException(const std::string &reason) : RISException(reason) {}
         };
 
         class AudioEngine

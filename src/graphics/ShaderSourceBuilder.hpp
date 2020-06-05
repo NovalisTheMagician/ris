@@ -1,9 +1,10 @@
 #pragma once
 
+#include "RisExcept.hpp"
+
 #include <string>
 #include <sstream>
 #include <functional>
-#include <stdexcept>
 
 #include <ctre.hpp>
 
@@ -11,6 +12,11 @@ namespace RIS
 {
     namespace Graphics
     {
+        struct ShaderSourceBuilderException : public RISException
+        {
+            ShaderSourceBuilderException(const std::string &msg) : RISException(msg) {};
+        };
+
         class ShaderSourceBuilder
         {
         public:
@@ -28,7 +34,7 @@ namespace RIS
         {
             if(level > MAX_INCLUDE_DEPTH)
             {
-                throw std::runtime_error("too many include recursions");
+                throw ShaderSourceBuilderException("too many include recursions");
             }
 
             std::stringstream in(src);
@@ -49,7 +55,7 @@ namespace RIS
                     }
                     catch(const std::exception& e)
                     {
-                        throw std::runtime_error("include file " + file + " not found");
+                        throw ShaderSourceBuilderException("include file " + file + " not found");
                     }
                     out << BuildSource(includeContent, file, includeCallback, level+1) << "\n";
                     out << "#line " << (lineNr+1) << "\n";

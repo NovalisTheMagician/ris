@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdexcept>
+#include "RisExcept.hpp"
 
 #include <glad/glad.h>
 #include <glm/glm.hpp>
@@ -27,9 +27,9 @@ namespace RIS
 {
     namespace Graphics
     {
-        struct RendererException : public std::runtime_error
+        struct RendererException : public RISException
         {
-            RendererException(std::string reason) : std::runtime_error(reason.c_str()) {}
+            RendererException(const std::string &reason) : RISException(reason) {}
         };
         
         class Renderer

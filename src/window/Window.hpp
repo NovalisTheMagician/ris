@@ -9,7 +9,8 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
-#include <stdexcept>
+#include "RisExcept.hpp"
+
 #include <string>
 #include <memory>
 
@@ -19,9 +20,9 @@ namespace RIS
 {
     namespace Window
     {
-        struct WindowException : public std::runtime_error
+        struct WindowException : public RISException
         {
-            WindowException(std::string reason) : std::runtime_error(reason.c_str()) {}
+            WindowException(const std::string &reason) : RISException(reason) {}
         };
 
         class Window

@@ -2,7 +2,7 @@
 
 #include "window/Window.hpp"
 
-#include <unordered_map>
+#include <vector>
 #include <functional>
 
 #include "input/KeyDefs.hpp"
@@ -11,11 +11,11 @@ namespace RIS
 {
     namespace Input
     {
-        using KeyFunc = std::function<void(InputKey)>;
-        using ButtonFunc = std::function<void(InputButton)>;
-        using MouseFunc = std::function<void(float, float)>;
-        using WheelFunc = std::function<void(float, float)>;
-        using CharFunc = std::function<void(char)>;
+        using KeyFunc = std::function<bool(InputKey)>;
+        using ButtonFunc = std::function<bool(InputButton)>;
+        using MouseFunc = std::function<bool(float, float)>;
+        using WheelFunc = std::function<bool(float, float)>;
+        using CharFunc = std::function<bool(char)>;
 
         class Input
         {
@@ -28,21 +28,13 @@ namespace RIS
             Input(Input&&) = default;
             Input& operator=(Input&&) = default;
 
-            void RegisterKeyUp(const std::string &handle, KeyFunc callback);
-            void RegisterKeyDown(const std::string &handle, KeyFunc callback);
-            void RegisterButtonUp(const std::string &handle, ButtonFunc callback);
-            void RegisterButtonDown(const std::string &handle, ButtonFunc callback);
-            void RegisterMouse(const std::string &handle, MouseFunc callback);
-            void RegisterWheel(const std::string &handle, WheelFunc callback);
-            void RegisterChar(const std::string &handle, CharFunc callback);
-
-            void UnregisterKeyUp(const std::string &handle);
-            void UnregisterKeyDown(const std::string &handle);
-            void UnregisterButtonUp(const std::string &handle);
-            void UnregisterButtonDown(const std::string &handle);
-            void UnregisterMouse(const std::string &handle);
-            void UnregisterWheel(const std::string &handle);
-            void UnregisterChar(const std::string &handle);
+            void RegisterKeyUp(KeyFunc callback, bool insertLast = false);
+            void RegisterKeyDown(KeyFunc callback, bool insertLast = false);
+            void RegisterButtonUp(ButtonFunc callback, bool insertLast = false);
+            void RegisterButtonDown(ButtonFunc callback, bool insertLast = false);
+            void RegisterMouse(MouseFunc callback, bool insertLast = false);
+            void RegisterWheel(WheelFunc callback, bool insertLast = false);
+            void RegisterChar(CharFunc callback, bool insertLast = false);
 
             void Update();
 
@@ -70,16 +62,16 @@ namespace RIS
         private:
             bool ready = false;
 
-            std::unordered_map<std::string, KeyFunc> keyUpCallbacks;
-            std::unordered_map<std::string, KeyFunc> keyDownCallbacks;
+            std::vector<KeyFunc> keyUpCallbacks;
+            std::vector<KeyFunc> keyDownCallbacks;
 
-            std::unordered_map<std::string, ButtonFunc> buttonUpCallbacks;
-            std::unordered_map<std::string, ButtonFunc> buttonDownCallbacks;
+            std::vector<ButtonFunc> buttonUpCallbacks;
+            std::vector<ButtonFunc> buttonDownCallbacks;
 
-            std::unordered_map<std::string, MouseFunc> mouseCallbacks;
-            std::unordered_map<std::string, WheelFunc> wheelCallbacks;
+            std::vector<MouseFunc> mouseCallbacks;
+            std::vector<WheelFunc> wheelCallbacks;
 
-            std::unordered_map<std::string, CharFunc> charCallbacks;
+            std::vector<CharFunc> charCallbacks;
 
         };
     }

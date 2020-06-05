@@ -70,120 +70,99 @@ namespace RIS
         void Input::OnKeyUp(int key)
         {
             if(!ready) return;
-            for(auto& [_, callback] : keyUpCallbacks)
-                callback(TranslateKey(key));
+            for(auto& callback : keyUpCallbacks)
+                if(callback(TranslateKey(key)))
+                    break;
         }
 
         void Input::OnKeyDown(int key)
         {
             if(!ready) return;
-            for(auto& [_, callback] : keyDownCallbacks)
-                callback(TranslateKey(key));
+            for(auto& callback : keyDownCallbacks)
+                if(callback(TranslateKey(key)))
+                    break;
         }
 
         void Input::OnChar(char character)
         {
             if(!ready) return;
-            for(auto& [_, callback] : charCallbacks)
-                callback(character);
+            for(auto& callback : charCallbacks)
+                if(callback(character))
+                    break;
         }
 
         void Input::OnMouseMove(float x, float y)
         {
             if(!ready) return;
-            for(auto& [_, callback] : mouseCallbacks)
-                callback(x, y);
+            for(auto& callback : mouseCallbacks)
+                if(callback(x, y))
+                    break;
         }
 
         void Input::OnScrollWheel(float x, float y)
         {
             if(!ready) return;
-            for(auto& [_, callback] : wheelCallbacks)
-                callback(x, y);
+            for(auto& callback : wheelCallbacks)
+                if(callback(x, y))
+                    break;
         }
 
         void Input::OnMouseButtonUp(int button)
         {
             if(!ready) return;
-            for(auto& [_, callback] : buttonUpCallbacks)
-                callback(TranslateButton(button));
+            for(auto& callback : buttonUpCallbacks)
+                if(callback(TranslateButton(button)))
+                    break;
         }
 
         void Input::OnMouseButtonDown(int button)
         {
             if(!ready) return;
-            for(auto& [_, callback] : buttonDownCallbacks)
-                callback(TranslateButton(button));
+            for(auto& callback : buttonDownCallbacks)
+                if(callback(TranslateButton(button)))
+                    break;
         }
 
-        void Input::RegisterKeyUp(const string &handle, KeyFunc callback)
+        void Input::RegisterKeyUp(KeyFunc callback, bool insertLast)
         {
-            keyUpCallbacks[handle] = callback;
+            auto insertPoint = insertLast ? keyUpCallbacks.end() : keyUpCallbacks.begin();
+            keyUpCallbacks.insert(insertPoint, callback);
         }
 
-        void Input::RegisterKeyDown(const string &handle, KeyFunc callback)
+        void Input::RegisterKeyDown(KeyFunc callback, bool insertLast)
         {
-            keyDownCallbacks[handle] = callback;
+            auto insertPoint = insertLast ? keyDownCallbacks.end() : keyDownCallbacks.begin();
+            keyDownCallbacks.insert(insertPoint, callback);
         }
 
-        void Input::RegisterButtonUp(const string &handle, ButtonFunc callback) 
+        void Input::RegisterButtonUp(ButtonFunc callback, bool insertLast) 
         {
-            buttonUpCallbacks[handle] = callback;
+            auto insertPoint = insertLast ? buttonUpCallbacks.end() : buttonUpCallbacks.begin();
+            buttonUpCallbacks.insert(insertPoint, callback);
         }
 
-        void Input::RegisterButtonDown(const string &handle, ButtonFunc callback)
+        void Input::RegisterButtonDown(ButtonFunc callback, bool insertLast)
         {
-            buttonDownCallbacks[handle] = callback;
+            auto insertPoint = insertLast ? buttonDownCallbacks.end() : buttonDownCallbacks.begin();
+            buttonDownCallbacks.insert(insertPoint, callback);
         }
 
-        void Input::RegisterMouse(const string &handle, MouseFunc callback)
+        void Input::RegisterMouse(MouseFunc callback, bool insertLast)
         {
-            mouseCallbacks[handle] = callback;
+            auto insertPoint = insertLast ? mouseCallbacks.end() : mouseCallbacks.begin();
+            mouseCallbacks.insert(insertPoint, callback);
         }
 
-        void Input::RegisterWheel(const string &handle, WheelFunc callback)
+        void Input::RegisterWheel(WheelFunc callback, bool insertLast)
         {
-            wheelCallbacks[handle] = callback;
+            auto insertPoint = insertLast ? wheelCallbacks.end() : wheelCallbacks.begin();
+            wheelCallbacks.insert(insertPoint, callback);
         }
 
-        void Input::RegisterChar(const std::string &handle, CharFunc callback)
+        void Input::RegisterChar(CharFunc callback, bool insertLast)
         {
-            charCallbacks[handle] = callback;
-        }
-
-        void Input::UnregisterKeyUp(const string &handle)
-        {
-            keyUpCallbacks.erase(handle);
-        }
-
-        void Input::UnregisterKeyDown(const string &handle)
-        {
-            keyDownCallbacks.erase(handle);
-        }
-
-        void Input::UnregisterButtonUp(const string &handle)
-        {
-            buttonUpCallbacks.erase(handle);
-        }
-
-        void Input::UnregisterButtonDown(const string &handle)
-        {
-            buttonDownCallbacks.erase(handle);
-        }
-
-        void Input::UnregisterMouse(const string &handle)
-        {
-            mouseCallbacks.erase(handle);
-        }
-
-        void Input::UnregisterWheel(const string &handle)
-        {
-            wheelCallbacks.erase(handle);
-        }
-
-        void Input::UnregisterChar(const string &handle)
-        {
-            charCallbacks.erase(handle);
+            auto insertPoint = insertLast ? charCallbacks.end() : charCallbacks.begin();
+            charCallbacks.insert(insertPoint, callback);
         }
 
         void Input::Update()

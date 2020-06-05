@@ -50,10 +50,6 @@ namespace RIS
             bool god = false;
             interface.GetConsole().BindFunc("god", UI::Helpers::BoolFunc(god, "Godmode ON", "Godmode OFF"));
 
-            scriptEngine.CallFunction<void>("mainTest");
-
-            std::cout << scriptEngine.GetSymbol<int>("truth").value() << std::endl;
-
             std::shared_ptr<Graphics::Texture> catTexture = loader.Load<Graphics::Texture>("textures/meow.dds");
             std::shared_ptr<Graphics::Font> font = loader.Load<Graphics::Font>("fonts/immortal.json");
             std::shared_ptr<Graphics::Model> cubeModel = loader.Load<Graphics::Model>("models/john.json");

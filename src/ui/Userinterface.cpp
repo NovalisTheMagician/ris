@@ -52,11 +52,11 @@ namespace RIS
             console.BindFunc("frametime", Helpers::BoolFunc(showFrametime, "Show Frametime", "Hide Frametime"));
 
             auto &input = GetInput();
-            input.RegisterChar("ui", [this](char ch){ OnChar(ch); });
-            input.RegisterMouse("ui", [this](float x, float y){ OnMouseMove(x, y); });
-            input.RegisterButtonDown("ui", [this](Input::InputButton button){ OnMouseDown(button); });
-            input.RegisterButtonUp("ui", [this](Input::InputButton button){ OnMouseUp(button); });
-            input.RegisterKeyDown("ui", [this](Input::InputKey key){ OnKeyDown(key); });
+            input.RegisterChar([this](char ch){ return OnChar(ch); });
+            input.RegisterMouse([this](float x, float y){ return OnMouseMove(x, y); });
+            input.RegisterButtonDown([this](Input::InputButton button){ return OnMouseDown(button); });
+            input.RegisterButtonUp([this](Input::InputButton button){ return OnMouseUp(button); });
+            input.RegisterKeyDown([this](Input::InputKey key){ return OnKeyDown(key); });
         }
 
         void Userinterface::Invalidate()
@@ -79,19 +79,6 @@ namespace RIS
 
             scriptEngine.Register<float(), c.next<__COUNTER__>()>("UI_GetWidth", [this](){ return static_cast<float>(uiWidth); });
             scriptEngine.Register<float(), c.next<__COUNTER__>()>("UI_GetHeight", [this](){ return static_cast<float>(uiHeight); });
-
-            scriptEngine.Register<void(), c.next<__COUNTER__>()>("UI_ClearRoot", [this]()
-            {
-                rootContainer->RemoveAll();
-            });
-
-            scriptEngine.Register<void(void*), c.next<__COUNTER__>()>("UI_AddToRoot", [this](void *component)
-            {
-                auto comp = std::find_if(std::begin(components), std::end(components), 
-                    [&component](const ComponentPtr &elem) { return static_cast<Component*>(component) == elem.get(); });
-                if(comp != std::end(components))
-                    rootContainer->Add(*comp);
-            });
 
             scriptEngine.Register<void*(const char*), c.next<__COUNTER__>()>("UI_CreateImage", [this](const char *name)
             {
@@ -167,6 +154,73 @@ namespace RIS
                 Button *b = static_cast<Button*>(button);
                 b->SetCallback(btnCallback);
             });
+
+            scriptEngine.Register<void*(const char*), c.next<__COUNTER__>()>("UI_CreatePanel", [this](const char *name)
+            {
+                PanelPtr panel = std::make_shared<Panel>();
+                panel->SetName(name);
+                panel->SetPosition({0, 0});
+                panel->SetSize({static_cast<float>(uiWidth), static_cast<float>(uiHeight)});
+                components.push_back(panel);
+                return panel.get();
+            });
+
+            scriptEngine.Register<void(void*, float, float), c.next<__COUNTER__>()>("UI_PanelSetPosition", [this](void *panel, float x, float y)
+            {
+                Panel *p = static_cast<Panel*>(panel);
+                p->SetPosition({x, y});
+            });
+
+            scriptEngine.Register<void(void*, float, float), c.next<__COUNTER__>()>("UI_PanelSetSize", [this](void *panel, float w, float h)
+            {
+                Panel *p = static_cast<Panel*>(panel);
+                p->SetSize({w, h});
+            });
+
+            scriptEngine.Register<void(void*, void*), c.next<__COUNTER__>()>("UI_PanelAdd", [this](void *panel, void *component)
+            {
+                Panel *p = static_cast<Panel*>(panel);
+                auto comp = std::find_if(std::begin(components), std::end(components), 
+                    [&component](const ComponentPtr &elem) { return static_cast<Component*>(component) == elem.get(); });
+                if(comp != std::end(components))
+                    p->Add(*comp);
+            });
+
+            scriptEngine.Register<void(void*, void*), c.next<__COUNTER__>()>("UI_PanelRemove", [this](void *panel, void *component)
+            {
+                Panel *p = static_cast<Panel*>(panel);
+                auto comp = std::find_if(std::begin(components), std::end(components), 
+                    [&component](const ComponentPtr &elem) { return static_cast<Component*>(component) == elem.get(); });
+                if(comp != std::end(components))
+                    p->Remove(*comp);
+            });
+
+            scriptEngine.Register<void(void*), c.next<__COUNTER__>()>("UI_PanelRemoveAll", [this](void *panel)
+            {
+                Panel *p = static_cast<Panel*>(panel);
+                p->RemoveAll();
+            });
+
+            scriptEngine.Register<void(const char*, void*), c.next<__COUNTER__>()>("UI_SetAsMenu", [this](const char *menuName, void *component)
+            {
+                auto comp = std::find_if(std::begin(components), std::end(components), 
+                    [&component](const ComponentPtr &elem) { return static_cast<Component*>(component) == elem.get(); });
+                if(comp != std::end(components))
+                    menus.insert_or_assign(menuName, *comp);
+            });
+
+            scriptEngine.Register<void(const char*), c.next<__COUNTER__>()>("UI_SetActiveMenu", [this](const char *menuName)
+            {
+                if(menus.count(menuName) > 0)
+                {
+                    auto& comp = menus.at(menuName);
+                    activeMenu = comp;
+                }
+                else
+                {
+                    activeMenu = nullptr;
+                }
+            });
         }
 
         Console &Userinterface::GetConsole()
@@ -179,7 +233,8 @@ namespace RIS
             renderer->Begin(static_cast<float>(uiWidth), static_cast<float>(uiHeight));
             if(showFps)
                 fpsLabel->Draw(*renderer, glm::vec2());
-            rootContainer->Draw(*renderer, glm::vec2());
+            if(activeMenu)
+                activeMenu->Draw(*renderer, glm::vec2());
             console.Draw(*renderer);
             renderer->End();
         }
@@ -191,34 +246,89 @@ namespace RIS
                 fpsLabel->SetText(std::to_string(frameTime));
             else
                 fpsLabel->SetText(std::to_string(static_cast<int>(1 / frameTime)));
-            rootContainer->Update();
+            if(activeMenu)
+                activeMenu->Update();
             console.Update(timer);
         }
 
-        void Userinterface::OnChar(char character)
+        bool Userinterface::OnChar(char character)
         {
-            rootContainer->OnChar(character);
-            console.OnChar(character);
+            if(console.IsOpen())
+            {
+                console.OnChar(character);
+                return true;
+            }
+            if(activeMenu)
+            {
+                activeMenu->OnChar(character);
+                return true;
+            }
+            return false;
         }
 
-        void Userinterface::OnMouseMove(float x, float y)
+        bool Userinterface::OnMouseMove(float x, float y)
         {
-            rootContainer->OnMouseMove(x, y);
+            if(activeMenu)
+            {
+                activeMenu->OnMouseMove(x, y);
+                return true;
+            }
+            return false;
         }
 
-        void Userinterface::OnMouseDown(Input::InputButton button)
+        bool Userinterface::OnMouseDown(Input::InputButton button)
         {
-            rootContainer->OnMouseDown(button);
+            if(activeMenu)
+            {
+                activeMenu->OnMouseDown(button);
+                return true;
+            }
+            return false;
         }
 
-        void Userinterface::OnMouseUp(Input::InputButton button)
+        bool Userinterface::OnMouseUp(Input::InputButton button)
         {
-            rootContainer->OnMouseUp(button);
+            if(activeMenu)
+            {
+                activeMenu->OnMouseUp(button);
+                return true;
+            }
+            return false;
         }
 
-        void Userinterface::OnKeyDown(Input::InputKey key)
+        bool Userinterface::OnMouseWheel(float x, float y)
         {
-            console.OnKeyDown(key);
+            if(activeMenu)
+            {
+                activeMenu->OnMouseWheel(x, y);
+                return true;
+            }
+            return false;
+        }
+
+        bool Userinterface::OnKeyDown(Input::InputKey key)
+        {
+            if(console.IsOpen())
+            {
+                console.OnKeyDown(key);
+                return true;
+            }
+            if(activeMenu)
+            {
+                activeMenu->OnKeyDown(key);
+                return true;
+            }
+            return false;
+        }
+
+        bool Userinterface::OnKeyUp(Input::InputKey key)
+        {
+            if(activeMenu)
+            {
+                activeMenu->OnKeyUp(key);
+                return true;
+            }
+            return false;
         }
     }
 }

@@ -123,6 +123,8 @@ namespace RIS
                         symbols->insert_or_assign(name, const_cast<void*>(val));
                     }
                 });
+
+                interface.Invalidate();
             }
         }
 

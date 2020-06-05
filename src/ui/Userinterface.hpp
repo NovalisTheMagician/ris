@@ -47,11 +47,13 @@ namespace RIS
             void Update(const Timer &timer);
 
         private:
-            void OnChar(char character);
-            void OnMouseMove(float x, float y);
-            void OnMouseDown(Input::InputButton button);
-            void OnMouseUp(Input::InputButton button);
-            void OnKeyDown(Input::InputKey key);
+            bool OnChar(char character);
+            bool OnMouseMove(float x, float y);
+            bool OnMouseDown(Input::InputButton button);
+            bool OnMouseUp(Input::InputButton button);
+            bool OnMouseWheel(float x, float y);
+            bool OnKeyDown(Input::InputKey key);
+            bool OnKeyUp(Input::InputKey key);
 
         private:
             Console console;
@@ -67,9 +69,9 @@ namespace RIS
             bool showFrametime = false;
             float frameTime;
 
-            int currentId = 0;
+            ComponentPtr activeMenu;
 
-            std::unordered_map<std::string, ContainerPtr> layouts;
+            std::unordered_map<std::string, ComponentPtr> menus;
             std::vector<ComponentPtr> components;
         };
     }

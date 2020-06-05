@@ -94,6 +94,11 @@ namespace RIS
             std::for_each(components.begin(), components.end(), [mouseCode](auto component){ component->OnMouseUp(mouseCode); });
         }
 
+        void Panel::OnMouseWheel(float x, float y)
+        {
+            std::for_each(components.begin(), components.end(), [x, y](auto component){ component->OnMouseWheel(x, y); });
+        }
+
         void Panel::OnKeyDown(Input::InputKey keyCode)
         {
             std::for_each(components.begin(), components.end(), [keyCode](auto component){ component->OnKeyDown(keyCode); });

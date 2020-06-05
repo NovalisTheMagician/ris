@@ -21,6 +21,7 @@ namespace RIS
             virtual void OnMouseMove(float x, float y) {};
             virtual void OnMouseDown(Input::InputButton mouseCode) {};
             virtual void OnMouseUp(Input::InputButton mouseCode) {};
+            virtual void OnMouseWheel(float x, float y) {};
 
             virtual void OnKeyDown(Input::InputKey keyCode) {};
             virtual void OnKeyUp(Input::InputKey keyCode) {};

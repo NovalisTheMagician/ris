@@ -118,11 +118,9 @@ namespace RIS
                 FuncPtr func = static_cast<FuncPtr>(rawFunc);
                 return func(args...);
             }
-            else
-            {
-                GetConsole().Print("Function \"" + name + "\" not found");
-                return Ret();
-            }
+            
+            GetConsole().Print("Function \"" + name + "\" not found");
+            return Ret();
         }
     }
 }

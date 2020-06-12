@@ -54,8 +54,8 @@ namespace RIS
             auto &input = GetInput();
             input.RegisterChar([this](char ch){ return OnChar(ch); });
             input.RegisterMouse([this](float x, float y){ return OnMouseMove(x, y); });
-            input.RegisterButtonDown([this](Input::InputButton button){ return OnMouseDown(button); });
-            input.RegisterButtonUp([this](Input::InputButton button){ return OnMouseUp(button); });
+            input.RegisterButtonDown([this](Input::InputKey button){ return OnMouseDown(button); });
+            input.RegisterButtonUp([this](Input::InputKey button){ return OnMouseUp(button); });
             input.RegisterKeyDown([this](Input::InputKey key){ return OnKeyDown(key); });
         }
 
@@ -201,7 +201,7 @@ namespace RIS
                 p->RemoveAll();
             });
 
-            scriptEngine.Register<void(const char*, void*), c.next<__COUNTER__>()>("UI_SetAsMenu", [this](const char *menuName, void *component)
+            scriptEngine.Register<void(const char*, void*), c.next<__COUNTER__>()>("UI_RegisterMenu", [this](const char *menuName, void *component)
             {
                 auto comp = std::find_if(std::begin(components), std::end(components), 
                     [&component](const ComponentPtr &elem) { return static_cast<Component*>(component) == elem.get(); });
@@ -276,7 +276,7 @@ namespace RIS
             return false;
         }
 
-        bool Userinterface::OnMouseDown(Input::InputButton button)
+        bool Userinterface::OnMouseDown(Input::InputKey button)
         {
             if(activeMenu)
             {
@@ -286,7 +286,7 @@ namespace RIS
             return false;
         }
 
-        bool Userinterface::OnMouseUp(Input::InputButton button)
+        bool Userinterface::OnMouseUp(Input::InputKey button)
         {
             if(activeMenu)
             {
@@ -308,6 +308,11 @@ namespace RIS
 
         bool Userinterface::OnKeyDown(Input::InputKey key)
         {
+            if(key == Input::InputKey::GRAVE_ACCENT)
+            {
+                console.Toggle();
+                return true;
+            }
             if(console.IsOpen())
             {
                 console.OnKeyDown(key);

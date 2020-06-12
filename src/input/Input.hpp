@@ -12,7 +12,7 @@ namespace RIS
     namespace Input
     {
         using KeyFunc = std::function<bool(InputKey)>;
-        using ButtonFunc = std::function<bool(InputButton)>;
+        using ButtonFunc = std::function<bool(InputKey)>;
         using MouseFunc = std::function<bool(float, float)>;
         using WheelFunc = std::function<bool(float, float)>;
         using CharFunc = std::function<bool(char)>;
@@ -54,7 +54,6 @@ namespace RIS
             void OnMouseButtonDown(int button);
 
             constexpr InputKey TranslateKey(int key);
-            constexpr InputButton TranslateButton(int button);
 
         private:
             static Input *instance;

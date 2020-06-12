@@ -58,6 +58,10 @@ namespace RIS
             auto tmpPath = std::filesystem::temp_directory_path();
             tmpPath = tmpPath / Version::GAME_NAME;
             auto tmpScriptsPath = tmpPath / "scripts";
+
+            if(std::filesystem::exists(tmpScriptsPath))
+                std::filesystem::remove_all(tmpScriptsPath);
+
             if(!std::filesystem::exists(tmpScriptsPath))
             {
                 if(!std::filesystem::exists(tmpPath))

@@ -137,17 +137,17 @@ namespace RIS
                 isInBounds = false;
         }
 
-        void Button::OnMouseDown(Input::InputButton button)
+        void Button::OnMouseDown(Input::InputKey button)
         {
-            if(button == Input::InputButton::LEFT && isInBounds)
+            if(button == Input::InputKey::MOUSE_LEFT && isInBounds)
             {
                 isClickedDown = true;
             }
         }
 
-        void Button::OnMouseUp(Input::InputButton button)
+        void Button::OnMouseUp(Input::InputKey button)
         {
-            if(button == Input::InputButton::LEFT && isClickedDown)
+            if(button == Input::InputKey::MOUSE_LEFT && isClickedDown)
             {
                 if(isInBounds)
                 {

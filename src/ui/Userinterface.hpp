@@ -49,8 +49,8 @@ namespace RIS
         private:
             bool OnChar(char character);
             bool OnMouseMove(float x, float y);
-            bool OnMouseDown(Input::InputButton button);
-            bool OnMouseUp(Input::InputButton button);
+            bool OnMouseDown(Input::InputKey button);
+            bool OnMouseUp(Input::InputKey button);
             bool OnMouseWheel(float x, float y);
             bool OnKeyDown(Input::InputKey key);
             bool OnKeyUp(Input::InputKey key);

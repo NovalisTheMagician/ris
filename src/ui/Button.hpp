@@ -52,8 +52,8 @@ namespace RIS
             void Draw(Graphics::SpriteRenderer &renderer, const glm::vec2 &parentPosition) override;
 
             void OnMouseMove(float x, float y) override;
-            void OnMouseDown(Input::InputButton button) override;
-            void OnMouseUp(Input::InputButton button) override;
+            void OnMouseDown(Input::InputKey button) override;
+            void OnMouseUp(Input::InputKey button) override;
 
         private:
             std::string text = "";

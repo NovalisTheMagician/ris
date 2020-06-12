@@ -37,8 +37,8 @@ namespace RIS
 
             void OnChar(char c) override;
             void OnMouseMove(float x, float y) override;
-            void OnMouseDown(Input::InputButton mouseCode) override;
-            void OnMouseUp(Input::InputButton mouseCode) override;
+            void OnMouseDown(Input::InputKey mouseCode) override;
+            void OnMouseUp(Input::InputKey mouseCode) override;
             void OnMouseWheel(float x, float y) override;
 
             void OnKeyDown(Input::InputKey keyCode) override;

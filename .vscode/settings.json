@@ -81,7 +81,8 @@
         "optional": "cpp",
         "typeindex": "cpp",
         "system.h": "c",
-        "unordered_set": "cpp"
+        "unordered_set": "cpp",
+        "span": "cpp"
     },
     "python.linting.enabled": false,
     "python.pythonPath": "D:\\Python38-32\\python.exe",

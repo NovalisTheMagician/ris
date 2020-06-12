@@ -1,24 +1,14 @@
 #pragma once
 
+#include <string_view>
+#include <magic_enum.hpp>
+
 #undef DELETE
 
 namespace RIS
 {
     namespace Input
     {
-        enum class InputButton
-        {
-            NONE,
-            LEFT,
-            RIGHT,
-            MIDDLE,
-            EXTRA1,
-            EXTRA2,
-            EXTRA3,
-            EXTRA4,
-            EXTRA5,
-        };
-
         enum class InputKey
         {
             NONE,
@@ -141,7 +131,27 @@ namespace RIS
             RIGHT_CONTROL,
             RIGHT_ALT,
             RIGHT_SUPER,
-            MENU
+            MENU,
+
+            MOUSE_LEFT,
+            MOUSE_RIGHT,
+            MOUSE_MIDDLE,
+            MOUSE_EXTRA1,
+            MOUSE_EXTRA2,
+            MOUSE_EXTRA3,
+            MOUSE_EXTRA4,
+            MOUSE_EXTRA5,
         };
+
+        constexpr InputKey ToKey(const std::string &keyName)
+        {
+            auto key = magic_enum::enum_cast<InputKey>(keyName);
+            return key.value_or(InputKey::NONE);
+        }
+
+        constexpr std::string_view ToString(InputKey key)
+        {
+            return magic_enum::enum_name<InputKey>(key);
+        }
     }
 }

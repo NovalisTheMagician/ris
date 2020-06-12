@@ -111,7 +111,7 @@ namespace RIS
         {
             if(!ready) return;
             for(auto& callback : buttonUpCallbacks)
-                if(callback(TranslateButton(button)))
+                if(callback(TranslateKey(button)))
                     break;
         }
 
@@ -119,7 +119,7 @@ namespace RIS
         {
             if(!ready) return;
             for(auto& callback : buttonDownCallbacks)
-                if(callback(TranslateButton(button)))
+                if(callback(TranslateKey(button)))
                     break;
         }
 
@@ -294,23 +294,15 @@ namespace RIS
             case GLFW_KEY_RIGHT_ALT: return InputKey::RIGHT_ALT;
             case GLFW_KEY_RIGHT_SUPER: return InputKey::RIGHT_SUPER;
             case GLFW_KEY_MENU: return InputKey::MENU;
+            case GLFW_MOUSE_BUTTON_LEFT: return InputKey::MOUSE_LEFT;
+            case GLFW_MOUSE_BUTTON_RIGHT: return InputKey::MOUSE_RIGHT;
+            case GLFW_MOUSE_BUTTON_MIDDLE: return InputKey::MOUSE_MIDDLE;
+            case GLFW_MOUSE_BUTTON_4: return InputKey::MOUSE_EXTRA1;
+            case GLFW_MOUSE_BUTTON_5: return InputKey::MOUSE_EXTRA2;
+            case GLFW_MOUSE_BUTTON_6: return InputKey::MOUSE_EXTRA3;
+            case GLFW_MOUSE_BUTTON_7: return InputKey::MOUSE_EXTRA4;
+            case GLFW_MOUSE_BUTTON_8: return InputKey::MOUSE_EXTRA5;
             default: return InputKey::NONE;
-            }
-        }
-
-        constexpr InputButton Input::TranslateButton(int button)
-        {
-            switch (button)
-            {
-            case GLFW_MOUSE_BUTTON_LEFT: return InputButton::LEFT;
-            case GLFW_MOUSE_BUTTON_RIGHT: return InputButton::RIGHT;
-            case GLFW_MOUSE_BUTTON_MIDDLE: return InputButton::MIDDLE;
-            case GLFW_MOUSE_BUTTON_4: return InputButton::EXTRA1;
-            case GLFW_MOUSE_BUTTON_5: return InputButton::EXTRA2;
-            case GLFW_MOUSE_BUTTON_6: return InputButton::EXTRA3;
-            case GLFW_MOUSE_BUTTON_7: return InputButton::EXTRA4;
-            case GLFW_MOUSE_BUTTON_8: return InputButton::EXTRA5;
-            default: return InputButton::NONE;
             }
         }
     }

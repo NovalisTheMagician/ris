@@ -16,7 +16,8 @@
                 "${workspaceFolder}/libs/libtcc/include/*",
                 "${workspaceFolder}/libs/ctre/include/*",
                 "${workspaceFolder}/libs/gsl/include/*",
-                "${workspaceFolder}/libs/fameta-counter/include/*"
+                "${workspaceFolder}/libs/fameta-counter/include/*",
+                "${workspaceFolder}/libs/magic_enum/include/*"
             ],
             "defines": [
                 "_DEBUG",

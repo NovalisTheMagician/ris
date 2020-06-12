@@ -80,7 +80,6 @@ namespace RIS
             {
                 auto &console = GetConsole();
                 console.Print(msg);
-                std::cout << msg << std::endl;
             });
 
             //extract the static libraries and headers into tmp

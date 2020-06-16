@@ -10,10 +10,14 @@ lk_flags = ['/nologo', '/INCREMENTAL:NO', '/LTCG:NOSTATUS', '/MACHINE:X64']
 dyn_libs = []
 
 inc_path = ['#src', '#libs/glm/include', '#libs/gli/include', '#libs/glad/include', '#libs/glfw/include', '#libs/soloud/include', '#libs/rapidjson/include', 
-            '#libs/libzip/include', '#libs/libzippp/include', '#libs/libtcc/include', '#libs/tiny_gltf/include', '#libs/ctre/include', '#libs/gsl/include',
-            '#libs/fameta-counter/include', '#libs/magic_enum/include']
-lib_path = ['libs/glad/lib', 'libs/glfw/lib', 'libs/soloud/lib', 'libs/libzip/lib', 'libs/libtcc/lib']
-libs = ['user32', 'kernel32', 'gdi32', 'shell32', 'opengl32', 'glad', 'glfw3', 'soloud_static', 'ws2_32', 'advapi32', 'libz-static', 'libzip-static', 'libtcc']
+            '#libs/libzip/include', '#libs/libzippp/include', '#libs/tiny_gltf/include', '#libs/ctre/include', '#libs/gsl/include',
+            '#libs/magic_enum/include', '#libs/squirrel/include', '#libs/squall/include']
+lib_path = ['libs/glad/lib', 'libs/glfw/lib', 'libs/soloud/lib', 'libs/libzip/lib', 'libs/squirrel/lib']
+
+libs_rel = ['glfw3', 'soloud', 'libz', 'libzip', 'squirrel', 'sqstdlib']
+libs_deb = ['glfw3d', 'soloudd', 'libzd', 'libzipd', 'squirreld', 'sqstdlibd']
+
+libs = ['user32', 'kernel32', 'gdi32', 'shell32', 'opengl32', 'ws2_32', 'advapi32', 'glad']
 
 defines = ['ZIP_STATIC']
 
@@ -23,9 +27,11 @@ if int(debug):
     cl_flags.append(['/Zi', '/MTd'])
     lk_flags.append(['/DEBUG'])
     defines.append(['_DEBUG'])
+    libs.append(libs_deb)
 else:
     cl_flags.append(['/O2', '/MT'])
     defines.append(['NDEBUG'])
+    libs.append(libs_rel)
 
 if not int(verbose):
     env['CXXCOMSTR'] = 'Compiling $TARGET'

@@ -14,8 +14,6 @@
 #include "misc/StringSupport.hpp"
 #include "misc/MathHelper.hpp"
 
-#include <fameta/counter.hpp>
-
 #include <memory>
 
 using namespace std::literals;
@@ -67,20 +65,17 @@ namespace RIS
 
         void Userinterface::RegisterScriptFunctions()
         {
-            constexpr fameta::counter<__COUNTER__, 200> c;
-
             auto &scriptEngine = GetScriptEngine();
             auto &loader = GetLoader();
 
-            scriptEngine.Register<void(const char*), c.next<__COUNTER__>()>("C_Print", [this](const char *msg){ console.Print(msg); });
-            scriptEngine.Register<void(), c.next<__COUNTER__>()>("C_OpenConsole", [this](){ console.Open(); });
-            scriptEngine.Register<void(), c.next<__COUNTER__>()>("C_CloseConsole", [this](){ console.Close(); });
-            scriptEngine.Register<void(), c.next<__COUNTER__>()>("C_ToggleConsole", [this](){ console.Toggle(); });
+            scriptEngine.Register("OpenConsole", [this](){ console.Open(); });
+            scriptEngine.Register("CloseConsole", [this](){ console.Close(); });
+            scriptEngine.Register("ToggleConsole", [this](){ console.Toggle(); });
 
-            scriptEngine.Register<float(), c.next<__COUNTER__>()>("UI_GetWidth", [this](){ return static_cast<float>(uiWidth); });
-            scriptEngine.Register<float(), c.next<__COUNTER__>()>("UI_GetHeight", [this](){ return static_cast<float>(uiHeight); });
+            scriptEngine.Register("UI_GetWidth", [this](){ return static_cast<float>(uiWidth); });
+            scriptEngine.Register("UI_GetHeight", [this](){ return static_cast<float>(uiHeight); });
 
-            scriptEngine.Register<void*(const char*), c.next<__COUNTER__>()>("UI_CreateImage", [this](const char *name)
+            scriptEngine.Register("UI_CreateImage", [this](const char *name)
             {
                 ImagePtr image = std::make_shared<Image>();
                 image->SetName(name);
@@ -88,26 +83,26 @@ namespace RIS
                 return image.get();
             });
 
-            scriptEngine.Register<void(void*, float, float), c.next<__COUNTER__>()>("UI_ImageSetPosition", [this](void *image, float x, float y)
+            scriptEngine.Register("UI_ImageSetPosition", [this](void *image, float x, float y)
             {
                 Image *i = static_cast<Image*>(image);
                 i->SetPosition({x, y});
             });
 
-            scriptEngine.Register<void(void*, float, float), c.next<__COUNTER__>()>("UI_ImageSetSize", [this](void *image, float w, float h)
+            scriptEngine.Register("UI_ImageSetSize", [this](void *image, float w, float h)
             {
                 Image *i = static_cast<Image*>(image);
                 i->SetSize({w, h});
             });
 
-            scriptEngine.Register<void(void*, const char*), c.next<__COUNTER__>()>("UI_ImageSetImage", [this, &loader](void *image, const char *textureName)
+            scriptEngine.Register("UI_ImageSetImage", [this, &loader](void *image, const char *textureName)
             {
                 Image *i = static_cast<Image*>(image);
                 auto texture = loader.Load<Graphics::Texture>(textureName);
                 i->SetImage(texture);
             });
 
-            scriptEngine.Register<void*(const char*), c.next<__COUNTER__>()>("UI_CreateButton", [this](const char *name)
+            scriptEngine.Register("UI_CreateButton", [this](const char *name)
             {
                 ButtonPtr button = std::make_shared<Button>(defaultFont);
                 button->SetName(name);
@@ -115,25 +110,25 @@ namespace RIS
                 return button.get();
             });
 
-            scriptEngine.Register<void(void*, float, float), c.next<__COUNTER__>()>("UI_ButtonSetPosition", [this](void *button, float x, float y)
+            scriptEngine.Register("UI_ButtonSetPosition", [this](void *button, float x, float y)
             {
                 Button *b = static_cast<Button*>(button);
                 b->SetPosition({x, y});
             });
 
-            scriptEngine.Register<void(void*, float, float), c.next<__COUNTER__>()>("UI_ButtonSetSize", [this](void *button, float w, float h)
+            scriptEngine.Register("UI_ButtonSetSize", [this](void *button, float w, float h)
             {
                 Button *b = static_cast<Button*>(button);
                 b->SetSize({w, h});
             });
 
-            scriptEngine.Register<void(void*, const char*), c.next<__COUNTER__>()>("UI_ButtonSetText", [this](void *button, const char *text)
+            scriptEngine.Register("UI_ButtonSetText", [this](void *button, const char *text)
             {
                 Button *b = static_cast<Button*>(button);
                 b->SetText(text);
             });
 
-            scriptEngine.Register<void(void*, const char*), c.next<__COUNTER__>()>("UI_ButtonSetFont", [this, &loader](void *button, const char *fontName)
+            scriptEngine.Register("UI_ButtonSetFont", [this, &loader](void *button, const char *fontName)
             {
                 Button *b = static_cast<Button*>(button);
                 auto font = loader.Load<Graphics::Font>(fontName);
@@ -143,19 +138,19 @@ namespace RIS
                 }
             });
 
-            scriptEngine.Register<void(void*, float), c.next<__COUNTER__>()>("UI_ButtonSetFontSize", [this](void *button, float fontSize)
+            scriptEngine.Register("UI_ButtonSetFontSize", [this](void *button, float fontSize)
             {
                 Button *b = static_cast<Button*>(button);
                 b->SetFontSize(fontSize);
             });
 
-            scriptEngine.Register<void(void*, void(*)()), c.next<__COUNTER__>()>("UI_ButtonSetCallback", [this](void *button, void(*btnCallback)())
+            scriptEngine.Register("UI_ButtonSetCallback", [this](void *button, std::function<void()> btnCallback)
             {
                 Button *b = static_cast<Button*>(button);
                 b->SetCallback(btnCallback);
             });
 
-            scriptEngine.Register<void*(const char*), c.next<__COUNTER__>()>("UI_CreatePanel", [this](const char *name)
+            scriptEngine.Register("UI_CreatePanel", [this](const char *name)
             {
                 PanelPtr panel = std::make_shared<Panel>();
                 panel->SetName(name);
@@ -165,19 +160,19 @@ namespace RIS
                 return panel.get();
             });
 
-            scriptEngine.Register<void(void*, float, float), c.next<__COUNTER__>()>("UI_PanelSetPosition", [this](void *panel, float x, float y)
+            scriptEngine.Register("UI_PanelSetPosition", [this](void *panel, float x, float y)
             {
                 Panel *p = static_cast<Panel*>(panel);
                 p->SetPosition({x, y});
             });
 
-            scriptEngine.Register<void(void*, float, float), c.next<__COUNTER__>()>("UI_PanelSetSize", [this](void *panel, float w, float h)
+            scriptEngine.Register("UI_PanelSetSize", [this](void *panel, float w, float h)
             {
                 Panel *p = static_cast<Panel*>(panel);
                 p->SetSize({w, h});
             });
 
-            scriptEngine.Register<void(void*, void*), c.next<__COUNTER__>()>("UI_PanelAdd", [this](void *panel, void *component)
+            scriptEngine.Register("UI_PanelAdd", [this](void *panel, void *component)
             {
                 Panel *p = static_cast<Panel*>(panel);
                 auto comp = std::find_if(std::begin(components), std::end(components), 
@@ -186,7 +181,7 @@ namespace RIS
                     p->Add(*comp);
             });
 
-            scriptEngine.Register<void(void*, void*), c.next<__COUNTER__>()>("UI_PanelRemove", [this](void *panel, void *component)
+            scriptEngine.Register("UI_PanelRemove", [this](void *panel, void *component)
             {
                 Panel *p = static_cast<Panel*>(panel);
                 auto comp = std::find_if(std::begin(components), std::end(components), 
@@ -195,13 +190,13 @@ namespace RIS
                     p->Remove(*comp);
             });
 
-            scriptEngine.Register<void(void*), c.next<__COUNTER__>()>("UI_PanelRemoveAll", [this](void *panel)
+            scriptEngine.Register("UI_PanelRemoveAll", [this](void *panel)
             {
                 Panel *p = static_cast<Panel*>(panel);
                 p->RemoveAll();
             });
 
-            scriptEngine.Register<void(const char*, void*), c.next<__COUNTER__>()>("UI_RegisterMenu", [this](const char *menuName, void *component)
+            scriptEngine.Register("UI_RegisterMenu", [this](const char *menuName, void *component)
             {
                 auto comp = std::find_if(std::begin(components), std::end(components), 
                     [&component](const ComponentPtr &elem) { return static_cast<Component*>(component) == elem.get(); });
@@ -209,7 +204,7 @@ namespace RIS
                     menus.insert_or_assign(menuName, *comp);
             });
 
-            scriptEngine.Register<void(const char*), c.next<__COUNTER__>()>("UI_SetActiveMenu", [this](const char *menuName)
+            scriptEngine.Register("UI_SetActiveMenu", [this](const char *menuName)
             {
                 if(menus.count(menuName) > 0)
                 {
@@ -308,7 +303,7 @@ namespace RIS
 
         bool Userinterface::OnKeyDown(Input::InputKey key)
         {
-            if(key == Input::InputKey::GRAVE_ACCENT)
+            if(key == Input::InputKey::F1)
             {
                 console.Toggle();
                 return true;

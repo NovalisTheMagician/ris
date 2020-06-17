@@ -13,16 +13,14 @@
                 "${workspaceFolder}/libs/libzip/include/*",
                 "${workspaceFolder}/libs/libzippp/include/*",
                 "${workspaceFolder}/libs/tiny_gltf/include/*",
-                "${workspaceFolder}/libs/libtcc/include/*",
                 "${workspaceFolder}/libs/ctre/include/*",
                 "${workspaceFolder}/libs/gsl/include/*",
-                "${workspaceFolder}/libs/fameta-counter/include/*",
-                "${workspaceFolder}/libs/magic_enum/include/*"
+                "${workspaceFolder}/libs/magic_enum/include/*",
+                "${workspaceFolder}/libs/squirrel/include/*",
+                "${workspaceFolder}/libs/squall/include/*"
             ],
             "defines": [
-                "_DEBUG",
-                "UNICODE",
-                "_UNICODE"
+                "_DEBUG"
             ],
             "windowsSdkVersion": "10.0.18362.0",
             "compilerPath": "F:/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.24.28314/bin/Hostx64/x64/cl.exe",

@@ -15,7 +15,7 @@ param (
 
 $imageFileFilter = "*.png", "*.jpg", "*.jfif", "*.jpeg"
 $shaderFileFilter = "*.glsl", "*.glsli"
-$scriptFileFilter = "*.c", "*.h", "*.a"
+$scriptFileFilter = "*.nut"
 $modelFileFilter = "*.json"
 $meshFileFilter = "*.glb"
 $fontFileFilter = "*.ttf"

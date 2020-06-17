@@ -50,9 +50,9 @@ public:
         }
     }
 
-    void dostring(const SQChar* source) {
+    void dostring(const SQChar* source, const SQChar* sourcename = _SC("dostring")) {
         keeper k(handle());
-        if (!SQ_SUCCEEDED(sq_compilebuffer(handle(), source, static_cast<int>(scstrlen(source) * sizeof(SQChar)), _SC("dostring"), 1))) {
+        if (!SQ_SUCCEEDED(sq_compilebuffer(handle(), source, static_cast<int>(scstrlen(source) * sizeof(SQChar)), sourcename, 1))) {
             throw squirrel_error("dostring compile failed");
         }
 

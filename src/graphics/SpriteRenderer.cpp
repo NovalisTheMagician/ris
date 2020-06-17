@@ -127,7 +127,8 @@ namespace RIS
                 if(c != ' ')
                 {
                     if(font.HasGlyph(c) == 0)
-                        continue;
+                        //continue;
+                        c = '?';
                 
                     const Glyph &glyph = font[c];
                     if(i > 0)

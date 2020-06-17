@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
         window->SetWindowIcon(windowIcon);
         window->SetCursorIcon(windowCursor, 1, 4);
     }
-    catch(const std::runtime_error &e)
+    catch(const RISException &e)
     {
         logger.Warning(e.what());
     }

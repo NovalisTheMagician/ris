@@ -23,20 +23,21 @@
 
 #include <iostream>
 
+#include <squirrel.h>
+#include <sqstdmath.h>
+#include <sqstdstring.h>
+
 using namespace std::literals;
+
+#define RIS_BUF_SIZE 256
 
 namespace RIS
 {
     namespace Script
     {
         ScriptEngine::ScriptEngine()
-            : state(tcc_new())
+            : vm(new squall::VMStd())
         {}
-
-        ScriptEngine::~ScriptEngine()
-        {
-            tcc_delete(state);
-        }
 
         void ScriptEngine::PostInit()
         {
@@ -53,91 +54,68 @@ namespace RIS
 
         void ScriptEngine::LoadScripts()
         {
-            auto &loader = GetLoader();
-            auto files = loader.GetFilesFromFolder(std::string("scripts"));
-            auto tmpPath = std::filesystem::temp_directory_path();
-            tmpPath = tmpPath / Version::GAME_NAME;
-            auto tmpScriptsPath = tmpPath / "scripts";
-
-            if(std::filesystem::exists(tmpScriptsPath))
-                std::filesystem::remove_all(tmpScriptsPath);
-
-            if(!std::filesystem::exists(tmpScriptsPath))
-            {
-                if(!std::filesystem::exists(tmpPath))
-                    std::filesystem::create_directory(tmpPath);
-                std::filesystem::create_directory(tmpScriptsPath);
-            }
-
-            //do defines here
-
-            tcc_add_sysinclude_path(state, tmpScriptsPath.generic_string().c_str());
-            tcc_add_include_path(state, tmpScriptsPath.generic_string().c_str());
-            tcc_add_library_path(state, tmpScriptsPath.generic_string().c_str());
-            tcc_set_output_type(state, TCC_OUTPUT_MEMORY);
-
-            tcc_set_error_func(state, nullptr, [](void* err_opaque, const char* msg)
+            auto vmInstance = vm->handle();
+            sq_setcompilererrorhandler(vmInstance, [](HSQUIRRELVM v, const SQChar *desc, const SQChar *source, SQInteger line, SQInteger column)
             {
                 auto &console = GetConsole();
-                console.Print(msg);
+                console.Print("Scripterror in "s + source + " (Ln "s + std::to_string(line) + ", Col "s + std::to_string(column) + ")"s);
+                console.Print(desc);
             });
 
-            //extract the static libraries and headers into tmp
+            sq_setprintfunc(vmInstance, [](HSQUIRRELVM v, const SQChar *msg, ...)
+            {
+                char buf[RIS_BUF_SIZE];
+                va_list args;
+                va_start(args, msg);
+                vsnprintf(buf, RIS_BUF_SIZE, msg, args);
+                va_end(args);
+
+                auto &console = GetConsole();
+                console.Print(buf);
+            }, [](HSQUIRRELVM v, const SQChar *msg, ...)
+            {
+                char buf[RIS_BUF_SIZE];
+                va_list args;
+                va_start(args, msg);
+                vsnprintf(buf, RIS_BUF_SIZE, msg, args);
+                va_end(args);
+
+                auto &console = GetConsole();
+                console.Print(buf);    
+            });
+
+            sqstd_register_mathlib(vmInstance);
+            sqstd_register_stringlib(vmInstance);
+
+            auto &loader = GetLoader();
+            auto &console = GetConsole();
+            auto files = loader.GetFilesFromFolder(std::string("scripts"));
+
             for(const auto &file : files)
             {
-                std::filesystem::path filePath(file);
-                std::string extension = filePath.extension().generic_string();
-                if(extension == ".h" || extension == ".a")
+                auto bytes = loader.LoadBytes(file);
+                try
                 {
-                    auto fileContents = loader.LoadBytes(file);
-                    std::fstream stream(tmpPath / file, std::fstream::out | std::fstream::binary | std::fstream::trunc);
-                    if (!stream) {
-                        std::cerr << "file open failed: " << std::strerror(errno) << "\n";
-                        continue;
-                    }
-                    stream.write(reinterpret_cast<char*>(fileContents.data()), fileContents.size());
+                    auto source = std::string(reinterpret_cast<char*>(bytes.data()), bytes.size());
+                    vm->dostring(source.c_str(), file.c_str());
+                }
+                catch(const squall::squirrel_error& e)
+                {
+                    //console.Print(e.what());
                 }
             }
 
-            //compile the source scripts
-            for(const auto &file : files)
-            {
-                std::filesystem::path filePath(file);
-                if(filePath.extension().generic_string() == ".c")
-                {
-                    auto fileContents = loader.Load<std::string>(file);
-                    tcc_compile_string(state, (*fileContents).c_str());
-                }
-            }
-
-            //do external funcs here
             auto &window = GetWindow();
             auto &interface = GetUserinterface();
             window.RegisterScriptFunctions();
             interface.RegisterScriptFunctions();
 
-            if(tcc_relocate(state, TCC_RELOCATE_AUTO) != -1)
-            {
-                tcc_list_symbols(state, &symbols, [](void *ctx, const char *name, const void *val)
-                {
-                    std::unordered_map<std::string, void*> *symbols = static_cast<std::unordered_map<std::string, void*>*>(ctx);
-                    if(name[0] != '_') // only add symbols which are not library symbols
-                    {
-                        symbols->insert_or_assign(name, const_cast<void*>(val));
-                    }
-                });
-
-                interface.Invalidate();
-            }
+            interface.Invalidate();
         }
 
         void ScriptEngine::Reload()
         {
-            tcc_delete(state);
-            state = tcc_new();
-
-            symbols.clear();
-
+            vm.reset(new squall::VMStd());
             LoadScripts();
         }
     }

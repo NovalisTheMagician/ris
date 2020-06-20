@@ -63,10 +63,12 @@ namespace RIS
 
         void Console::Print(const std::string &msg)
         {
-            while(lines.size() >= maxLines - 2)
+            auto msgs = split(msg, "\n");
+            while(lines.size() >= maxLines - (msgs.size() + 1))
                 lines.pop_back();
             
-            lines.insert(lines.begin(), msg);
+            for(auto& m : msgs)
+                lines.insert(lines.begin(), m);
         }
 
         void Console::BindFunc(const std::string &name, ConsoleFunc func)

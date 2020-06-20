@@ -86,21 +86,21 @@ int main(int argc, char *argv[])
 
     std::unique_ptr<Window::Window> window;
     std::unique_ptr<Graphics::Renderer> renderer;
+    std::unique_ptr<Script::ScriptEngine> scriptEngine;
     std::unique_ptr<Audio::AudioEngine> audio;
     std::unique_ptr<UI::Userinterface> userinterface;
     std::unique_ptr<Loader::Loader> loader;
     std::unique_ptr<Input::Input> input;
-    std::unique_ptr<Script::ScriptEngine> scriptEngine;
-
+    
     try
     {
         window = std::make_unique<Window::Window>(Version::GAME_NAME);
         renderer = std::make_unique<Graphics::Renderer>();
+        scriptEngine = std::make_unique<Script::ScriptEngine>();
         audio = std::make_unique<Audio::AudioEngine>();
         userinterface = std::make_unique<UI::Userinterface>();
         loader = std::make_unique<Loader::Loader>(assetFolder);
         input = std::make_unique<Input::Input>(*window);
-        scriptEngine = std::make_unique<Script::ScriptEngine>();
 
         std::string baseArchive = "main.zip";
         if(args.IsSet("-debug"))

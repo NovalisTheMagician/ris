@@ -68,14 +68,25 @@ namespace RIS
             auto &scriptEngine = GetScriptEngine();
             auto &loader = GetLoader();
 
-            scriptEngine.Register("OpenConsole", [this](){ console.Open(); });
-            scriptEngine.Register("CloseConsole", [this](){ console.Close(); });
-            scriptEngine.Register("ToggleConsole", [this](){ console.Toggle(); });
+            scriptEngine.Register("openConsole", [this](){ console.Open(); });
+            scriptEngine.Register("closeConsole", [this](){ console.Close(); });
+            scriptEngine.Register("toggleConsole", [this](){ console.Toggle(); });
 
-            scriptEngine.Register("UI_GetWidth", [this](){ return static_cast<float>(uiWidth); });
-            scriptEngine.Register("UI_GetHeight", [this](){ return static_cast<float>(uiHeight); });
+            scriptEngine.Register("getUIWidth", [this](){ return static_cast<float>(uiWidth); });
+            scriptEngine.Register("getUIHeight", [this](){ return static_cast<float>(uiHeight); });
 
-            scriptEngine.Register("UI_CreateImage", [this](const char *name)
+            scriptEngine.RegisterKlass<Component>("Component");
+
+            scriptEngine.RegisterKlass<Image, Component>("Image")
+                .RegisterFunc("setPosition", [](Image *self, float x, float y){ self->SetPosition({x, y}); })
+                .RegisterFunc("setSize", [](Image *self, float w, float h){ self->SetSize({w, h}); })
+                .RegisterFunc("setImage", [&loader](Image *self, const std::string &image)
+                { 
+                    auto texture = loader.Load<Graphics::Texture>(image);
+                    self->SetImage(texture);
+                });
+
+            scriptEngine.Register("createImage", [this](const std::string &name)
             {
                 ImagePtr image = std::make_shared<Image>();
                 image->SetName(name);
@@ -83,26 +94,22 @@ namespace RIS
                 return image.get();
             });
 
-            scriptEngine.Register("UI_ImageSetPosition", [this](void *image, float x, float y)
-            {
-                Image *i = static_cast<Image*>(image);
-                i->SetPosition({x, y});
-            });
+            scriptEngine.RegisterKlass<Button, Component>("Button")
+                .RegisterFunc("setPosition", [](Button *self, float x, float y){ self->SetPosition({x, y}); })
+                .RegisterFunc("setSize", [](Button *self, float w, float h){ self->SetSize({w, h}); })
+                .RegisterFunc("setText", &Button::SetText)
+                .RegisterFunc("setFont", [&loader](Button *self, const std::string &fontName)
+                {
+                    auto font = loader.Load<Graphics::Font>(fontName);
+                    if(font)
+                    {
+                        self->SetFont(font);
+                    }
+                })
+                .RegisterFunc("setFontSize", &Button::SetFontSize)
+                .RegisterFunc("setCallback", &Button::SetCallback);
 
-            scriptEngine.Register("UI_ImageSetSize", [this](void *image, float w, float h)
-            {
-                Image *i = static_cast<Image*>(image);
-                i->SetSize({w, h});
-            });
-
-            scriptEngine.Register("UI_ImageSetImage", [this, &loader](void *image, const char *textureName)
-            {
-                Image *i = static_cast<Image*>(image);
-                auto texture = loader.Load<Graphics::Texture>(textureName);
-                i->SetImage(texture);
-            });
-
-            scriptEngine.Register("UI_CreateButton", [this](const char *name)
+            scriptEngine.Register("createButton", [this](const std::string &name)
             {
                 ButtonPtr button = std::make_shared<Button>(defaultFont);
                 button->SetName(name);
@@ -110,47 +117,26 @@ namespace RIS
                 return button.get();
             });
 
-            scriptEngine.Register("UI_ButtonSetPosition", [this](void *button, float x, float y)
-            {
-                Button *b = static_cast<Button*>(button);
-                b->SetPosition({x, y});
-            });
-
-            scriptEngine.Register("UI_ButtonSetSize", [this](void *button, float w, float h)
-            {
-                Button *b = static_cast<Button*>(button);
-                b->SetSize({w, h});
-            });
-
-            scriptEngine.Register("UI_ButtonSetText", [this](void *button, const char *text)
-            {
-                Button *b = static_cast<Button*>(button);
-                b->SetText(text);
-            });
-
-            scriptEngine.Register("UI_ButtonSetFont", [this, &loader](void *button, const char *fontName)
-            {
-                Button *b = static_cast<Button*>(button);
-                auto font = loader.Load<Graphics::Font>(fontName);
-                if(font)
+            scriptEngine.RegisterKlass<Panel, Component>("Panel")
+                .RegisterFunc("setPosition", [](Panel *self, float x, float y){ self->SetPosition({x, y}); })
+                .RegisterFunc("setSize", [](Panel *self, float w, float h){ self->SetSize({w, h}); })
+                .RegisterFunc("add", [this](Panel *self, Component *component)
                 {
-                    b->SetFont(font);
-                }
-            });
+                    auto comp = std::find_if(std::begin(components), std::end(components), 
+                    [&component](const ComponentPtr &elem) { return static_cast<Component*>(component) == elem.get(); });
+                    if(comp != std::end(components))
+                        self->Add(*comp);
+                })
+                .RegisterFunc("remove", [this](Panel *self, Component *component)
+                {
+                    auto comp = std::find_if(std::begin(components), std::end(components), 
+                    [&component](const ComponentPtr &elem) { return static_cast<Component*>(component) == elem.get(); });
+                    if(comp != std::end(components))
+                        self->Remove(*comp);
+                })
+                .RegisterFunc("removeAll", &Panel::RemoveAll);
 
-            scriptEngine.Register("UI_ButtonSetFontSize", [this](void *button, float fontSize)
-            {
-                Button *b = static_cast<Button*>(button);
-                b->SetFontSize(fontSize);
-            });
-
-            scriptEngine.Register("UI_ButtonSetCallback", [this](void *button, std::function<void()> btnCallback)
-            {
-                Button *b = static_cast<Button*>(button);
-                b->SetCallback(btnCallback);
-            });
-
-            scriptEngine.Register("UI_CreatePanel", [this](const char *name)
+            scriptEngine.Register("createPanel", [this](const std::string &name)
             {
                 PanelPtr panel = std::make_shared<Panel>();
                 panel->SetName(name);
@@ -160,43 +146,7 @@ namespace RIS
                 return panel.get();
             });
 
-            scriptEngine.Register("UI_PanelSetPosition", [this](void *panel, float x, float y)
-            {
-                Panel *p = static_cast<Panel*>(panel);
-                p->SetPosition({x, y});
-            });
-
-            scriptEngine.Register("UI_PanelSetSize", [this](void *panel, float w, float h)
-            {
-                Panel *p = static_cast<Panel*>(panel);
-                p->SetSize({w, h});
-            });
-
-            scriptEngine.Register("UI_PanelAdd", [this](void *panel, void *component)
-            {
-                Panel *p = static_cast<Panel*>(panel);
-                auto comp = std::find_if(std::begin(components), std::end(components), 
-                    [&component](const ComponentPtr &elem) { return static_cast<Component*>(component) == elem.get(); });
-                if(comp != std::end(components))
-                    p->Add(*comp);
-            });
-
-            scriptEngine.Register("UI_PanelRemove", [this](void *panel, void *component)
-            {
-                Panel *p = static_cast<Panel*>(panel);
-                auto comp = std::find_if(std::begin(components), std::end(components), 
-                    [&component](const ComponentPtr &elem) { return static_cast<Component*>(component) == elem.get(); });
-                if(comp != std::end(components))
-                    p->Remove(*comp);
-            });
-
-            scriptEngine.Register("UI_PanelRemoveAll", [this](void *panel)
-            {
-                Panel *p = static_cast<Panel*>(panel);
-                p->RemoveAll();
-            });
-
-            scriptEngine.Register("UI_RegisterMenu", [this](const char *menuName, void *component)
+            scriptEngine.Register("registerMenu", [this](const std::string &menuName, Component *component)
             {
                 auto comp = std::find_if(std::begin(components), std::end(components), 
                     [&component](const ComponentPtr &elem) { return static_cast<Component*>(component) == elem.get(); });
@@ -204,7 +154,7 @@ namespace RIS
                     menus.insert_or_assign(menuName, *comp);
             });
 
-            scriptEngine.Register("UI_SetActiveMenu", [this](const char *menuName)
+            scriptEngine.Register("setActiveMenu", [this](const std::string &menuName)
             {
                 if(menus.count(menuName) > 0)
                 {

@@ -105,11 +105,11 @@ namespace RIS
         {
             auto &scriptEngine = GetScriptEngine();
 
-            scriptEngine.Register("Exit", [this](){ Exit(0); });
-            scriptEngine.Register("LogInfo", [](const std::string &msg){ Logger::Instance().Info(msg); });
-            scriptEngine.Register("LogWarning", [](const std::string &msg){ Logger::Instance().Warning(msg); });
-            scriptEngine.Register("LogError", [](const std::string &msg){ Logger::Instance().Error(msg); });
-            scriptEngine.Register("SetRelativeMouse", [this](int relative){ SetRelativeMouse(relative); });
+            scriptEngine.Register("exit", [this](){ Exit(0); });
+            scriptEngine.Register("logInfo", [](const std::string &msg){ Logger::Instance().Info(msg); });
+            scriptEngine.Register("logWarning", [](const std::string &msg){ Logger::Instance().Warning(msg); });
+            scriptEngine.Register("logError", [](const std::string &msg){ Logger::Instance().Error(msg); });
+            scriptEngine.Register("setRelativeMouse", [this](int relative){ SetRelativeMouse(relative); });
         }
 
         void Window::SetRelativeMouse(bool setRelative)

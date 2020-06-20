@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include <string>
 #include <algorithm>
 #include <locale>
@@ -63,6 +64,21 @@ namespace RIS
 		std::string newStr(str);
 		std::transform(str.begin(), str.end(), newStr.begin(), [](unsigned char c){ return std::tolower(c); });
 		return str;
+	}
+
+	inline std::vector<std::string> split(const std::string &str, const std::string &delimiter)
+	{
+		std::vector<std::string> tokens;
+		auto start = 0U;
+		auto end = str.find(delimiter);
+		while (end != std::string::npos)
+		{
+			tokens.push_back(str.substr(start, end - start));
+			start = end + delimiter.length();
+			end = str.find(delimiter, start);
+		}
+		tokens.push_back(str.substr(start, end));
+		return tokens;
 	}
 
 #pragma warning(push)

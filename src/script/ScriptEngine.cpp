@@ -81,15 +81,17 @@ namespace RIS
                 va_end(args);
 
                 auto &console = GetConsole();
-                console.Print(buf);    
+                console.Print(buf);
+                Logger::Instance().Error(buf);
             });
 
+            //check for return value (can it even fail?)
             sqstd_register_mathlib(vmInstance);
             sqstd_register_stringlib(vmInstance);
 
             auto &loader = GetLoader();
             auto &console = GetConsole();
-            auto files = loader.GetFilesFromFolder(std::string("scripts"));
+            auto files = loader.GetFilesFromFolder("scripts"s);
 
             for(const auto &file : files)
             {

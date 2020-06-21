@@ -18,6 +18,9 @@ namespace RIS
         class Panel : public Container
         {
         public:
+            using Ptr = std::shared_ptr<Panel>;
+            static Ptr Create();
+
             Panel() = default;
             virtual ~Panel() = default;
             Panel(const Panel&) = default;
@@ -26,14 +29,12 @@ namespace RIS
             Panel& operator=(Panel&&) = default;
 
             void SetColor(const glm::vec4 &color);
-            void SetPosition(const glm::vec2 &position);
             void SetImage(std::shared_ptr<Graphics::Texture> image);
-            void SetSize(const glm::vec2 &size);
 
-            void Add(ComponentPtr component) override;
-            void Remove(ComponentPtr component) override;
+            void Add(Component::Ptr component) override;
+            void Remove(Component::Ptr component) override;
             void RemoveAll() override;
-            ComponentPtr Find(const std::string &name, bool recursive = false) override;
+            Component::Ptr Find(const std::string &name, bool recursive = false) override;
 
             void OnChar(char c) override;
             void OnMouseMove(float x, float y) override;
@@ -48,14 +49,12 @@ namespace RIS
             void Draw(Graphics::SpriteRenderer &renderer, const glm::vec2 &parentPosition) override;
 
         private:
-            std::vector<ComponentPtr> components;
+            std::vector<Component::Ptr> components;
 
             glm::vec4 color;
-            glm::vec2 position, size;
 
             std::shared_ptr<Graphics::Texture> backgroundImage;
 
         };
-        using PanelPtr = std::shared_ptr<Panel>;
     }
 }

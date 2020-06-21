@@ -14,15 +14,14 @@ namespace RIS
         class InputBox : public Component
         {
         public:
+            using Ptr = std::shared_ptr<InputBox>;
+
             InputBox() = default;
             virtual ~InputBox() = default;
             InputBox(const InputBox&) = default;
             InputBox& operator=(const InputBox&) = default;
             InputBox(InputBox&&) = default;
             InputBox& operator=(InputBox&&) = default;
-
-            void SetPosition(const glm::vec2 &position);
-            void SetSize(const glm::vec2 &size);
 
             void SetPreviewText(const std::string &previewText);
             void SetText(const std::string &text);
@@ -37,13 +36,11 @@ namespace RIS
 
         private:
             std::string previewText, text;
-            glm::vec2 position, size;
 
             glm::vec4 previewTextColor = glm::vec4(0.6f, 0.6f, 0.6f, 1.0f), textColor = glm::vec4(0, 0, 0, 1);
             int font;
             float fontSize;
 
         };
-        using InputBoxPtr = std::shared_ptr<InputBox>;
     }
 }

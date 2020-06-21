@@ -21,15 +21,15 @@ namespace RIS
         class Button : public Component
         {
         public:
+            using Ptr = std::shared_ptr<Button>;
+            static Ptr Create(std::shared_ptr<Graphics::Font> defaultFont);
+
             Button(std::shared_ptr<Graphics::Font> defaultFont);
             virtual ~Button() = default;
             Button(const Button&) = default;
             Button& operator=(const Button&) = default;
             Button(Button&&) = default;
             Button& operator=(Button&&) = default;
-
-            void SetPosition(const glm::vec2 &position);
-            void SetSize(const glm::vec2 &size);
 
             void SetText(const std::string &text);
             void SetFont(std::shared_ptr<Graphics::Font> font);
@@ -62,8 +62,6 @@ namespace RIS
             float fontSize = -1;
             glm::vec4 textColor = glm::vec4(0, 0, 0, 1);
 
-            glm::vec2 position, size;
-
             glm::vec4 normalColor = glm::vec4(1, 1, 1, 1);
             glm::vec4 hoverColor = glm::vec4(0.7f, 0.7f, 0.7f, 1);
             glm::vec4 downColor = glm::vec4(0.5f, 0.5f, 0.5f, 1);
@@ -77,6 +75,5 @@ namespace RIS
             ButtonFunc callback;
 
         };
-        using ButtonPtr = std::shared_ptr<Button>;
     }
 }

@@ -6,19 +6,14 @@ namespace RIS
 {
     namespace UI
     {
+        Panel::Ptr Panel::Create()
+        {
+            return std::make_shared<Panel>();
+        }
+
         void Panel::SetColor(const glm::vec4 &color)
         {
             this->color = color;
-        }
-
-        void Panel::SetPosition(const glm::vec2 &position)
-        {
-            this->position = position;
-        }
-
-        void Panel::SetSize(const glm::vec2 &size)
-        {
-            this->size = size;
         }
 
         void Panel::SetImage(std::shared_ptr<Graphics::Texture> image)
@@ -26,7 +21,7 @@ namespace RIS
             backgroundImage = image;
         }
 
-        void Panel::Add(ComponentPtr component)
+        void Panel::Add(Component::Ptr component)
         {
             if(component)
             {
@@ -34,7 +29,7 @@ namespace RIS
             }
         }
 
-        void Panel::Remove(ComponentPtr component)
+        void Panel::Remove(Component::Ptr component)
         {
             if(component)
             {
@@ -51,7 +46,7 @@ namespace RIS
             components.clear();
         }
 
-        ComponentPtr Panel::Find(const std::string &name, bool recursive)
+        Component::Ptr Panel::Find(const std::string &name, bool recursive)
         {
             auto found = std::find_if(components.begin(), components.end(), [&name](auto &component){ return component->GetName() == name; });
             if(found != components.end())
@@ -63,7 +58,7 @@ namespace RIS
             {
                 for(auto &c : components)
                 {
-                    ContainerPtr container = std::dynamic_pointer_cast<Container>(c);
+                    Container::Ptr container = std::dynamic_pointer_cast<Container>(c);
                     if(container)
                     {
                         return container->Find(name, recursive);

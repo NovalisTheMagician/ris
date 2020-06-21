@@ -8,19 +8,14 @@ namespace RIS
 {
     namespace UI
     {
+        Button::Ptr Button::Create(std::shared_ptr<Graphics::Font> defaultFont)
+        {
+            return std::make_shared<Button>(defaultFont);
+        }
+
         Button::Button(std::shared_ptr<Graphics::Font> defaultFont)
             : callback([](){}), font(defaultFont)
         {
-        }
-
-        void Button::SetPosition(const glm::vec2 &position)
-        {
-            this->position = position;
-        }
-
-        void Button::SetSize(const glm::vec2 &size)
-        {
-            this->size = size;
         }
 
         void Button::SetText(const std::string &text)

@@ -63,17 +63,17 @@ namespace RIS
             std::shared_ptr<Graphics::Font> defaultFont;
 
             int uiWidth, uiHeight;
-            ContainerPtr rootContainer;
+            Container::Ptr rootContainer;
 
-            LabelPtr fpsLabel;
+            Label::Ptr fpsLabel;
             bool showFps = false;
             bool showFrametime = false;
             float frameTime;
 
-            ComponentPtr activeMenu;
+            Component::Ptr activeMenu;
 
-            std::unordered_map<std::string, ComponentPtr> menus;
-            std::vector<ComponentPtr> components;
+            std::unordered_map<std::string, Component::Ptr> menus;
+            std::vector<Component::Ptr> components;
         };
     }
 }

@@ -40,11 +40,12 @@ namespace RIS
 
             console.InitLimits(glm::vec2(uiWidth, uiHeight));
 
-            fpsLabel = std::make_shared<Label>(defaultFont);
+            fpsLabel = Label::Create(defaultFont);
             fpsLabel->SetPosition({0, 0});
             fpsLabel->SetText("0");
             fpsLabel->SetTextColor({1, 1, 1, 1});
-            fpsLabel->SetFont(defaultFont, 16);
+            fpsLabel->SetFont(defaultFont);
+            fpsLabel->SetFontSize(16);
 
             console.BindFunc("fps", Helpers::BoolFunc(showFps, "Show FPS", "Hide FPS"));
             console.BindFunc("frametime", Helpers::BoolFunc(showFrametime, "Show Frametime", "Hide Frametime"));
@@ -82,11 +83,13 @@ namespace RIS
             scriptEngine.Register("getUIWidth", [this](){ return static_cast<float>(uiWidth); });
             scriptEngine.Register("getUIHeight", [this](){ return static_cast<float>(uiHeight); });
 
-            scriptEngine.RegisterKlass<Component>("Component");
+            scriptEngine.RegisterKlass<Component>("Component")
+                .RegisterFunc("setPosition", [](Component *self, float x, float y){ self->SetPosition({x, y}); })
+                .RegisterFunc("setSize", [](Component *self, float w, float h){ self->SetSize({w, h}); });
+
+            scriptEngine.RegisterKlass<Container, Component>("Container");
 
             scriptEngine.RegisterKlass<Image, Component>("Image")
-                .RegisterFunc("setPosition", [](Image *self, float x, float y){ self->SetPosition({x, y}); })
-                .RegisterFunc("setSize", [](Image *self, float w, float h){ self->SetSize({w, h}); })
                 .RegisterFunc("setImage", [&loader](Image *self, const std::string &image)
                 { 
                     auto texture = loader.Load<Graphics::Texture>(image);
@@ -95,49 +98,43 @@ namespace RIS
 
             scriptEngine.Register("createImage", [this](const std::string &name)
             {
-                ImagePtr image = std::make_shared<Image>();
+                Image::Ptr image = Image::Create();
                 image->SetName(name);
                 components.push_back(image);
                 return image.get();
             });
 
             scriptEngine.RegisterKlass<Button, Component>("Button")
-                .RegisterFunc("setPosition", [](Button *self, float x, float y){ self->SetPosition({x, y}); })
-                .RegisterFunc("setSize", [](Button *self, float w, float h){ self->SetSize({w, h}); })
                 .RegisterFunc("setText", &Button::SetText)
                 .RegisterFunc("setFont", [&loader](Button *self, const std::string &fontName)
                 {
                     auto font = loader.Load<Graphics::Font>(fontName);
                     if(font)
-                    {
                         self->SetFont(font);
-                    }
                 })
                 .RegisterFunc("setFontSize", &Button::SetFontSize)
                 .RegisterFunc("setCallback", &Button::SetCallback);
 
             scriptEngine.Register("createButton", [this](const std::string &name)
             {
-                ButtonPtr button = std::make_shared<Button>(defaultFont);
+                Button::Ptr button = Button::Create(defaultFont);
                 button->SetName(name);
                 components.push_back(button);
                 return button.get();
             });
 
-            scriptEngine.RegisterKlass<Panel, Component>("Panel")
-                .RegisterFunc("setPosition", [](Panel *self, float x, float y){ self->SetPosition({x, y}); })
-                .RegisterFunc("setSize", [](Panel *self, float w, float h){ self->SetSize({w, h}); })
+            scriptEngine.RegisterKlass<Panel, Container>("Panel")
                 .RegisterFunc("add", [this](Panel *self, Component *component)
                 {
                     auto comp = std::find_if(std::begin(components), std::end(components), 
-                    [&component](const ComponentPtr &elem) { return static_cast<Component*>(component) == elem.get(); });
+                    [&component](const Component::Ptr &elem) { return component == elem.get(); });
                     if(comp != std::end(components))
                         self->Add(*comp);
                 })
                 .RegisterFunc("remove", [this](Panel *self, Component *component)
                 {
                     auto comp = std::find_if(std::begin(components), std::end(components), 
-                    [&component](const ComponentPtr &elem) { return static_cast<Component*>(component) == elem.get(); });
+                    [&component](const Component::Ptr &elem) { return component == elem.get(); });
                     if(comp != std::end(components))
                         self->Remove(*comp);
                 })
@@ -145,7 +142,7 @@ namespace RIS
 
             scriptEngine.Register("createPanel", [this](const std::string &name)
             {
-                PanelPtr panel = std::make_shared<Panel>();
+                Panel::Ptr panel = Panel::Create();
                 panel->SetName(name);
                 panel->SetPosition({0, 0});
                 panel->SetSize({static_cast<float>(uiWidth), static_cast<float>(uiHeight)});
@@ -153,10 +150,43 @@ namespace RIS
                 return panel.get();
             });
 
+            scriptEngine.RegisterKlass<Label, Component>("Label")
+                .RegisterFunc("setFont", [&loader](Label *self, const std::string &fontName)
+                {
+                    auto font = loader.Load<Graphics::Font>(fontName);
+                    if(font)
+                        self->SetFont(font);
+                })
+                .RegisterFunc("setFontSize", &Label::SetFontSize)
+                .RegisterFunc("setText", &Label::SetText)
+                .RegisterFunc("setTextColor", [](Label *self, float r, float g, float b, float a)
+                {
+                    self->SetTextColor({ r, g, b, a });
+                });
+
+            scriptEngine.Register("createLabel", [this](const std::string &name)
+            {
+                Label::Ptr label = Label::Create(defaultFont);
+                label->SetName(name);
+                components.push_back(label);
+                return label.get();
+            });
+
+            scriptEngine.RegisterKlass<Graphics::TextMetrics>("TextMetrics")
+                .RegisterFunc("getWidth", [](Graphics::TextMetrics *self){ return self->width; })
+                .RegisterFunc("getHeight", [](Graphics::TextMetrics *self){ return self->height; });
+
+            scriptEngine.Register("measureText", [&loader](const std::string &fontName, const std::string &text, float fontSize)
+            {
+                auto font = loader.Load<Graphics::Font>(fontName);
+                if(font)
+                    return font->MeasureString(text, fontSize);
+            });
+
             scriptEngine.Register("registerMenu", [this](const std::string &menuName, Component *component)
             {
                 auto comp = std::find_if(std::begin(components), std::end(components), 
-                    [&component](const ComponentPtr &elem) { return static_cast<Component*>(component) == elem.get(); });
+                    [&component](const Component::Ptr &elem) { return component == elem.get(); });
                 if(comp != std::end(components))
                     menus.insert_or_assign(menuName, *comp);
             });

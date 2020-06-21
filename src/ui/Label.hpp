@@ -16,6 +16,9 @@ namespace RIS
         class Label : public Component
         {
         public:
+            using Ptr = std::shared_ptr<Label>;
+            static Ptr Create(std::shared_ptr<Graphics::Font> defaultFont);
+
             Label(std::shared_ptr<Graphics::Font> defaultFont);
             virtual ~Label() = default;
             Label(const Label&) = default;
@@ -23,9 +26,9 @@ namespace RIS
             Label(Label&&) = default;
             Label& operator=(Label&&) = default;
 
-            void SetFont(std::shared_ptr<Graphics::Font> font, float fontSize);
+            void SetFont(std::shared_ptr<Graphics::Font> font);
+            void SetFontSize(float fontSize);
             void SetTextColor(const glm::vec4 &color);
-            void SetPosition(const glm::vec2 &position);
             void SetVisible(bool visible);
             void SetText(const std::string &text);
 
@@ -33,7 +36,6 @@ namespace RIS
             void Draw(Graphics::SpriteRenderer &renderer, const glm::vec2 &parentPosition) override;
 
         private:
-            glm::vec2 position;
             std::string text = "";
 
             std::shared_ptr<Graphics::Font> font;
@@ -42,6 +44,5 @@ namespace RIS
             bool isVisible = true;
 
         };
-        using LabelPtr = std::shared_ptr<Label>;
     }
 }

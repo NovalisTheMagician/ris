@@ -16,6 +16,8 @@ namespace RIS
         class Component
         {
         public:
+            using Ptr = std::shared_ptr<Component>;
+
             virtual ~Component() = default;
 
             virtual void OnMouseMove(float x, float y) {};
@@ -31,13 +33,17 @@ namespace RIS
             virtual void SetName(const std::string &name) { this->name = name; };
             virtual std::string GetName() const { return name; };
 
+            virtual void SetPosition(const glm::vec2 &position) { this->position = position; };
+            virtual void SetSize(const glm::vec2 &size) { this->size = size; };
+
             virtual void Update() = 0;
             virtual void Draw(Graphics::SpriteRenderer &renderer, const glm::vec2 &parentPosition) = 0;
 
         protected:
             std::string name;
+            glm::vec2 position;
+            glm::vec2 size;
 
         };
-        using ComponentPtr = std::shared_ptr<Component>;
     }
 }

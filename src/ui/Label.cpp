@@ -8,13 +8,22 @@ namespace RIS
 {
     namespace UI
     {
+        Label::Ptr Label::Create(std::shared_ptr<Graphics::Font> defaultFont)
+        {
+            return std::make_shared<Label>(defaultFont);
+        }
+
         Label::Label(std::shared_ptr<Graphics::Font> defaultFont)
             : font(defaultFont)
         {}
 
-        void Label::SetFont(std::shared_ptr<Graphics::Font> font, float fontSize)
+        void Label::SetFont(std::shared_ptr<Graphics::Font> font)
         {
             this->font = font;
+        }
+
+        void Label::SetFontSize(float fontSize)
+        {
             this->fontSize = fontSize;
         }
 
@@ -26,11 +35,6 @@ namespace RIS
         void Label::SetVisible(bool visible)
         {
             isVisible = visible;
-        }
-
-        void Label::SetPosition(const glm::vec2 &position)
-        {
-            this->position = position;
         }
 
         void Label::SetText(const string &text)

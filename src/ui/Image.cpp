@@ -4,6 +4,11 @@ namespace RIS
 {
     namespace UI
     {
+        Image::Ptr Image::Create()
+        {
+            return std::make_shared<Image>();
+        }
+
         void Image::SetImage(std::shared_ptr<Graphics::Texture> image)
         {
             this->image = image;
@@ -12,16 +17,6 @@ namespace RIS
         void Image::SetColor(const glm::vec4 &color)
         {
             this->color = color;
-        }
-
-        void Image::SetPosition(const glm::vec2 &position)
-        {
-            this->position = position;
-        }
-
-        void Image::SetSize(const glm::vec2 &size)
-        {
-            this->size = size;
         }
 
         void Image::Update()

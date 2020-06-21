@@ -16,6 +16,9 @@ namespace RIS
         class Image : public Component
         {
         public:
+            using Ptr = std::shared_ptr<Image>;
+            static Ptr Create();
+
             Image() = default;
             virtual ~Image() = default;
             Image(const Image&) = default;
@@ -24,8 +27,6 @@ namespace RIS
             Image& operator=(Image&&) = default;
 
             void SetImage(std::shared_ptr<Graphics::Texture> image);
-            void SetPosition(const glm::vec2 &position);
-            void SetSize(const glm::vec2 &size);
             void SetColor(const glm::vec4 &color);
 
             void Update() override;
@@ -34,9 +35,7 @@ namespace RIS
         private:
             std::shared_ptr<Graphics::Texture> image;
             glm::vec4 color = glm::vec4(1, 1, 1, 1);
-            glm::vec2 position, size;
 
         };
-        using ImagePtr = std::shared_ptr<Image>;
     }
 }

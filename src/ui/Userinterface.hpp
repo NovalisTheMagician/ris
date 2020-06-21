@@ -39,6 +39,7 @@ namespace RIS
             void PostInit();
             void RegisterScriptFunctions();
 
+            void ReleaseScriptReferences();
             void Invalidate();
 
             Console& GetConsole();

@@ -57,6 +57,13 @@ namespace RIS
             input.RegisterKeyDown([this](Input::InputKey key){ return OnKeyDown(key); });
         }
 
+        void Userinterface::ReleaseScriptReferences()
+        {
+            components.clear();
+            menus.clear();
+            activeMenu = nullptr;
+        }
+
         void Userinterface::Invalidate()
         {
             auto &scriptEngine = GetScriptEngine();

@@ -117,6 +117,8 @@ namespace RIS
 
         void ScriptEngine::Reload()
         {
+            auto &interface = GetUserinterface();
+            interface.ReleaseScriptReferences();
             vm.reset(new squall::VMStd());
             LoadScripts();
         }

@@ -8,7 +8,16 @@ param (
     [switch]$silent = $false,
     [switch]$restore = $false,
     [switch]$clear = $false,
-    [switch]$skipFonts = $false,
+
+    [switch]$all = $false,
+    [switch]$root = $false,
+    [switch]$textures = $false,
+    [switch]$shaders = $false,
+    [switch]$scripts = $false,
+    [switch]$models = $false,
+    [switch]$meshes = $false,
+    [switch]$fonts = $false,
+
     [string]$backupPath = "G:/",
     [string]$toolsPath = "tools/"
 )
@@ -28,7 +37,7 @@ $textureArgs = "-nologo -y"
 $textureFormat = "BC3_UNORM"
 $imageFormat = "R8G8B8A8_UNORM"
 $fontTextureFormat = "BC4_UNORM"
-$fontMapSize = "512"
+$fontMapSize = "1024"
 
 if($clear) {
     if(!$silent) { Write-Host "Removing $buildPath" }
@@ -43,99 +52,111 @@ if($clear) {
 if($build) {
     if(!$silent) { Write-Host "Building assets from $assetPath" }
 
-    if(!$silent) { Write-Host "Rootfiles" -NoNewline }
-    $subDir = ""
-    $fileFilter = $imageFileFilter
-    $workingDir = "$assetPath$subDir"
-    $targetDir = "$buildPath$subDir"
-    if(!(Test-Path -Path $targetDir)) {
-        New-Item -Path $targetDir -ItemType Directory -Force | Out-Null
+    if($root -or $all) {
+        if(!$silent) { Write-Host "Rootfiles" -NoNewline }
+        $subDir = ""
+        $fileFilter = $imageFileFilter
+        $workingDir = "$assetPath$subDir"
+        $targetDir = "$buildPath$subDir"
+        if(!(Test-Path -Path $targetDir)) {
+            New-Item -Path $targetDir -ItemType Directory -Force | Out-Null
+        }
+        $files = Get-ChildItem -File -Path "$workingDir*" -Include $fileFilter
+        foreach($file in $files) {
+            if(!$silent) { Write-Host "." -NoNewline }
+            Start-Process -FilePath "$toolsPath$textureTool" -Wait -NoNewWindow -ArgumentList $textureArgs, "-f $imageFormat", $file.Name -WorkingDirectory $workingDir -RedirectStandardOutput ".\NUL"
+            Move-Item -Path "$workingDir$($file.BaseName).dds" -Destination $targetDir -Force
+        }
+        if(!$silent) { Write-Host }
     }
-    $files = Get-ChildItem -File -Path "$workingDir*" -Include $fileFilter
-    foreach($file in $files) {
-        if(!$silent) { Write-Host "." -NoNewline }
-        Start-Process -FilePath "$toolsPath$textureTool" -Wait -NoNewWindow -ArgumentList $textureArgs, "-f $imageFormat", $file.Name -WorkingDirectory $workingDir -RedirectStandardOutput ".\NUL"
-        Move-Item -Path "$workingDir$($file.BaseName).dds" -Destination $targetDir -Force
-    }
-    if(!$silent) { Write-Host }
 
-    if(!$silent) { Write-Host "Textures" -NoNewline }
-    $subDir = "textures/"
-    $fileFilter = $imageFileFilter
-    $workingDir = "$assetPath$subDir"
-    $targetDir = "$buildPath$subDir"
-    if(!(Test-Path -Path $targetDir)) {
-        New-Item -Path $targetDir -ItemType Directory -Force | Out-Null
+    if($textures -or $all) {
+        if(!$silent) { Write-Host "Textures" -NoNewline }
+        $subDir = "textures/"
+        $fileFilter = $imageFileFilter
+        $workingDir = "$assetPath$subDir"
+        $targetDir = "$buildPath$subDir"
+        if(!(Test-Path -Path $targetDir)) {
+            New-Item -Path $targetDir -ItemType Directory -Force | Out-Null
+        }
+        $files = Get-ChildItem -File -Path "$workingDir*" -Include $fileFilter
+        foreach($file in $files) {
+            if(!$silent) { Write-Host "." -NoNewline }
+            Start-Process -FilePath "$toolsPath$textureTool" -Wait -NoNewWindow -ArgumentList $textureArgs, "-f $textureFormat", $file.Name -WorkingDirectory $workingDir -RedirectStandardOutput ".\NUL"
+            Move-Item -Path "$workingDir$($file.BaseName).dds" -Destination $targetDir -Force
+        }
+        if(!$silent) { Write-Host }
     }
-    $files = Get-ChildItem -File -Path "$workingDir*" -Include $fileFilter
-    foreach($file in $files) {
-        if(!$silent) { Write-Host "." -NoNewline }
-        Start-Process -FilePath "$toolsPath$textureTool" -Wait -NoNewWindow -ArgumentList $textureArgs, "-f $textureFormat", $file.Name -WorkingDirectory $workingDir -RedirectStandardOutput ".\NUL"
-        Move-Item -Path "$workingDir$($file.BaseName).dds" -Destination $targetDir -Force
-    }
-    if(!$silent) { Write-Host }
 
-    if(!$silent) { Write-Host "Shaders" -NoNewline }
-    $subDir = "shaders/"
-    $fileFilter = $shaderFileFilter
-    $workingDir = "$assetPath$subDir"
-    $targetDir = "$buildPath$subDir"
-    if(!(Test-Path -Path $targetDir)) {
-        New-Item -Path $targetDir -ItemType Directory -Force | Out-Null
+    if($shaders -or $all) {
+        if(!$silent) { Write-Host "Shaders" -NoNewline }
+        $subDir = "shaders/"
+        $fileFilter = $shaderFileFilter
+        $workingDir = "$assetPath$subDir"
+        $targetDir = "$buildPath$subDir"
+        if(!(Test-Path -Path $targetDir)) {
+            New-Item -Path $targetDir -ItemType Directory -Force | Out-Null
+        }
+        $files = Get-ChildItem -File -Path "$workingDir*" -Include $fileFilter
+        foreach($file in $files) {
+            if(!$silent) { Write-Host "." -NoNewline }
+            Copy-Item -Path "$workingDir$($file.Name)" -Destination $targetDir -Force
+        }
+        if(!$silent) { Write-Host }
     }
-    $files = Get-ChildItem -File -Path "$workingDir*" -Include $fileFilter
-    foreach($file in $files) {
-        if(!$silent) { Write-Host "." -NoNewline }
-        Copy-Item -Path "$workingDir$($file.Name)" -Destination $targetDir -Force
-    }
-    if(!$silent) { Write-Host }
 
-    if(!$silent) { Write-Host "Scripts" -NoNewline }
-    $subDir = "scripts/"
-    $fileFilter = $scriptFileFilter
-    $workingDir = "$assetPath$subDir"
-    $targetDir = "$buildPath$subDir"
-    if(!(Test-Path -Path $targetDir)) {
-        New-Item -Path $targetDir -ItemType Directory -Force | Out-Null
+    if($scripts -or $all) {
+        if(!$silent) { Write-Host "Scripts" -NoNewline }
+        $subDir = "scripts/"
+        $fileFilter = $scriptFileFilter
+        $workingDir = "$assetPath$subDir"
+        $targetDir = "$buildPath$subDir"
+        if(!(Test-Path -Path $targetDir)) {
+            New-Item -Path $targetDir -ItemType Directory -Force | Out-Null
+        }
+        $files = Get-ChildItem -File -Path "$workingDir*" -Include $fileFilter
+        foreach($file in $files) {
+            if(!$silent) { Write-Host "." -NoNewline }
+            Copy-Item -Path "$workingDir$($file.Name)" -Destination $targetDir -Force
+        }
+        if(!$silent) { Write-Host }
     }
-    $files = Get-ChildItem -File -Path "$workingDir*" -Include $fileFilter
-    foreach($file in $files) {
-        if(!$silent) { Write-Host "." -NoNewline }
-        Copy-Item -Path "$workingDir$($file.Name)" -Destination $targetDir -Force
-    }
-    if(!$silent) { Write-Host }
 
-    if(!$silent) { Write-Host "Models" -NoNewline }
-    $subDir = "models/"
-    $fileFilter = $modelFileFilter
-    $workingDir = "$assetPath$subDir"
-    $targetDir = "$buildPath$subDir"
-    if(!(Test-Path -Path $targetDir)) {
-        New-Item -Path $targetDir -ItemType Directory -Force | Out-Null
+    if($models -or $all) {
+        if(!$silent) { Write-Host "Models" -NoNewline }
+        $subDir = "models/"
+        $fileFilter = $modelFileFilter
+        $workingDir = "$assetPath$subDir"
+        $targetDir = "$buildPath$subDir"
+        if(!(Test-Path -Path $targetDir)) {
+            New-Item -Path $targetDir -ItemType Directory -Force | Out-Null
+        }
+        $files = Get-ChildItem -File -Path "$workingDir*" -Include $fileFilter
+        foreach($file in $files) {
+            if(!$silent) { Write-Host "." -NoNewline }
+            Copy-Item -Path "$workingDir$($file.Name)" -Destination $targetDir -Force
+        }
+        if(!$silent) { Write-Host }
     }
-    $files = Get-ChildItem -File -Path "$workingDir*" -Include $fileFilter
-    foreach($file in $files) {
-        if(!$silent) { Write-Host "." -NoNewline }
-        Copy-Item -Path "$workingDir$($file.Name)" -Destination $targetDir -Force
-    }
-    if(!$silent) { Write-Host }
 
-    if(!$silent) { Write-Host "Meshes" -NoNewline }
-    $subDir = "meshes/"
-    $fileFilter = $meshFileFilter
-    $workingDir = "$assetPath$subDir"
-    $targetDir = "$buildPath$subDir"
-    if(!(Test-Path -Path $targetDir)) {
-        New-Item -Path $targetDir -ItemType Directory -Force | Out-Null
+    if($meshes -or $all) {
+        if(!$silent) { Write-Host "Meshes" -NoNewline }
+        $subDir = "meshes/"
+        $fileFilter = $meshFileFilter
+        $workingDir = "$assetPath$subDir"
+        $targetDir = "$buildPath$subDir"
+        if(!(Test-Path -Path $targetDir)) {
+            New-Item -Path $targetDir -ItemType Directory -Force | Out-Null
+        }
+        $files = Get-ChildItem -File -Path "$workingDir*" -Include $fileFilter
+        foreach($file in $files) {
+            if(!$silent) { Write-Host "." -NoNewline }
+            Copy-Item -Path "$workingDir$($file.Name)" -Destination $targetDir -Force
+        }
+        if(!$silent) { Write-Host }
     }
-    $files = Get-ChildItem -File -Path "$workingDir*" -Include $fileFilter
-    foreach($file in $files) {
-        if(!$silent) { Write-Host "." -NoNewline }
-        Copy-Item -Path "$workingDir$($file.Name)" -Destination $targetDir -Force
-    }
-    if(!$silent) { Write-Host }
 
-    if(!$skipFonts) {
+    if($fonts -or $all) {
         if(!$silent) { Write-Host "Fonts" -NoNewline }
         $subDir = "fonts/"
         $fileFilter = $fontFileFilter

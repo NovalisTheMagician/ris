@@ -11,11 +11,11 @@ dyn_libs = []
 
 inc_path = ['#src', '#libs/glm/include', '#libs/gli/include', '#libs/glad/include', '#libs/glfw/include', '#libs/soloud/include', '#libs/rapidjson/include', 
             '#libs/libzip/include', '#libs/libzippp/include', '#libs/tiny_gltf/include', '#libs/ctre/include', '#libs/gsl/include',
-            '#libs/magic_enum/include', '#libs/squirrel/include', '#libs/squall/include']
-lib_path = ['libs/glad/lib', 'libs/glfw/lib', 'libs/soloud/lib', 'libs/libzip/lib', 'libs/squirrel/lib']
+            '#libs/magic_enum/include', '#libs/squirrel/include', '#libs/squall/include', '#libs/utf8/include', '#libs/fmt/include']
+lib_path = ['libs/glad/lib', 'libs/glfw/lib', 'libs/soloud/lib', 'libs/libzip/lib', 'libs/squirrel/lib', 'libs/fmt/lib']
 
-libs_rel = ['glfw3', 'soloud', 'libz', 'libzip', 'squirrel', 'sqstdlib']
-libs_deb = ['glfw3d', 'soloudd', 'libzd', 'libzipd', 'squirreld', 'sqstdlibd']
+libs_rel = ['glfw3', 'soloud', 'libz', 'libzip', 'squirrel', 'sqstdlib', 'fmt']
+libs_deb = ['glfw3d', 'soloudd', 'libzd', 'libzipd', 'squirreld', 'sqstdlibd', 'fmtd']
 
 libs = ['user32', 'kernel32', 'gdi32', 'shell32', 'opengl32', 'ws2_32', 'advapi32', 'glad']
 

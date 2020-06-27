@@ -17,7 +17,9 @@
                 "${workspaceFolder}/libs/gsl/include/*",
                 "${workspaceFolder}/libs/magic_enum/include/*",
                 "${workspaceFolder}/libs/squirrel/include/*",
-                "${workspaceFolder}/libs/squall/include/*"
+                "${workspaceFolder}/libs/squall/include/*",
+                "${workspaceFolder}/libs/utf8/include/*",
+                "${workspaceFolder}/libs/fmt/include/*"
             ],
             "defines": [
                 "_DEBUG"

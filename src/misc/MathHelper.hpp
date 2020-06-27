@@ -9,4 +9,10 @@ namespace RIS
     {
         return val < min ? min : val > max ? max : val;
     }
+
+    template <typename T> 
+    int Signum(T val) 
+    {
+        return (T(0) < val) - (val < T(0));
+    }
 }

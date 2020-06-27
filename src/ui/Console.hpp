@@ -61,13 +61,16 @@ namespace RIS
 
             bool IsOpen();
 
+            void Clear();
+
             void Update(const Timer &timer);
             void Draw(Graphics::SpriteRenderer &renderer);
 
             bool ProcessLine(const std::string &lineToProcess);
 
-            void OnChar(char c);
+            void OnChar(uint32_t c);
             void OnKeyDown(Input::InputKey key);
+            void OnMouseWheel(float x, float y);
 
         private:
             std::string SetParam(std::vector<std::string> params);
@@ -100,6 +103,8 @@ namespace RIS
             float openSpeed = 2000;
 
             std::unordered_map<std::string, ConsoleFunc> funcVars;
+
+            int viewOffset = 0;
 
         };
     }

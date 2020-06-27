@@ -36,7 +36,7 @@ namespace RIS
             void RemoveAll() override;
             Component::Ptr Find(const std::string &name, bool recursive = false) override;
 
-            void OnChar(char c) override;
+            void OnChar(uint32_t c) override;
             void OnMouseMove(float x, float y) override;
             void OnMouseDown(Input::InputKey mouseCode) override;
             void OnMouseUp(Input::InputKey mouseCode) override;

@@ -23,15 +23,15 @@ namespace RIS
             float advanceX;
             float bboxWidth, bboxHeight;
             float bearingX, bearingY;
-            char charCode;
+            uint32_t charCode;
             float s0, s1, t0, t1;
-            std::unordered_map<char, float> kernings;
+            std::unordered_map<uint32_t, float> kernings;
         };
 
         class Font
         {
         public:
-            Font(float ascender, float descender, float height, float maxAdvance, const std::string &name, float size, float spaceAdvance, const std::unordered_map<char, Glyph> glyphs, std::shared_ptr<Texture> texture);
+            Font(float ascender, float descender, float height, float maxAdvance, const std::string &name, float size, float spaceAdvance, const std::unordered_map<uint32_t, Glyph> glyphs, std::shared_ptr<Texture> texture);
             ~Font() = default;
             Font(const Font&) = default;
             Font& operator=(const Font&) = default;
@@ -48,8 +48,8 @@ namespace RIS
             float GetMaxHeight(float size) const;
 
             size_t NumGlyphs() const;
-            bool HasGlyph(char character) const;
-            const Glyph& operator[](char character) const;
+            bool HasGlyph(uint32_t character) const;
+            const Glyph& operator[](uint32_t character) const;
 
         private:
             float ascender, descender;
@@ -58,7 +58,7 @@ namespace RIS
             std::string name;
             float size;
             float spaceAdvance;
-            std::unordered_map<char, Glyph> glyphs;
+            std::unordered_map<uint32_t, Glyph> glyphs;
 
             std::shared_ptr<Texture> texture;
         };

@@ -48,8 +48,6 @@ namespace RIS
                 Reload();
                 return "";
             });
-
-            auto &loader = GetLoader();
         }
 
         void ScriptEngine::LoadScripts()

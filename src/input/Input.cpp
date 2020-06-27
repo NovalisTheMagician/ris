@@ -36,10 +36,10 @@ namespace RIS
             }
         }
 
-        void Input::CharCallback(GLFWwindow *window, unsigned int codePoint)
+        void Input::CharCallback(GLFWwindow *window, uint32_t codePoint)
         {
             Input &input = *instance;
-            input.OnChar(static_cast<char>(codePoint));
+            input.OnChar(codePoint);
         }
 
         void Input::MousePosCallback(GLFWwindow* window, double x, double y)
@@ -83,7 +83,7 @@ namespace RIS
                     break;
         }
 
-        void Input::OnChar(char character)
+        void Input::OnChar(uint32_t character)
         {
             if(!ready) return;
             for(auto& callback : charCallbacks)

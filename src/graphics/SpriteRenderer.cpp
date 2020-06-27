@@ -12,6 +12,8 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <utf8.h>
+
 namespace RIS
 {
     namespace Graphics
@@ -109,7 +111,7 @@ namespace RIS
             glDrawArrays(GL_TRIANGLES, 0, 6);
         }
 
-        void SpriteRenderer::DrawString(const std::string &string, const Font &font, float size, const glm::vec2 &position, const glm::vec4 &tint)
+        void SpriteRenderer::DrawString(const std::string &str, const Font &font, float size, const glm::vec2 &position, const glm::vec4 &tint)
         {
             pipeline.SetShader(*fragmentTextShader);
             vertexLayout.SetVertexBuffer<VertexType::SpriteVertex>(vertexTextBuffer);
@@ -121,19 +123,22 @@ namespace RIS
                 fontSize = font.GetSize();
 
             std::vector<VertexType::SpriteVertex> vertices;
-            for(int i = 0; i < string.length(); ++i)
+
+            bool first = true;
+            for(auto &it = str.begin(); it != str.end();)
             {
-                char c = string[i];
-                if(c != ' ')
+                uint32_t c = utf8::next(it, str.end());
+                if(c != U' ')
                 {
                     if(font.HasGlyph(c) == 0)
                         //continue;
-                        c = '?';
+                        c = U'?';
                 
                     const Glyph &glyph = font[c];
-                    if(i > 0)
+                    if(!first)
                     {
-                        char kernChar = string[i-1];
+                        uint32_t kernChar = utf8::prior(it, str.begin());
+                        utf8::advance(it, 1, str.end());
                         if(glyph.kernings.count(kernChar) > 0)
                         {
                             float kernVal = glyph.kernings.at(kernChar);
@@ -148,7 +153,7 @@ namespace RIS
                     float glyphAdvanceX = glyph.advanceX * fontSize;
 
                     float x = penX + glyphBearingX;
-                    float y = penY + (font['H'].bearingY - glyph.bearingY) * fontSize;
+                    float y = penY + (font[U'H'].bearingY - glyph.bearingY) * fontSize;
                     float w = glyphWidth;
                     float h = glyphHeight;
 

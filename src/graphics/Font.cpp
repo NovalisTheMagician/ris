@@ -1,10 +1,12 @@
 #include "graphics/Font.hpp"
 
+#include <utf8.h>
+
 namespace RIS
 {
     namespace Graphics
     {
-        Font::Font(float ascender, float descender, float height, float maxAdvance, const std::string &name, float size, float spaceAdvance, const std::unordered_map<char, Glyph> glyphs, std::shared_ptr<Texture> texture)
+        Font::Font(float ascender, float descender, float height, float maxAdvance, const std::string &name, float size, float spaceAdvance, const std::unordered_map<uint32_t, Glyph> glyphs, std::shared_ptr<Texture> texture)
             : ascender(ascender), descender(descender), height(height), maxAdvance(maxAdvance), name(name), size(size), spaceAdvance(spaceAdvance), glyphs(glyphs), texture(texture)
         {}
 
@@ -17,18 +19,20 @@ namespace RIS
             
             float height = 0;
 
-            for(int i = 0; i < str.length(); ++i)
+            bool first = true;
+            for(auto &it = str.begin(); it != str.end();)
             {
-                char c = str[i];
-                if(c != ' ')
+                uint32_t c = utf8::next(it, str.end());
+                if(c != U' ')
                 {
                     if(glyphs.count(c) == 0)
                         continue;
                 
                     const Glyph &glyph = glyphs.at(c);
-                    if(i > 0)
+                    if(!first)
                     {
-                        char kernChar = str[i-1];
+                        uint32_t kernChar = utf8::prior(it, str.begin());
+                        utf8::advance(it, 1, str.end());
                         if(glyph.kernings.count(kernChar) > 0)
                         {
                             float kernVal = glyph.kernings.at(kernChar);
@@ -50,6 +54,7 @@ namespace RIS
                 {
                     penX += spaceAdvance * fontSize;
                 }
+                first = false;
             }
             return { penX, height };
         }
@@ -84,12 +89,12 @@ namespace RIS
             return glyphs.size();
         }
 
-        bool Font::HasGlyph(char character) const
+        bool Font::HasGlyph(uint32_t character) const
         {
             return glyphs.count(character) > 0;
         }
 
-        const Glyph& Font::operator[](char character) const
+        const Glyph& Font::operator[](uint32_t character) const
         {
             return glyphs.at(character);
         }

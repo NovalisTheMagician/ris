@@ -28,7 +28,7 @@ namespace RIS
             virtual void OnKeyDown(Input::InputKey keyCode) {};
             virtual void OnKeyUp(Input::InputKey keyCode) {};
 
-            virtual void OnChar(char c) {};
+            virtual void OnChar(uint32_t c) {};
 
             virtual void SetName(const std::string &name) { this->name = name; };
             virtual std::string GetName() const { return name; };

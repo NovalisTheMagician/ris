@@ -15,6 +15,7 @@
 
 #include <squall/squall_vmstd.hpp>
 #include <squall/squall_klass.hpp>
+#include <squall/squall_table.hpp>
 
 namespace RIS
 {
@@ -38,15 +39,46 @@ namespace RIS
             ScriptClass& operator=(ScriptClass&&) = delete;
 
             template<typename T>
-            ScriptClass& RegisterFunc(const std::string &name, T func)
+            ScriptClass& Func(const std::string &name, T func)
             {
                 klass.func(name, func);
+                return *this;
+            }
+
+            template<typename T>
+            ScriptClass& Var(const std::string &name, T C::* var)
+            {
+                klass.var(name, var);
                 return *this;
             }
 
         private:
             squall::VMStd *vm;
             squall::Klass<C, Base> klass;
+
+        };
+
+        class ScriptTable
+        {
+        public:
+            ScriptTable(squall::VMStd *vm, const std::string &name) : vm(vm), table(*vm) { vm->root_table().set(name, table); }
+            ~ScriptTable() = default;
+
+            ScriptTable(const ScriptTable&) = delete;
+            ScriptTable(ScriptTable&&) = delete;
+            ScriptTable& operator=(const ScriptTable&) = delete;
+            ScriptTable& operator=(ScriptTable&&) = delete;
+
+            template<typename T>
+            ScriptTable& Func(const std::string &name, T func)
+            {
+                table.defun(name, func);
+                return *this;
+            }
+
+        private:
+            squall::VMStd *vm;
+            squall::Table table;
 
         };
 
@@ -65,44 +97,42 @@ namespace RIS
             void Reload();
 
             template<typename T>
-            void Register(const std::string &name, T func);
+            void Func(const std::string &name, T func)
+            {
+                vm->defun(name, func);
+            }
 
             template<typename C, typename Base = void>
-            ScriptClass<C, Base> RegisterKlass(const std::string &name);
+            ScriptClass<C, Base> Class(const std::string &name)
+            {
+                return ScriptClass<C, Base>(vm.get(), name);
+            }
+
+            template<typename T>
+            void Var(const std::string &name, T *var)
+            {
+                vm->root_table().set(name, var);
+            }
 
             template<typename Ret, typename... Args>
-            Ret CallFunction(const std::string &name, Args...);
+            Ret Call(const std::string &name, Args... args)
+            {
+                try
+                {
+                    return vm->call<Ret>(name, args...);
+                }
+                catch(const std::exception& e)
+                {
+                    GetConsole().Print(e.what());
+                    return Ret();
+                }
+            }
 
         private:
             //only a pointer so we can reset the vm when we hotreload scripts
             std::unique_ptr<squall::VMStd> vm;
 
         };
-
-        template<typename T>
-        void ScriptEngine::Register(const std::string &name, T func)
-        {
-            vm->defun(name, func);
-        }
-
-        template<typename C, typename Base>
-        ScriptClass<C, Base> ScriptEngine::RegisterKlass(const std::string &name)
-        {
-            return ScriptClass<C, Base>(vm.get(), name);
-        }
-
-        template<typename Ret, typename... Args>
-        Ret ScriptEngine::CallFunction(const std::string &name, Args... args)
-        {
-            try
-            {
-                return vm->call<Ret>(name, args...);
-            }
-            catch(const std::exception& e)
-            {
-                GetConsole().Print(e.what());
-                return Ret();
-            }
-        }
+        
     }
 }

@@ -6,7 +6,6 @@
 #include "ui/Userinterface.hpp"
 
 #include "misc/Timer.hpp"
-
 #include "misc/Logger.hpp"
 
 #include <algorithm>
@@ -24,7 +23,7 @@ namespace RIS
     {
         Userinterface::Userinterface()
         {
-            rootContainer = std::make_shared<Panel>();
+            rootContainer = Panel::Create();
         }
 
         void Userinterface::PostInit()
@@ -51,8 +50,9 @@ namespace RIS
             console.BindFunc("frametime", Helpers::BoolFunc(showFrametime, "Show Frametime", "Hide Frametime"));
 
             auto &input = GetInput();
-            input.RegisterChar([this](char ch){ return OnChar(ch); });
+            input.RegisterChar([this](uint32_t ch){ return OnChar(ch); });
             input.RegisterMouse([this](float x, float y){ return OnMouseMove(x, y); });
+            input.RegisterWheel([this](float x, float y){ return OnMouseWheel(x, y); });
             input.RegisterButtonDown([this](Input::InputKey button){ return OnMouseDown(button); });
             input.RegisterButtonUp([this](Input::InputKey button){ return OnMouseUp(button); });
             input.RegisterKeyDown([this](Input::InputKey key){ return OnKeyDown(key); });
@@ -68,7 +68,7 @@ namespace RIS
         void Userinterface::Invalidate()
         {
             auto &scriptEngine = GetScriptEngine();
-            scriptEngine.CallFunction<void>("InitUserinterfaces");
+            scriptEngine.Call<void>("InitUserinterfaces");
         }
 
         void Userinterface::RegisterScriptFunctions()
@@ -76,27 +76,27 @@ namespace RIS
             auto &scriptEngine = GetScriptEngine();
             auto &loader = GetLoader();
 
-            scriptEngine.Register("openConsole", [this](){ console.Open(); });
-            scriptEngine.Register("closeConsole", [this](){ console.Close(); });
-            scriptEngine.Register("toggleConsole", [this](){ console.Toggle(); });
+            scriptEngine.Func("openConsole", [this](){ console.Open(); });
+            scriptEngine.Func("closeConsole", [this](){ console.Close(); });
+            scriptEngine.Func("toggleConsole", [this](){ console.Toggle(); });
 
-            scriptEngine.Register("getUIWidth", [this](){ return static_cast<float>(uiWidth); });
-            scriptEngine.Register("getUIHeight", [this](){ return static_cast<float>(uiHeight); });
+            scriptEngine.Func("getUIWidth", [this](){ return static_cast<float>(uiWidth); });
+            scriptEngine.Func("getUIHeight", [this](){ return static_cast<float>(uiHeight); });
 
-            scriptEngine.RegisterKlass<Component>("Component")
-                .RegisterFunc("setPosition", [](Component *self, float x, float y){ self->SetPosition({x, y}); })
-                .RegisterFunc("setSize", [](Component *self, float w, float h){ self->SetSize({w, h}); });
+            scriptEngine.Class<Component>("Component")
+                .Func("setPosition", [](Component *self, float x, float y){ self->SetPosition({x, y}); })
+                .Func("setSize", [](Component *self, float w, float h){ self->SetSize({w, h}); });
 
-            scriptEngine.RegisterKlass<Container, Component>("Container");
+            scriptEngine.Class<Container, Component>("Container");
 
-            scriptEngine.RegisterKlass<Image, Component>("Image")
-                .RegisterFunc("setImage", [&loader](Image *self, const std::string &image)
+            scriptEngine.Class<Image, Component>("Image")
+                .Func("setImage", [&loader](Image *self, const std::string &image)
                 { 
                     auto texture = loader.Load<Graphics::Texture>(image);
                     self->SetImage(texture);
                 });
 
-            scriptEngine.Register("createImage", [this](const std::string &name)
+            scriptEngine.Func("createImage", [this](const std::string &name)
             {
                 Image::Ptr image = Image::Create();
                 image->SetName(name);
@@ -104,18 +104,18 @@ namespace RIS
                 return image.get();
             });
 
-            scriptEngine.RegisterKlass<Button, Component>("Button")
-                .RegisterFunc("setText", &Button::SetText)
-                .RegisterFunc("setFont", [&loader](Button *self, const std::string &fontName)
+            scriptEngine.Class<Button, Component>("Button")
+                .Func("setText", &Button::SetText)
+                .Func("setFont", [&loader](Button *self, const std::string &fontName)
                 {
                     auto font = loader.Load<Graphics::Font>(fontName);
                     if(font)
                         self->SetFont(font);
                 })
-                .RegisterFunc("setFontSize", &Button::SetFontSize)
-                .RegisterFunc("setCallback", &Button::SetCallback);
+                .Func("setFontSize", &Button::SetFontSize)
+                .Func("setCallback", &Button::SetCallback);
 
-            scriptEngine.Register("createButton", [this](const std::string &name)
+            scriptEngine.Func("createButton", [this](const std::string &name)
             {
                 Button::Ptr button = Button::Create(defaultFont);
                 button->SetName(name);
@@ -123,24 +123,24 @@ namespace RIS
                 return button.get();
             });
 
-            scriptEngine.RegisterKlass<Panel, Container>("Panel")
-                .RegisterFunc("add", [this](Panel *self, Component *component)
+            scriptEngine.Class<Panel, Container>("Panel")
+                .Func("add", [this](Panel *self, Component *component)
                 {
                     auto comp = std::find_if(std::begin(components), std::end(components), 
                     [&component](const Component::Ptr &elem) { return component == elem.get(); });
                     if(comp != std::end(components))
                         self->Add(*comp);
                 })
-                .RegisterFunc("remove", [this](Panel *self, Component *component)
+                .Func("remove", [this](Panel *self, Component *component)
                 {
                     auto comp = std::find_if(std::begin(components), std::end(components), 
                     [&component](const Component::Ptr &elem) { return component == elem.get(); });
                     if(comp != std::end(components))
                         self->Remove(*comp);
                 })
-                .RegisterFunc("removeAll", &Panel::RemoveAll);
+                .Func("removeAll", &Panel::RemoveAll);
 
-            scriptEngine.Register("createPanel", [this](const std::string &name)
+            scriptEngine.Func("createPanel", [this](const std::string &name)
             {
                 Panel::Ptr panel = Panel::Create();
                 panel->SetName(name);
@@ -150,21 +150,21 @@ namespace RIS
                 return panel.get();
             });
 
-            scriptEngine.RegisterKlass<Label, Component>("Label")
-                .RegisterFunc("setFont", [&loader](Label *self, const std::string &fontName)
+            scriptEngine.Class<Label, Component>("Label")
+                .Func("setFont", [&loader](Label *self, const std::string &fontName)
                 {
                     auto font = loader.Load<Graphics::Font>(fontName);
                     if(font)
                         self->SetFont(font);
                 })
-                .RegisterFunc("setFontSize", &Label::SetFontSize)
-                .RegisterFunc("setText", &Label::SetText)
-                .RegisterFunc("setTextColor", [](Label *self, float r, float g, float b, float a)
+                .Func("setFontSize", &Label::SetFontSize)
+                .Func("setText", &Label::SetText)
+                .Func("setTextColor", [](Label *self, float r, float g, float b, float a)
                 {
                     self->SetTextColor({ r, g, b, a });
                 });
 
-            scriptEngine.Register("createLabel", [this](const std::string &name)
+            scriptEngine.Func("createLabel", [this](const std::string &name)
             {
                 Label::Ptr label = Label::Create(defaultFont);
                 label->SetName(name);
@@ -172,18 +172,19 @@ namespace RIS
                 return label.get();
             });
 
-            scriptEngine.RegisterKlass<Graphics::TextMetrics>("TextMetrics")
-                .RegisterFunc("getWidth", [](Graphics::TextMetrics *self){ return self->width; })
-                .RegisterFunc("getHeight", [](Graphics::TextMetrics *self){ return self->height; });
+            scriptEngine.Class<Graphics::TextMetrics>("TextMetrics")
+                .Var("width", &Graphics::TextMetrics::width)
+                .Var("height", &Graphics::TextMetrics::height);
 
-            scriptEngine.Register("measureText", [&loader](const std::string &fontName, const std::string &text, float fontSize)
+            scriptEngine.Func("measureText", [&loader](const std::string &fontName, const std::string &text, float fontSize) -> Graphics::TextMetrics
             {
                 auto font = loader.Load<Graphics::Font>(fontName);
                 if(font)
                     return font->MeasureString(text, fontSize);
+                return { 0, 0 };
             });
 
-            scriptEngine.Register("registerMenu", [this](const std::string &menuName, Component *component)
+            scriptEngine.Func("registerMenu", [this](const std::string &menuName, Component *component)
             {
                 auto comp = std::find_if(std::begin(components), std::end(components), 
                     [&component](const Component::Ptr &elem) { return component == elem.get(); });
@@ -191,7 +192,24 @@ namespace RIS
                     menus.insert_or_assign(menuName, *comp);
             });
 
-            scriptEngine.Register("setActiveMenu", [this](const std::string &menuName)
+            scriptEngine.Func("menuExists", [this](const std::string &menuName)
+            {
+                return menus.count(menuName) > 0;
+            });
+
+            scriptEngine.Func("getMenu", [this](const std::string &menuName) -> Component*
+            {
+                if(menus.count(menuName) > 0)
+                    return menus.at(menuName).get();
+                return nullptr;
+            });
+
+            scriptEngine.Func("getActiveMenu", [this]()
+            {
+                return activeMenu.get();
+            });
+
+            scriptEngine.Func("setActiveMenu", [this](const std::string &menuName)
             {
                 if(menus.count(menuName) > 0)
                 {
@@ -233,7 +251,7 @@ namespace RIS
             console.Update(timer);
         }
 
-        bool Userinterface::OnChar(char character)
+        bool Userinterface::OnChar(uint32_t character)
         {
             if(console.IsOpen())
             {
@@ -280,6 +298,11 @@ namespace RIS
 
         bool Userinterface::OnMouseWheel(float x, float y)
         {
+            if(console.IsOpen())
+            {
+                console.OnMouseWheel(x, y);
+                return true;
+            }
             if(activeMenu)
             {
                 activeMenu->OnMouseWheel(x, y);

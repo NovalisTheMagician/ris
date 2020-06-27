@@ -48,7 +48,7 @@ namespace RIS
             void Update(const Timer &timer);
 
         private:
-            bool OnChar(char character);
+            bool OnChar(uint32_t character);
             bool OnMouseMove(float x, float y);
             bool OnMouseDown(Input::InputKey button);
             bool OnMouseUp(Input::InputKey button);

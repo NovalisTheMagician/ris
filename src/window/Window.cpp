@@ -3,6 +3,7 @@
 #include "RIS.hpp"
 
 #include "misc/Logger.hpp"
+#include "misc/Version.hpp"
 #include "script/ScriptEngine.hpp"
 #include "graphics/Renderer.hpp"
 
@@ -105,11 +106,15 @@ namespace RIS
         {
             auto &scriptEngine = GetScriptEngine();
 
-            scriptEngine.Register("exit", [this](){ Exit(0); });
-            scriptEngine.Register("logInfo", [](const std::string &msg){ Logger::Instance().Info(msg); });
-            scriptEngine.Register("logWarning", [](const std::string &msg){ Logger::Instance().Warning(msg); });
-            scriptEngine.Register("logError", [](const std::string &msg){ Logger::Instance().Error(msg); });
-            scriptEngine.Register("setRelativeMouse", [this](int relative){ SetRelativeMouse(relative); });
+            scriptEngine.Func("exit", [this](){ Exit(0); });
+            scriptEngine.Func("logInfo", [](const std::string &msg){ Logger::Instance().Info(msg); });
+            scriptEngine.Func("logWarning", [](const std::string &msg){ Logger::Instance().Warning(msg); });
+            scriptEngine.Func("logError", [](const std::string &msg){ Logger::Instance().Error(msg); });
+            scriptEngine.Func("setRelativeMouse", [this](int relative){ SetRelativeMouse(relative); });
+            
+            scriptEngine.Func("getGameName", [](){ return Version::GAME_NAME.c_str(); });
+            scriptEngine.Func("getVersionMajor", [](){ return Version::MAJOR; });
+            scriptEngine.Func("getVersionMinor", [](){ return Version::MINOR; });
         }
 
         void Window::SetRelativeMouse(bool setRelative)

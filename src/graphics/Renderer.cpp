@@ -37,6 +37,8 @@
 #include <rapidjson/error/en.h>
 #include <rapidjson/document.h>
 
+#include <utf8.h>
+
 using namespace std::literals;
 
 // Windows "hack" to force some laptops to use the highperformance GPU
@@ -244,7 +246,7 @@ namespace RIS
                 std::string fontTexturePath = "fonts/" + fontName + ".dds";
                 auto fontTexture = loader.Load<Texture>(fontTexturePath);
 
-                std::unordered_map<char, Glyph> glyphs;
+                std::unordered_map<uint32_t, Glyph> glyphs;
 
                 const rapidjson::Value &glyphData = fontJson["glyph_data"];
                 for (auto itr = glyphData.MemberBegin(); itr != glyphData.MemberEnd(); ++itr)
@@ -256,16 +258,20 @@ namespace RIS
                     glyph.bboxWidth = glyphJson["bbox_width"].GetFloat();
                     glyph.bearingX = glyphJson["bearing_x"].GetFloat();
                     glyph.bearingY = glyphJson["bearing_y"].GetFloat();
-                    glyph.charCode = glyphJson["charcode"].GetString()[0];
                     glyph.s0 = glyphJson["s0"].GetFloat();
                     glyph.t0 = glyphJson["t0"].GetFloat();
                     glyph.s1 = glyphJson["s1"].GetFloat();
                     glyph.t1 = glyphJson["t1"].GetFloat();
 
+                    auto c = glyphJson["charcode"].GetString();
+                    auto cc = std::string(c);
+                    glyph.charCode = utf8::next(cc.begin(), cc.end());
+
                     const rapidjson::Value &kerningsJson = glyphJson["kernings"];
                     for(auto kItr = kerningsJson.MemberBegin(); kItr != kerningsJson.MemberEnd(); ++kItr)
                     {
-                        char c = kItr->name.GetString()[0];
+                        auto cc = std::string(kItr->name.GetString());
+                        uint32_t c = utf8::next(cc.begin(), cc.end());
                         float val = kItr->value.GetFloat();
                         glyph.kernings.insert({ c, val });
                     }

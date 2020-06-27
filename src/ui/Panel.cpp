@@ -69,7 +69,7 @@ namespace RIS
             return nullptr;
         }
 
-        void Panel::OnChar(char c)
+        void Panel::OnChar(uint32_t c)
         {
             std::for_each(components.begin(), components.end(), [c](auto component){ component->OnChar(c); });
         }

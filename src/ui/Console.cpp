@@ -12,6 +12,9 @@
 #include "misc/StringSupport.hpp"
 #include "misc/MathHelper.hpp"
 
+#include <utf8.h>
+#include <fmt/format.h>
+
 #include <cmath>
 
 namespace RIS
@@ -26,13 +29,14 @@ namespace RIS
             maxY = 0;
             currentY = -(viewSize.y * 0.5f);
 
-            consoleFont = loader.Load<Graphics::Font>("fonts/fsex302.json");
+            consoleFont = loader.Load<Graphics::Font>("fonts/immortal.json");
             maxLineHeight = consoleFont->GetMaxHeight(consoleFontSize);
             maxLines = 512;
 
             auto& wnd = GetWindow();
             BindFunc("con", [this](std::vector<std::string> params){ return SetParam(params); });
             BindFunc("exit", [&wnd](std::vector<std::string> params){ wnd.Exit(0); return ""; });
+            BindFunc("clear", [this](std::vector<std::string> params){ Clear(); return ""; });
         }
 
         void Console::Open()
@@ -79,6 +83,12 @@ namespace RIS
         bool Console::IsOpen()
         {
             return isOpen;
+        }
+
+        void Console::Clear()
+        {
+            lines.clear();
+            viewOffset = 0;
         }
 
         int roundHalf(float f)
@@ -132,7 +142,7 @@ namespace RIS
             {
                 renderer.DrawRect({0, currentY}, {viewSize.x, viewSize.y * 0.5f}, backgroundColor);
 
-                auto it = lines.begin();
+                auto it = lines.begin() + viewOffset;
                 for(int i = 1; it != lines.end(); ++it, ++i)
                 {
                     const std::string &msg = *it;
@@ -143,11 +153,12 @@ namespace RIS
             }
         }
 
-        void Console::OnChar(char c)
+        void Console::OnChar(uint32_t c)
         {
             if(isOpen)
             {
-                inputLine.insert(inputLine.end(), c);
+                //maybe check exception
+                utf8::append(c, std::back_inserter(inputLine));
             }
         }
 
@@ -171,7 +182,11 @@ namespace RIS
                 else if(key == Input::InputKey::BACKSPACE)
                 {
                     if(inputLine.size() > 0)
-                        inputLine.erase(inputLine.end() - 1);
+                    {
+                        auto it = inputLine.end();
+                        utf8::prior(it, inputLine.begin());
+                        inputLine.erase(it, inputLine.end());
+                    }
                 }
                 else if(key == Input::InputKey::UP)
                 {
@@ -189,7 +204,34 @@ namespace RIS
                         historyIndex = Clamp(0, static_cast<int>(inputHistory.size())-1, historyIndex);
                     }
                 }
+                else if(key == Input::InputKey::PAGE_UP)
+                {
+                    viewOffset++;
+                    if(viewOffset > lines.size() - 1)
+                        viewOffset = lines.size() - 1;
+                }
+                else if(key == Input::InputKey::PAGE_DOWN)
+                {
+                    viewOffset--;
+                    if(viewOffset < 0)
+                        viewOffset = 0;
+                }
+                else if(key == Input::InputKey::HOME)
+                {
+                    viewOffset = lines.size() - 1;
+                }
+                else if(key == Input::InputKey::END)
+                {
+                    viewOffset = 0;
+                }
             }
+        }
+
+        void Console::OnMouseWheel(float x, float y)
+        {
+            viewOffset += 1 * Signum(y);
+            int max = static_cast<int>(lines.size()) - 1;
+            viewOffset = Clamp(0, max, viewOffset);
         }
 
         bool Console::ProcessLine(const std::string &lineToProcess)
@@ -223,36 +265,66 @@ namespace RIS
                 if(params.size() < 5)
                     return "not enough color data";
                 
-                backgroundColor.r = std::stof(params[1]);
-                backgroundColor.g = std::stof(params[2]);
-                backgroundColor.b = std::stof(params[3]);
-                backgroundColor.a = std::stof(params[4]);
+                try 
+                {
+                    backgroundColor.r = std::stof(params[1]);
+                    backgroundColor.g = std::stof(params[2]);
+                    backgroundColor.b = std::stof(params[3]);
+                    backgroundColor.a = std::stof(params[4]);
+                }
+                catch(const std::invalid_argument &e)
+                {
+                    Print(e.what());
+                }
             }
             else if(params[0] == "forground")
             {
                 if(params.size() < 5)
                     return "not enough color data";
                 
-                fontColor.r = std::stof(params[1]);
-                fontColor.g = std::stof(params[2]);
-                fontColor.b = std::stof(params[3]);
-                fontColor.a = std::stof(params[4]);
+                try 
+                {
+                    fontColor.r = std::stof(params[1]);
+                    fontColor.g = std::stof(params[2]);
+                    fontColor.b = std::stof(params[3]);
+                    fontColor.a = std::stof(params[4]);
+                }
+                catch(const std::invalid_argument &e)
+                {
+                    Print(e.what());
+                }
             }
             else if(params[0] == "font")
             {
                 if(params.size() < 2)
                     return "no font specified";
                 
-                //consoleFont = GetSystems().GetRenderer().Get2DRenderer().LoadFont(params[1]);
-                //maxLineHeight = GetSystems().GetRenderer().Get2DRenderer().MaxHeightFont(consoleFont, consoleFontSize);
+                auto &loader = GetLoader();
+
+                try
+                {
+                    consoleFont = loader.Load<Graphics::Font>(params[1]);
+                    maxLineHeight = consoleFont->GetMaxHeight(consoleFontSize);
+                }
+                catch(const RISException& e)
+                {
+                    Print(e.what());
+                }
             }
             else if(params[0] == "fontsize")
             {
                 if(params.size() < 2)
                     return "no size specified";
                 
-                consoleFontSize = std::stof(params[1]);
-                //maxLineHeight = GetSystems().GetRenderer().Get2DRenderer().MaxHeightFont(consoleFont, consoleFontSize);
+                try
+                {
+                    consoleFontSize = std::stof(params[1]);
+                    maxLineHeight = consoleFont->GetMaxHeight(consoleFontSize);
+                }
+                catch(const std::invalid_argument &e)
+                {
+                    Print(e.what());
+                }
             }
             else
             {

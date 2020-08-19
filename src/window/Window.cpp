@@ -42,11 +42,13 @@ namespace RIS
             int height = config.GetValue("r_height", 600);
             int fullscreen = config.GetValue("r_fullscreen", 0);
             bool vsync = config.GetValue("r_vsync", false);
+            int msaa = config.GetValue("r_msaa", 0);
 
             glfwWindowHint(GLFW_RED_BITS, 8);
             glfwWindowHint(GLFW_GREEN_BITS, 8);
             glfwWindowHint(GLFW_BLUE_BITS, 8);
             glfwWindowHint(GLFW_ALPHA_BITS, 8);
+            glfwWindowHint(GLFW_SAMPLES, msaa);
 
             if(fullscreen == 0) // windowed mode
             {

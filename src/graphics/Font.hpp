@@ -31,6 +31,8 @@ namespace RIS
         class Font
         {
         public:
+            using Ptr = std::shared_ptr<Font>;
+
             Font(float ascender, float descender, float height, float maxAdvance, const std::string &name, float size, float spaceAdvance, const std::unordered_map<uint32_t, Glyph> glyphs, std::shared_ptr<Texture> texture);
             ~Font() = default;
             Font(const Font&) = default;

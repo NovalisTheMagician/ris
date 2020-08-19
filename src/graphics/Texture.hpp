@@ -8,6 +8,8 @@
 
 #include "graphics/Buffer.hpp"
 
+#include <memory>
+
 namespace RIS
 {
     namespace Graphics
@@ -15,6 +17,8 @@ namespace RIS
         class Texture : public GLObject
         {
         public:
+            using Ptr = std::shared_ptr<Texture>;
+
             Texture();
             Texture(const std::vector<std::byte> &data, bool flip = false);
             Texture(GLenum format, int width, int height);

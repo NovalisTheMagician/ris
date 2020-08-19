@@ -100,5 +100,106 @@ namespace RIS
         {
             return type;
         }
+
+        Uniform Shader::GetUniform(GLuint location) const
+        {
+            return Uniform(*this, location);
+        }
+
+        Uniform Shader::GetUniform(const std::string &name) const
+        {
+            GLint location = glGetUniformLocation(id, name.c_str());
+            if(location == -1)
+                throw ShaderException("uniform (" + name + ") not found");
+            return Uniform(*this, location);
+        }
+
+        Uniform::Uniform(const Shader &shader, GLuint location)
+            : shader(shader), location(location)
+        {}
+
+        template<>
+        void Uniform::Set<float>(const float &value, bool transpose)
+        {
+            glProgramUniform1f(shader.GetId(), location, value);
+        }
+
+        template<>
+        void Uniform::Set<int>(const int &value, bool transpose)
+        {
+            glProgramUniform1i(shader.GetId(), location, value);
+        }
+
+        template<>
+        void Uniform::Set<unsigned int>(const unsigned int &value, bool transpose)
+        {
+            glProgramUniform1ui(shader.GetId(), location, value);
+        }
+
+        template<>
+        void Uniform::Set<glm::vec2>(const glm::vec2 &value, bool transpose)
+        {
+            glProgramUniform2fv(shader.GetId(), location, 2, glm::value_ptr(value));
+        }
+
+        template<>
+        void Uniform::Set<glm::vec3>(const glm::vec3 &value, bool transpose)
+        {
+            glProgramUniform2fv(shader.GetId(), location, 3, glm::value_ptr(value));
+        }
+
+        template<>
+        void Uniform::Set<glm::vec4>(const glm::vec4 &value, bool transpose)
+        {
+            glProgramUniform2fv(shader.GetId(), location, 4, glm::value_ptr(value));
+        }
+
+        template<>
+        void Uniform::Set<glm::mat4>(const glm::mat4 &value, bool transpose)
+        {
+            glProgramUniformMatrix4fv(shader.GetId(), location, 1, transpose, glm::value_ptr(value));
+        }
+
+        template<>
+        void Uniform::Set<float>(const std::vector<float> &values, bool transpose)
+        {
+            glProgramUniform1fv(shader.GetId(), location, values.size(), values.data());
+        }
+
+        template<>
+        void Uniform::Set<int>(const std::vector<int> &values, bool transpose)
+        {
+            glProgramUniform1iv(shader.GetId(), location, values.size(), values.data());
+        }
+
+        template<>
+        void Uniform::Set<unsigned int>(const std::vector<unsigned int> &values, bool transpose)
+        {
+            glProgramUniform1uiv(shader.GetId(), location, values.size(), values.data());
+        }
+
+        template<>
+        void Uniform::Set<glm::vec2>(const std::vector<glm::vec2> &values, bool transpose)
+        {
+            glProgramUniform2fv(shader.GetId(), location, values.size(), glm::value_ptr(values[0]));
+        }
+
+        template<>
+        void Uniform::Set<glm::vec3>(const std::vector<glm::vec3> &values, bool transpose)
+        {
+            glProgramUniform3fv(shader.GetId(), location, values.size(), glm::value_ptr(values[0]));
+        }
+
+        template<>
+        void Uniform::Set<glm::vec4>(const std::vector<glm::vec4> &values, bool transpose)
+        {
+            glProgramUniform4fv(shader.GetId(), location, values.size(), glm::value_ptr(values[0]));
+        }
+
+        template<>
+        void Uniform::Set<glm::mat4>(const std::vector<glm::mat4> &values, bool transpose)
+        {
+            glProgramUniformMatrix4fv(shader.GetId(), location, values.size(), transpose, glm::value_ptr(values[0]));
+        }
     }
 }

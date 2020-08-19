@@ -98,6 +98,7 @@ namespace RIS
 
         void Console::Update(const Timer &timer)
         {
+            // cursor blink
             if(roundHalf(timer.Total()) % 2)
             {
                 cursor = "_";

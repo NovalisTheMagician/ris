@@ -96,7 +96,7 @@ namespace RIS
                     self->SetImage(texture);
                 });
 
-            scriptEngine.Func("createImage", [this](const std::string &name)
+            scriptEngine.Func("Image", [this](const std::string &name)
             {
                 Image::Ptr image = Image::Create();
                 image->SetName(name);
@@ -115,7 +115,7 @@ namespace RIS
                 .Func("setFontSize", &Button::SetFontSize)
                 .Func("setCallback", &Button::SetCallback);
 
-            scriptEngine.Func("createButton", [this](const std::string &name)
+            scriptEngine.Func("Button", [this](const std::string &name)
             {
                 Button::Ptr button = Button::Create(defaultFont);
                 button->SetName(name);
@@ -140,7 +140,7 @@ namespace RIS
                 })
                 .Func("removeAll", &Panel::RemoveAll);
 
-            scriptEngine.Func("createPanel", [this](const std::string &name)
+            scriptEngine.Func("Panel", [this](const std::string &name)
             {
                 Panel::Ptr panel = Panel::Create();
                 panel->SetName(name);
@@ -164,7 +164,7 @@ namespace RIS
                     self->SetTextColor({ r, g, b, a });
                 });
 
-            scriptEngine.Func("createLabel", [this](const std::string &name)
+            scriptEngine.Func("Label", [this](const std::string &name)
             {
                 Label::Ptr label = Label::Create(defaultFont);
                 label->SetName(name);

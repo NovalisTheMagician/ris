@@ -22,21 +22,20 @@ namespace RIS
             VertexArray(VertexArray &&other);
             VertexArray& operator=(VertexArray &&other);
 
-            void SetVertexBuffer(const Buffer &buffer, int bindingPoint = 0, size_t stride = 0, size_t offset = 0);
-            template<typename T>
-            void SetVertexBuffer(const Buffer &buffer, int bindingPoint = 0, size_t offset = 0);
+            template<typename T, std::size_t Stride = sizeof T>
+            void SetVertexBuffer(const Buffer &buffer, int bindingPoint = 0, std::size_t offset = 0);
 
             void SetIndexBuffer(const Buffer &buffer);
-            void SetAttribFormat(int attrib, int numComponents, GLenum type, std::size_t offset, int bindingPoint = 0);
+            void SetAttribFormat(int attrib, int numComponents, GLenum type, std::size_t offset, bool normalized = false, int bindingPoint = 0);
 
             void Bind();
 
         };
 
-        template<typename T>
-        void VertexArray::SetVertexBuffer(const Buffer &buffer, int bindingPoint, size_t offset)
+        template<typename T, std::size_t Stride>
+        void VertexArray::SetVertexBuffer(const Buffer &buffer, int bindingPoint, std::size_t offset)
         {
-            SetVertexBuffer(buffer, bindingPoint, sizeof T, offset);
+            glVertexArrayVertexBuffer(id, bindingPoint, buffer.GetId(), offset, Stride);
         }
     }
 }

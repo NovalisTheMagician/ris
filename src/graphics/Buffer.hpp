@@ -6,7 +6,6 @@
 
 #include <glad/glad.h>
 
-#include <unordered_map>
 #include <vector>
 
 namespace RIS
@@ -18,9 +17,9 @@ namespace RIS
         public:
             Buffer(const void *data, size_t size, GLenum usage);
             Buffer(size_t size, GLenum usage);
-            template<typename T>
+            template<typename T, std::size_t Size = sizeof T>
             Buffer(const T &data, GLenum usage);
-            template<typename T>
+            template<typename T, std::size_t Size = sizeof T>
             Buffer(const std::vector<T> &data, GLenum usage);
 
             Buffer();
@@ -34,9 +33,9 @@ namespace RIS
 
             void UpdateData(const void *data, size_t size, size_t offset = 0);
 
-            template<typename T>
+            template<typename T, std::size_t Size = sizeof T>
             void UpdateData(const T &data, size_t offset = 0);
-            template<typename T>
+            template<typename T, std::size_t Size = sizeof T>
             void UpdateData(const std::vector<T> &data, size_t offset = 0);
 
             void Bind(GLenum target, int bindBase);
@@ -52,26 +51,26 @@ namespace RIS
 
         };
 
-        template<typename T>
+        template<typename T, std::size_t Size>
         void Buffer::UpdateData(const T &data, size_t offset)
         {
-            UpdateData(&data, sizeof T, offset);
+            UpdateData(&data, Size, offset);
         }
 
-        template<typename T>
+        template<typename T, std::size_t Size>
         void Buffer::UpdateData(const std::vector<T> &data, size_t offset)
         {
-            UpdateData(data.data(), data.size() * sizeof T, offset);
+            UpdateData(data.data(), data.size() * Size, offset);
         }
 
-        template<typename T>
+        template<typename T, std::size_t Size>
         Buffer::Buffer(const T &data, GLenum usage)
-            : Buffer(&data, sizeof T, usage)
+            : Buffer(&data, Size, usage)
         {}
 
-        template<typename T>
+        template<typename T, std::size_t Size>
         Buffer::Buffer(const std::vector<T> &data, GLenum usage)
-            : Buffer(data.data(), data.size() * sizeof T, usage)
+            : Buffer(data.data(), data.size() * Size, usage)
         {}
     }
 }

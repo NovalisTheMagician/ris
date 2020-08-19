@@ -36,6 +36,8 @@ namespace RIS
 			trim(key);
 			trim(value);
 
+			lowerCase(key);
+
 			//is it a number?
 			try
 			{

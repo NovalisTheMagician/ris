@@ -6,19 +6,29 @@ namespace RIS
 {
     namespace Graphics
     {
-        Mesh::Mesh(Buffer &&vertexBuffer, Buffer &&indexBuffer, int numIndices)
-            : vertexBuffer(std::move(vertexBuffer)), indexBuffer(std::move(indexBuffer)), numIndices(numIndices)
+        Mesh::Mesh(Buffer &&positionBuffer, Buffer &&normalBuffer, Buffer &&texCoordBuffer, Buffer &&jointsBuffer, Buffer &&weightsBuffer, Buffer &&indexBuffer, int numIndices)
+            : positionBuffer(std::move(positionBuffer))
+            , normalBuffer(std::move(normalBuffer))
+            , texCoordBuffer(std::move(texCoordBuffer))
+            , jointsBuffer(std::move(jointsBuffer))
+            , weightsBuffer(std::move(weightsBuffer))
+            , indexBuffer(std::move(indexBuffer))
+            , numIndices(numIndices)
         {}
 
-        void Mesh::Bind(VertexArray &vao)
+        void Mesh::Bind(VertexArray &vao) const
         {
-            vao.SetVertexBuffer<VertexType::ModelVertex>(vertexBuffer);
+            vao.SetVertexBuffer<glm::vec3>(positionBuffer, 0);
+            vao.SetVertexBuffer<glm::vec3>(normalBuffer, 1);
+            vao.SetVertexBuffer<glm::vec2>(texCoordBuffer, 2);
+            vao.SetVertexBuffer<glm::i16vec4>(jointsBuffer, 3);
+            vao.SetVertexBuffer<glm::vec4>(weightsBuffer, 4);
             vao.SetIndexBuffer(indexBuffer);
         }
 
         const Buffer& Mesh::VertexBuffer() const
         {
-            return vertexBuffer;
+            return positionBuffer;
         }
 
         const Buffer& Mesh::IndexBuffer() const

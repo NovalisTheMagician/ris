@@ -11,18 +11,14 @@
 
 #include "misc/Timer.hpp"
 #include "misc/Logger.hpp"
+#include "misc/Config.hpp"
 
 #include "graphics/Framebuffer.hpp"
 
 #include "misc/StringSupport.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
-
-#include <memory>
-
-#include <iostream>
-
-#include "graphics/SpriteRenderer.hpp"
+#include <glm/gtc/type_ptr.hpp>
 
 #include "graphics/Sampler.hpp"
 #include "graphics/ProgramPipeline.hpp"
@@ -30,6 +26,8 @@
 #include "graphics/VertexTypes.hpp"
 #include "graphics/Shader.hpp"
 #include "graphics/Buffer.hpp"
+#include "graphics/Animation.hpp"
+#include "graphics/Transform.hpp"
 
 using namespace std::literals;
 
@@ -50,19 +48,22 @@ namespace RIS
             bool god = false;
             interface.GetConsole().BindFunc("god", UI::Helpers::BoolFunc(god, "Godmode ON", "Godmode OFF"));
 
-            std::shared_ptr<Graphics::Texture> catTexture = loader.Load<Graphics::Texture>("textures/meow.dds");
-            std::shared_ptr<Graphics::Font> font = loader.Load<Graphics::Font>("fonts/immortal.json");
-            std::shared_ptr<Graphics::Model> cubeModel = loader.Load<Graphics::Model>("models/john.json");
+            Graphics::Texture::Ptr catTexture = loader.Load<Graphics::Texture>("textures/meow.dds");
+            Graphics::Font::Ptr font = loader.Load<Graphics::Font>("fonts/immortal.json");
+            Graphics::Model::Ptr cubeModel = loader.Load<Graphics::Model>("models/john.json");
 
-            std::shared_ptr<Graphics::Shader> modelVertexShader = loader.Load<Graphics::Shader>("shaders/mStatic.glsl", Graphics::ShaderType::VERTEX);
-            std::shared_ptr<Graphics::Shader> modelFragmentShader = loader.Load<Graphics::Shader>("shaders/mUnlit.glsl", Graphics::ShaderType::FRAGMENT);
+            Graphics::Shader::Ptr modelVertexShader = loader.Load<Graphics::Shader>("shaders/mAnim.glsl", Graphics::ShaderType::VERTEX);
+            Graphics::Shader::Ptr modelFragmentShader = loader.Load<Graphics::Shader>("shaders/mUnlit.glsl", Graphics::ShaderType::FRAGMENT);
+
+            Graphics::Animation::Skeleton::Ptr skeleton = loader.Load<Graphics::Animation::Skeleton>("meshes/john.glb");
+            Graphics::Animation::Animation::Ptr animation = loader.Load<Graphics::Animation::Animation>("meshes/john.glb");
 
             Graphics::VertexArray modelLayout;
-            modelLayout.SetAttribFormat(0, 3, GL_FLOAT, offsetof(VertexType::ModelVertex, position));
-            modelLayout.SetAttribFormat(1, 3, GL_FLOAT, offsetof(VertexType::ModelVertex, normal));
-            modelLayout.SetAttribFormat(2, 2, GL_FLOAT, offsetof(VertexType::ModelVertex, texCoords));
-            modelLayout.SetAttribFormat(3, 4, GL_BYTE, offsetof(VertexType::ModelVertex, joints));
-            modelLayout.SetAttribFormat(4, 4, GL_FLOAT, offsetof(VertexType::ModelVertex, weights));
+            modelLayout.SetAttribFormat(0, 3, GL_FLOAT, 0, false, 0);
+            modelLayout.SetAttribFormat(1, 3, GL_FLOAT, 0, false, 1);
+            modelLayout.SetAttribFormat(2, 2, GL_FLOAT, 0, false, 2);
+            modelLayout.SetAttribFormat(3, 4, GL_UNSIGNED_SHORT, 0, false, 3);
+            modelLayout.SetAttribFormat(4, 4, GL_FLOAT, 0, false, 4);
 
             Graphics::ProgramPipeline pipeline;
             pipeline.SetShader(*modelVertexShader);
@@ -73,11 +74,31 @@ namespace RIS
             Graphics::Buffer viewProjBuffer(glm::mat4(), GL_DYNAMIC_STORAGE_BIT);
             Graphics::Buffer worldBuffer(glm::mat4(), GL_DYNAMIC_STORAGE_BIT);
 
-            glm::mat4 projection = glm::perspective(glm::radians(60.0f), 4.0f / 3.0f, 0.1f, 1000.0f);
+            auto &config = GetConfig();
+            float width = config.GetValue("r_width", 800.0f);
+            float height = config.GetValue("r_height", 600.0f);
+
+            glm::mat4 projection = glm::perspective(glm::radians(60.0f), width / height, 0.1f, 1000.0f);
             glm::mat4 view = glm::lookAt(glm::vec3(5, 5, 5), glm::vec3(), glm::vec3(0, 1, 0));
             glm::mat4 world = glm::mat4(1.0f);
 
-            glm::vec3 camPos(std::cosf(0), 5, std::sinf(0));
+            float dist = 5;
+            interface.GetConsole().BindFunc("dist", [&dist](std::vector<std::string> params)
+            {
+                if(params.size() > 0)
+                    dist = std::stof(params.at(0));
+                return "";
+            });
+
+            float animSpeed = 1.0f;
+            interface.GetConsole().BindFunc("anim_speed", [&animSpeed](std::vector<std::string> params)
+            {
+                if(params.size() > 0)
+                    animSpeed = std::stof(params.at(0));
+                return "";
+            });
+
+            glm::vec3 camPos(std::cos(0.0f) * dist, 5, std::sin(0.0f) * dist);
             float x = 0;
 
             glm::vec4 clearColor(0.392f, 0.584f, 0.929f, 1.0f);
@@ -86,13 +107,75 @@ namespace RIS
 
             Graphics::Framebuffer defaultFramebuffer;
 
+            std::vector<glm::mat4> matrixPalette;
+            float playbackTime = 0.0f;
+
+            Graphics::Animation::Clip &clip = animation->GetByIndex(0);
+            Graphics::Animation::Pose &animPose = skeleton->GetBindPose();
+
+            Graphics::Buffer skeletonBuffer(sizeof glm::mat4 * 120, GL_DYNAMIC_STORAGE_BIT);
+
+            const std::vector<glm::mat4> &invBindPose = skeleton->GetInvBindPose();
+
+            clip.SetLooping(true);
+
+#pragma region DebugSetup
+
+            Graphics::Shader::Ptr debugVertexShader = loader.Load<Graphics::Shader>("shaders/debugVertex.glsl", Graphics::ShaderType::VERTEX);
+            Graphics::Shader::Ptr debugFragmentShader = loader.Load<Graphics::Shader>("shaders/debugFragment.glsl", Graphics::ShaderType::FRAGMENT);
+
+            Graphics::ProgramPipeline debugPipeline;
+            debugPipeline.SetShader(*debugVertexShader);
+            debugPipeline.SetShader(*debugFragmentShader);
+
+            Graphics::VertexArray debugLayout;
+            debugLayout.SetAttribFormat(0, 3, GL_FLOAT, 0);
+
+            std::vector<glm::vec3> points;
+            std::vector<glm::vec3> lines;
+            for(std::size_t i = 0; i < animPose.Size(); ++i)
+            {
+                auto transform = animPose.GetGlobalTransform(i);
+                points.push_back(transform.position);
+
+                int parent = animPose.GetParent(i);
+                if(parent >= 0)
+                {
+                    auto parentTrans = animPose.GetGlobalTransform(parent);
+                    lines.push_back(transform.position);
+                    lines.push_back(parentTrans.position);
+                }
+                else
+                {
+                    lines.push_back(transform.position);
+                    glm::vec3 nextPos = transform.position + (transform.rotation * (transform.scale * glm::vec3(0, 1, 0)));
+                    lines.push_back(nextPos);
+                }
+            }
+
+            Graphics::Buffer bonePointBuffer(points, GL_DYNAMIC_STORAGE_BIT);
+            Graphics::Buffer boneLineBuffer(lines, GL_DYNAMIC_STORAGE_BIT);
+
+            glDisable(GL_PROGRAM_POINT_SIZE);
+            glPointSize(6.0f);
+
+#pragma endregion DebugSetup
+
             while (!window.HandleMessages())
             {
                 timer.Update();
                 input.Update();
 
+                playbackTime = clip.Sample(animPose, playbackTime + timer.Delta() * animSpeed);
+                animPose.GetMatrixPalette(matrixPalette);
+
+                for(std::size_t i = 0; i < matrixPalette.size(); ++i)
+                    matrixPalette[i] = matrixPalette[i] * invBindPose[i];
+
+                skeletonBuffer.UpdateData(matrixPalette);
+
                 x += timer.Delta();
-                camPos = glm::vec3(std::cosf(x) * 5, 5, std::sinf(x) * 5);
+                camPos = glm::vec3(std::cos(x) * dist, 5, std::sin(x) * dist);
 
                 view = glm::lookAt(camPos, glm::vec3(), glm::vec3(0, 1, 0));
                 viewProjBuffer.UpdateData(projection * view);
@@ -105,12 +188,53 @@ namespace RIS
                 pipeline.Use();
                 viewProjBuffer.Bind(GL_UNIFORM_BUFFER, 0);
                 worldBuffer.Bind(GL_UNIFORM_BUFFER, 1);
+                skeletonBuffer.Bind(GL_UNIFORM_BUFFER, 2);
 
                 modelLayout.Bind();
                 cubeModel->GetMesh()->Bind(modelLayout);
                 cubeModel->GetTexture()->Bind(0);
                 sampler.Bind(0);
                 cubeModel->GetMesh()->Draw();
+
+#pragma region DebugDraw
+
+                lines.clear();
+                for(std::size_t i = 0; i < animPose.Size(); ++i)
+                {
+                    auto transform = animPose.GetGlobalTransform(i);
+                    points[i] = transform.position;
+
+                    int parent = animPose.GetParent(i);
+                    if(parent >= 0)
+                    {
+                        auto parentTrans = animPose.GetGlobalTransform(parent);
+                        lines.push_back(transform.position);
+                        lines.push_back(parentTrans.position);
+                    }
+                    else
+                    {
+                        lines.push_back(transform.position);
+                        glm::vec3 nextPos = transform.position + (transform.rotation * (transform.scale * transform.position));
+                        lines.push_back(nextPos);
+                    }
+                }
+
+                bonePointBuffer.UpdateData(points);
+                boneLineBuffer.UpdateData(lines);
+
+                glDisable(GL_DEPTH_TEST);
+
+                debugPipeline.Use();
+                debugLayout.Bind();
+                debugLayout.SetVertexBuffer<glm::vec3>(bonePointBuffer);
+                glDrawArrays(GL_POINTS, 0, points.size());
+
+                debugLayout.SetVertexBuffer<glm::vec3>(boneLineBuffer);
+                glDrawArrays(GL_LINES, 0, lines.size());
+
+                glEnable(GL_DEPTH_TEST);
+
+#pragma endregion DebugDraw
 
                 interface.Draw();
                 

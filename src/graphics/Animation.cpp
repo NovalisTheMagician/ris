@@ -1,26 +1,60 @@
 #include "graphics/Animation.hpp"
 
-#include <algorithm>
-
 namespace RIS
 {
-    Joint::Joint(int index, const std::string &name, const glm::mat4 &inverseBindTransform)
-        : index(index), name(name), inverseBindTransform(inverseBindTransform)
+    namespace Graphics
     {
-    }
+        namespace Animation
+        {
+            Animation::Animation(std::vector<Clip> &&newClips)
+            {
+                clips = std::move(newClips);
+                for(std::size_t i = 0; i < clips.size(); ++i)
+                {
+                    auto &clip = clips.at(i);
+                    nameToIndex.insert_or_assign(clip.GetName(), i);
+                }
+            }
 
-    void Joint::AddChild(size_t jointIndex)
-    {
-        childrenIndices.push_back(jointIndex);
-    }
+            Clip& Animation::GetByName(const std::string &clipName)
+            {
+                return clips.at(nameToIndex.at(clipName));
+            }
 
-    Animator::Animator()
-    {
+            const Clip& Animation::GetByName(const std::string &clipName) const
+            {
+                return clips.at(nameToIndex.at(clipName));
+            }
 
-    }
+            Clip& Animation::GetByIndex(std::size_t index)
+            {
+                return clips.at(index);
+            }
 
-    Animator::~Animator()
-    {
+            const Clip& Animation::GetByIndex(std::size_t index) const
+            {
+                return clips.at(index);
+            }
 
+            Clip& Animation::operator[](const std::string &clipName)
+            {
+                return GetByName(clipName);
+            }
+
+            const Clip& Animation::operator[](const std::string &clipName) const
+            {
+                return GetByName(clipName);
+            }
+
+            Clip& Animation::operator[](std::size_t index)
+            {
+                return GetByIndex(index);
+            }
+
+            const Clip& Animation::operator[](std::size_t index) const
+            {
+                return GetByIndex(index);
+            }
+        }
     }
 }

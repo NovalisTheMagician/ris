@@ -11,7 +11,7 @@ namespace RIS
         class Mesh
         {
         public:
-            Mesh(Buffer &&vertexBuffer, Buffer &&indexBuffer, int numIndices);
+            Mesh(Buffer &&positionBuffer, Buffer &&normalBuffer, Buffer &&texCoordBuffer, Buffer &&jointsBuffer, Buffer &&weightsBuffer, Buffer &&indexBuffer, int numIndices);
 
             Mesh() = default;
             Mesh(const Mesh &) = delete;
@@ -19,7 +19,7 @@ namespace RIS
             Mesh &operator=(const Mesh &) = delete;
             Mesh &operator=(Mesh &&) = default;
 
-            void Bind(VertexArray &vao);
+            void Bind(VertexArray &vao) const;
             void Draw() const;
 
             const Buffer& VertexBuffer() const;
@@ -27,7 +27,11 @@ namespace RIS
             int NumIndices() const;
 
         private:
-            Buffer vertexBuffer;
+            Buffer positionBuffer;
+            Buffer normalBuffer;
+            Buffer texCoordBuffer;
+            Buffer jointsBuffer;
+            Buffer weightsBuffer;
             Buffer indexBuffer;
             const int numIndices;
         };

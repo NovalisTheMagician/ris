@@ -22,6 +22,7 @@
 #include "graphics/Mesh.hpp"
 #include "graphics/Model.hpp"
 #include "graphics/Font.hpp"
+#include "graphics/Animation.hpp"
 
 namespace RIS
 {
@@ -48,6 +49,9 @@ namespace RIS
             void ClearCacheMeshes();
             void ClearCacheModels();
             void ClearCacheShaders();
+            void ClearCacheFonts();
+            void ClearCacheSkeletons();
+            void ClearCacheAnimations();
             void ClearCache();
 
             void Resize(int width, int height);
@@ -58,8 +62,8 @@ namespace RIS
             std::unordered_map<std::string, std::shared_ptr<Model>> loadedModels;
             std::unordered_map<std::string, std::shared_ptr<Shader>> loadedShaders;
             std::unordered_map<std::string, std::shared_ptr<Font>> loadedFonts;
-
-            bool useAmdFix = false;
+            std::unordered_map<std::string, std::shared_ptr<Animation::Skeleton>> loadedSkeletons;
+            std::unordered_map<std::string, std::shared_ptr<Animation::Animation>> loadedAnimations;
 
         };
     }

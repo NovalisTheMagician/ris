@@ -34,7 +34,7 @@ namespace RIS
 		return ltrim(rtrim(str));
 	}
 
-	inline std::string trim_copy(std::string const &str)
+	inline std::string trim(const std::string &str)
 	{
 		auto s = str;
 		return ltrim(rtrim(s));

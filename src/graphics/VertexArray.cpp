@@ -30,21 +30,21 @@ namespace RIS
             return *this;
         }
 
-        void VertexArray::SetAttribFormat(int attrib, int numComponents, GLenum type, std::size_t offset, int bindingPoint)
+        void VertexArray::SetAttribFormat(int attrib, int numComponents, GLenum type, std::size_t offset, bool normalized, int bindingPoint)
         {
             glEnableVertexArrayAttrib(id, attrib);
-            glVertexArrayAttribFormat(id, attrib, numComponents, type, GL_FALSE, offset);
+            if(type == GL_FLOAT)
+                glVertexArrayAttribFormat(id, attrib, numComponents, type, normalized, offset);
+            else if(type == GL_DOUBLE)
+                glVertexArrayAttribLFormat(id, attrib, numComponents, type, offset);
+            else
+                glVertexArrayAttribIFormat(id, attrib, numComponents, type, offset);
             glVertexArrayAttribBinding(id, attrib, bindingPoint);
         }
 
         void VertexArray::Bind()
         {
             glBindVertexArray(id);
-        }
-
-        void VertexArray::SetVertexBuffer(const Buffer &buffer, int bindingPoint, size_t stride, size_t offset)
-        {
-            glVertexArrayVertexBuffer(id, bindingPoint, buffer.GetId(), offset, stride);
         }
 
         void VertexArray::SetIndexBuffer(const Buffer &buffer)

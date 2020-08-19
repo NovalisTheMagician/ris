@@ -14,10 +14,10 @@ inc_path = ['#src', '#libs/glm/include', '#libs/gli/include', '#libs/glad/includ
             '#libs/magic_enum/include', '#libs/squirrel/include', '#libs/squall/include', '#libs/utf8/include', '#libs/fmt/include']
 lib_path = ['libs/glad/lib', 'libs/glfw/lib', 'libs/soloud/lib', 'libs/libzip/lib', 'libs/squirrel/lib', 'libs/fmt/lib']
 
-libs_rel = ['glfw3', 'soloud', 'libz', 'libzip', 'squirrel', 'sqstdlib', 'fmt']
-libs_deb = ['glfw3d', 'soloudd', 'libzd', 'libzipd', 'squirreld', 'sqstdlibd', 'fmtd']
+libs_rel = ['glfw3', 'soloud', 'libz', 'libzip', 'squirrel', 'sqstdlib', 'fmt', 'glad']
+libs_deb = ['glfw3d', 'soloudd', 'libzd', 'libzipd', 'squirreld', 'sqstdlibd', 'fmtd', 'gladd']
 
-libs = ['user32', 'kernel32', 'gdi32', 'shell32', 'opengl32', 'ws2_32', 'advapi32', 'glad']
+libs = ['user32', 'kernel32', 'gdi32', 'shell32', 'opengl32', 'ws2_32', 'advapi32']
 
 defines = ['ZIP_STATIC']
 

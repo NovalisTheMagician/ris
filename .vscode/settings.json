@@ -83,9 +83,11 @@
         "system.h": "c",
         "unordered_set": "cpp",
         "span": "cpp",
-        "clocale": "cpp"
+        "clocale": "cpp",
+        "compare": "cpp"
     },
     "python.linting.enabled": false,
-    "python.pythonPath": "D:\\Python38-32\\python.exe",
-    "workbench.colorTheme": "C Enhanced",
+    "python.pythonPath": "D:\\python38\\python.exe",
+    "workbench.colorTheme": "A Touch of Lilac Theme",
+    "cmake.configureOnOpen": false,
 }

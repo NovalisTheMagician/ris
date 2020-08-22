@@ -27,6 +27,7 @@ namespace RIS
 
             virtual void OnKeyDown(Input::InputKey keyCode) {};
             virtual void OnKeyUp(Input::InputKey keyCode) {};
+            virtual void OnKeyRepeat(Input::InputKey keyCode) {};
 
             virtual void OnChar(uint32_t c) {};
 

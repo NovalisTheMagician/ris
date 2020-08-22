@@ -163,7 +163,17 @@ namespace RIS
             }
         }
 
+        void Console::OnKeyRepeat(Input::InputKey key)
+        {
+            OnKey(key, true);
+        }
+
         void Console::OnKeyDown(Input::InputKey key)
+        {
+            OnKey(key, false);
+        }
+
+        void Console::OnKey(Input::InputKey key, bool repeat)
         {
             if(isOpen)
             {

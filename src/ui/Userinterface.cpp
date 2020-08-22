@@ -56,6 +56,7 @@ namespace RIS
             input.RegisterButtonDown([this](Input::InputKey button){ return OnMouseDown(button); });
             input.RegisterButtonUp([this](Input::InputKey button){ return OnMouseUp(button); });
             input.RegisterKeyDown([this](Input::InputKey key){ return OnKeyDown(key); });
+            input.RegisterKeyRepeat([this](Input::InputKey key){ return OnKeyRepeat(key); });
         }
 
         void Userinterface::ReleaseScriptReferences()
@@ -336,6 +337,21 @@ namespace RIS
             if(activeMenu)
             {
                 activeMenu->OnKeyUp(key);
+                return true;
+            }
+            return false;
+        }
+
+        bool Userinterface::OnKeyRepeat(Input::InputKey key)
+        {
+            if(console.IsOpen())
+            {
+                console.OnKeyRepeat(key);
+                return true;
+            }
+            if(activeMenu)
+            {
+                activeMenu->OnKeyRepeat(key);
                 return true;
             }
             return false;

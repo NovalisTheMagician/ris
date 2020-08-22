@@ -70,11 +70,14 @@ namespace RIS
 
             void OnChar(uint32_t c);
             void OnKeyDown(Input::InputKey key);
+            void OnKeyRepeat(Input::InputKey key);
             void OnMouseWheel(float x, float y);
 
         private:
             std::string SetParam(std::vector<std::string> params);
             glm::vec2 GetPosForLine(int lineNr);
+
+            void OnKey(Input::InputKey key, bool repeat);
 
         private:
             bool isOpen = false;

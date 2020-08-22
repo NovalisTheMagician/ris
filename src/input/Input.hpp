@@ -35,6 +35,7 @@ namespace RIS
             void RegisterMouse(MouseFunc callback, bool insertLast = false);
             void RegisterWheel(WheelFunc callback, bool insertLast = false);
             void RegisterChar(CharFunc callback, bool insertLast = false);
+            void RegisterKeyRepeat(KeyFunc callback, bool insertLast = false);
 
             void Update();
 
@@ -52,6 +53,7 @@ namespace RIS
             void OnScrollWheel(float x, float y);
             void OnMouseButtonUp(int button);
             void OnMouseButtonDown(int button);
+            void OnKeyRepeat(int key);
 
             constexpr InputKey TranslateKey(int key);
 
@@ -63,6 +65,7 @@ namespace RIS
 
             std::vector<KeyFunc> keyUpCallbacks;
             std::vector<KeyFunc> keyDownCallbacks;
+            std::vector<KeyFunc> keyRepeatCallbacks;
 
             std::vector<ButtonFunc> buttonUpCallbacks;
             std::vector<ButtonFunc> buttonDownCallbacks;

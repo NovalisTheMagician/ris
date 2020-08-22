@@ -55,6 +55,7 @@ namespace RIS
             bool OnMouseWheel(float x, float y);
             bool OnKeyDown(Input::InputKey key);
             bool OnKeyUp(Input::InputKey key);
+            bool OnKeyRepeat(Input::InputKey key);
 
         private:
             Console console;

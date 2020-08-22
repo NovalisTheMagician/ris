@@ -34,6 +34,10 @@ namespace RIS
             {
                 input.OnKeyUp(key);
             }
+            else if(action == GLFW_REPEAT)
+            {
+                input.OnKeyRepeat(key);
+            }
         }
 
         void Input::CharCallback(GLFWwindow *window, uint32_t codePoint)
@@ -79,6 +83,14 @@ namespace RIS
         {
             if(!ready) return;
             for(auto& callback : keyDownCallbacks)
+                if(callback(TranslateKey(key)))
+                    break;
+        }
+
+        void Input::OnKeyRepeat(int key)
+        {
+            if(!ready) return;
+            for(auto& callback : keyRepeatCallbacks)
                 if(callback(TranslateKey(key)))
                     break;
         }
@@ -163,6 +175,12 @@ namespace RIS
         {
             auto insertPoint = insertLast ? charCallbacks.end() : charCallbacks.begin();
             charCallbacks.insert(insertPoint, callback);
+        }
+
+        void Input::RegisterKeyRepeat(KeyFunc callback, bool insertLast)
+        {
+            auto insertPoint = insertLast ? keyRepeatCallbacks.end() : keyRepeatCallbacks.begin();
+            keyRepeatCallbacks.insert(insertPoint, callback);
         }
 
         void Input::Update()

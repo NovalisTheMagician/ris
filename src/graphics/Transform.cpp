@@ -13,7 +13,7 @@ namespace RIS
             Transform out;
 
             out.scale = a.scale * b.scale;
-            out.rotation = b.rotation * a.rotation;
+            out.rotation = a.rotation * b.rotation;
 
             out.position = a.rotation * (a.scale * b.position);
             out.position = a.position + out.position;

@@ -342,12 +342,11 @@ namespace RIS
                 std::size_t numJoints = skin.joints.size();
                 for(std::size_t i = 0; i < numJoints; ++i)
                 {
-                    std::size_t boneId = i;
                     float *matrix = invBindAccessor.data() + i * compCount;
                     glm::mat4 invBindMatrix = glm::make_mat4(matrix);
                     glm::mat4 bindMatrix = glm::inverse(invBindMatrix);
                     Transform bindTransform = Mat4ToTransform(bindMatrix);
-                    worldBindPose[boneId] = bindTransform;
+                    worldBindPose[i] = bindTransform;
                 }
 
                 Animation::Pose bindPose(restPose);

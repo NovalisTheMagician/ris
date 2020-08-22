@@ -98,6 +98,9 @@ namespace RIS
                 return "";
             });
 
+            bool debugDraw = false;
+            interface.GetConsole().BindFunc("debug_draw", UI::Helpers::BoolFunc(debugDraw, "Show debug stuff", "Dont show debug stuff"));
+
             glm::vec3 camPos(std::cos(0.0f) * dist, 5, std::sin(0.0f) * dist);
             float x = 0;
 
@@ -198,41 +201,44 @@ namespace RIS
 
 #pragma region DebugDraw
 
-                lines.clear();
-                for(std::size_t i = 0; i < animPose.Size(); ++i)
+                if(debugDraw)
                 {
-                    auto transform = animPose.GetGlobalTransform(i);
-                    points[i] = transform.position;
+                    lines.clear();
+                    for(std::size_t i = 0; i < animPose.Size(); ++i)
+                    {
+                        auto transform = animPose.GetGlobalTransform(i);
+                        points[i] = transform.position;
 
-                    int parent = animPose.GetParent(i);
-                    if(parent >= 0)
-                    {
-                        auto parentTrans = animPose.GetGlobalTransform(parent);
-                        lines.push_back(transform.position);
-                        lines.push_back(parentTrans.position);
+                        int parent = animPose.GetParent(i);
+                        if(parent >= 0)
+                        {
+                            auto parentTrans = animPose.GetGlobalTransform(parent);
+                            lines.push_back(transform.position);
+                            lines.push_back(parentTrans.position);
+                        }
+                        else
+                        {
+                            lines.push_back(transform.position);
+                            glm::vec3 nextPos = transform.position + (transform.rotation * (transform.scale * transform.position));
+                            lines.push_back(nextPos);
+                        }
                     }
-                    else
-                    {
-                        lines.push_back(transform.position);
-                        glm::vec3 nextPos = transform.position + (transform.rotation * (transform.scale * transform.position));
-                        lines.push_back(nextPos);
-                    }
+
+                    bonePointBuffer.UpdateData(points);
+                    boneLineBuffer.UpdateData(lines);
+
+                    glDisable(GL_DEPTH_TEST);
+
+                    debugPipeline.Use();
+                    debugLayout.Bind();
+                    debugLayout.SetVertexBuffer<glm::vec3>(bonePointBuffer);
+                    glDrawArrays(GL_POINTS, 0, points.size());
+
+                    debugLayout.SetVertexBuffer<glm::vec3>(boneLineBuffer);
+                    glDrawArrays(GL_LINES, 0, lines.size());
+
+                    glEnable(GL_DEPTH_TEST);
                 }
-
-                bonePointBuffer.UpdateData(points);
-                boneLineBuffer.UpdateData(lines);
-
-                glDisable(GL_DEPTH_TEST);
-
-                debugPipeline.Use();
-                debugLayout.Bind();
-                debugLayout.SetVertexBuffer<glm::vec3>(bonePointBuffer);
-                glDrawArrays(GL_POINTS, 0, points.size());
-
-                debugLayout.SetVertexBuffer<glm::vec3>(boneLineBuffer);
-                glDrawArrays(GL_LINES, 0, lines.size());
-
-                glEnable(GL_DEPTH_TEST);
 
 #pragma endregion DebugDraw
 

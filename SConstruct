@@ -12,8 +12,8 @@ dyn_libs = []
 inc_path = ['#src', os.environ['INC_PATH']]
 lib_path = [os.environ['LIB_PATH']]
 
-libs_rel = ['glfw3', 'soloud', 'libz', 'libzip', 'squirrel', 'sqstdlib', 'fmt', 'glad']
-libs_deb = ['glfw3d', 'soloudd', 'libzd', 'libzipd', 'squirreld', 'sqstdlibd', 'fmtd', 'gladd']
+libs_rel = ['glfw3', 'soloud', 'libz', 'libzip', 'squirrel', 'sqstdlib', 'fmt', 'glad', 'boxer']
+libs_deb = ['glfw3d', 'soloudd', 'libzd', 'libzipd', 'squirreld', 'sqstdlibd', 'fmtd', 'gladd', 'boxerd']
 
 libs = ['user32', 'kernel32', 'gdi32', 'shell32', 'opengl32', 'ws2_32', 'advapi32']
 

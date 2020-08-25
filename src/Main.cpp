@@ -32,6 +32,8 @@
 
 #include "RIS.hpp"
 
+#include <boxer/boxer.h>
+
 using namespace std::literals::string_literals;
 
 using namespace RIS;
@@ -144,9 +146,7 @@ int main(int argc, char *argv[])
         logger.Error("Failed to init system: "s + e.what());
         Logger::Destroy();
 
-#ifdef WIN32
-        MessageBoxA(nullptr, e.what(), "Failed to launch game", MB_OK | MB_ICONERROR);
-#endif
+        boxer::show(e.what(), "Failed to launch game", boxer::Style::Error);
 
         return 1;
     }
@@ -175,9 +175,8 @@ int main(int argc, char *argv[])
     catch(const RISException &e)
     {
         //logger.Error(e.what());
-#ifdef WIN32
-        MessageBoxA(nullptr, e.what(), "Game Error", MB_OK | MB_ICONERROR);
-#endif
+
+        boxer::show(e.what(), "Game Error", boxer::Style::Error);
     }
 
     logger.Info("Exit game");

@@ -4,22 +4,7 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/src/*",
-                "${workspaceFolder}/libs/glfw/include/*",
-                "${workspaceFolder}/libs/glad/include/*",
-                "${workspaceFolder}/libs/glm/include/*",
-                "${workspaceFolder}/libs/gli/include/*",
-                "${workspaceFolder}/libs/soloud/include/*",
-                "${workspaceFolder}/libs/rapidjson/include/*",
-                "${workspaceFolder}/libs/libzip/include/*",
-                "${workspaceFolder}/libs/libzippp/include/*",
-                "${workspaceFolder}/libs/tiny_gltf/include/*",
-                "${workspaceFolder}/libs/ctre/include/*",
-                "${workspaceFolder}/libs/gsl/include/*",
-                "${workspaceFolder}/libs/magic_enum/include/*",
-                "${workspaceFolder}/libs/squirrel/include/*",
-                "${workspaceFolder}/libs/squall/include/*",
-                "${workspaceFolder}/libs/utf8/include/*",
-                "${workspaceFolder}/libs/fmt/include/*"
+                "${INC_PATH}/*"
             ],
             "defines": [
                 "_DEBUG"

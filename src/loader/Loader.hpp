@@ -51,7 +51,7 @@ namespace RIS
             template<typename T>
             void RegisterLoadFunction(LoadFunc<T> function, std::optional<DefaultFunc<T>> defaultFunc = {});
 
-            template<typename T>
+            template<typename T, bool DoThrow = true>
             std::shared_ptr<T> Load(const std::string &assetName, std::any param = {}, bool cacheAsset = true);
 
             std::vector<std::byte> LoadBytes(const std::string &name);
@@ -77,13 +77,16 @@ namespace RIS
             }
         }
 
-        template<typename T>
+        template<typename T, bool DoThrow>
         std::shared_ptr<T> Loader::Load(const std::string &assetName, std::any param, bool cacheAsset)
         {
             const type_info &ti = typeid(T);
             if(loadFuncs.count(ti) == 0)
             {
-                throw LoaderException(std::string("No Loader registered for type ") + ti.name());
+                if constexpr (DoThrow)
+                    throw LoaderException(std::string("No Loader registered for type ") + ti.name());
+                else
+                    return nullptr;
             }
 
             LoadFunc<T> &func = std::any_cast<LoadFunc<T>>(loadFuncs.at(ti));
@@ -101,9 +104,24 @@ namespace RIS
                     DefaultFunc<T> &defFunc = std::any_cast<DefaultFunc<T>>(defaultFuncs.at(ti));
                     return defFunc();
                 }
-                throw;
+                if constexpr (DoThrow)
+                    throw;
+                else
+                    return nullptr;
             }
-            return func(bytes, assetName, cacheAsset, param);
+            if constexpr (DoThrow)
+                return func(bytes, assetName, cacheAsset, param);
+            else
+            {
+                try
+                {
+                    return func(bytes, assetName, cacheAsset, param);
+                }
+                catch(const RISException& e)
+                {
+                    return nullptr;
+                }
+            }
         }
     }
 }

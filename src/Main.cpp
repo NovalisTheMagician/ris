@@ -151,18 +151,13 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    try
-    {
-        auto windowIcon = loader->Load<Graphics::Image>("cat_icon.dds");
-        auto windowCursor = loader->Load<Graphics::Image>("cat_cursor.dds");
+    auto windowIcon = loader->Load<Graphics::Image, false>("cat_icon.dds");
+    auto windowCursor = loader->Load<Graphics::Image, false>("cat_cursor.dds");
 
+    if(windowIcon)
         window->SetWindowIcon(windowIcon);
+    if(windowCursor)
         window->SetCursorIcon(windowCursor, 1, 4);
-    }
-    catch(const RISException &e)
-    {
-        logger.Warning(e.what());
-    }
 
     logger.Info("System init OK");
 

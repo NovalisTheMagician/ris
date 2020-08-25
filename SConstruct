@@ -9,10 +9,8 @@ lk_flags = ['/nologo', '/INCREMENTAL:NO', '/LTCG:NOSTATUS', '/MACHINE:X64']
 
 dyn_libs = []
 
-inc_path = ['#src', '#libs/glm/include', '#libs/gli/include', '#libs/glad/include', '#libs/glfw/include', '#libs/soloud/include', '#libs/rapidjson/include', 
-            '#libs/libzip/include', '#libs/libzippp/include', '#libs/tiny_gltf/include', '#libs/ctre/include', '#libs/gsl/include',
-            '#libs/magic_enum/include', '#libs/squirrel/include', '#libs/squall/include', '#libs/utf8/include', '#libs/fmt/include']
-lib_path = ['libs/glad/lib', 'libs/glfw/lib', 'libs/soloud/lib', 'libs/libzip/lib', 'libs/squirrel/lib', 'libs/fmt/lib']
+inc_path = ['#src', os.environ['INC_PATH']]
+lib_path = [os.environ['LIB_PATH']]
 
 libs_rel = ['glfw3', 'soloud', 'libz', 'libzip', 'squirrel', 'sqstdlib', 'fmt', 'glad']
 libs_deb = ['glfw3d', 'soloudd', 'libzd', 'libzipd', 'squirreld', 'sqstdlibd', 'fmtd', 'gladd']

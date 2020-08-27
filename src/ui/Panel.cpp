@@ -104,9 +104,14 @@ namespace RIS
             std::for_each(components.begin(), components.end(), [keyCode](auto component){ component->OnKeyUp(keyCode); });
         }
 
-        void Panel::Update()
+        void Panel::OnKeyRepeat(Input::InputKey keyCode)
         {
-            std::for_each(components.begin(), components.end(), [](auto component){ component->Update(); });
+            std::for_each(components.begin(), components.end(), [keyCode](auto component){ component->OnKeyRepeat(keyCode); });
+        }
+
+        void Panel::Update(const Timer &timer)
+        {
+            std::for_each(components.begin(), components.end(), [&timer](auto component){ component->Update(timer); });
         }
 
         void Panel::Draw(Graphics::SpriteRenderer &renderer, const glm::vec2 &parentPosition)

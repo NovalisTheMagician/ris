@@ -19,7 +19,7 @@ namespace RIS
             this->color = color;
         }
 
-        void Image::Update()
+        void Image::Update(const Timer &timer)
         {
 
         }

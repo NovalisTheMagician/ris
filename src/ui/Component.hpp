@@ -5,6 +5,8 @@
 
 #include <glm/glm.hpp>
 
+#include "misc/Timer.hpp"
+
 #include "input/KeyDefs.hpp"
 
 #include "graphics/SpriteRenderer.hpp"
@@ -37,7 +39,7 @@ namespace RIS
             virtual void SetPosition(const glm::vec2 &position) { this->position = position; };
             virtual void SetSize(const glm::vec2 &size) { this->size = size; };
 
-            virtual void Update() = 0;
+            virtual void Update(const Timer &timer) = 0;
             virtual void Draw(Graphics::SpriteRenderer &renderer, const glm::vec2 &parentPosition) = 0;
 
         protected:

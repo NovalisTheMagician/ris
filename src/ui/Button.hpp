@@ -48,7 +48,7 @@ namespace RIS
 
             void SetCallback(ButtonFunc func);
 
-            void Update() override;
+            void Update(const Timer &timer) override;
             void Draw(Graphics::SpriteRenderer &renderer, const glm::vec2 &parentPosition) override;
 
             void OnMouseMove(float x, float y) override;

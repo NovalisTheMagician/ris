@@ -32,7 +32,7 @@ namespace RIS
             void SetVisible(bool visible);
             void SetText(const std::string &text);
 
-            void Update() override;
+            void Update(const Timer &timer) override;
             void Draw(Graphics::SpriteRenderer &renderer, const glm::vec2 &parentPosition) override;
 
         private:

@@ -42,7 +42,7 @@ namespace RIS
             this->text = text;
         }
 
-        void Label::Update()
+        void Label::Update(const Timer &timer)
         {
 
         }

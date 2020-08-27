@@ -87,7 +87,7 @@ namespace RIS
             callback = func;
         }
 
-        void Button::Update()
+        void Button::Update(const Timer &timer)
         {
             
         }

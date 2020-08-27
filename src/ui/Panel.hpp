@@ -44,8 +44,9 @@ namespace RIS
 
             void OnKeyDown(Input::InputKey keyCode) override;
             void OnKeyUp(Input::InputKey keyCode) override;
+            void OnKeyRepeat(Input::InputKey keyCode) override;
 
-            void Update() override;
+            void Update(const Timer &timer) override;
             void Draw(Graphics::SpriteRenderer &renderer, const glm::vec2 &parentPosition) override;
 
         private:

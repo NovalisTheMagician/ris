@@ -29,7 +29,7 @@ namespace RIS
             void SetImage(std::shared_ptr<Graphics::Texture> image);
             void SetColor(const glm::vec4 &color);
 
-            void Update() override;
+            void Update(const Timer &timer) override;
             void Draw(Graphics::SpriteRenderer &renderer, const glm::vec2 &parentPosition) override;
 
         private:

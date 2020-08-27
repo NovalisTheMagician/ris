@@ -173,6 +173,26 @@ namespace RIS
                 return label.get();
             });
 
+            scriptEngine.Class<InputBox, Component>("Textbox")
+                .Func("setFont", [&loader](InputBox *self, const std::string &fontName)
+                {
+                    auto font = loader.Load<Graphics::Font>(fontName);
+                    if(font)
+                        self->SetFont(font);
+                })
+                .Func("setFontSize", &Label::SetFontSize)
+                .Func("setPreviewText", &InputBox::SetPreviewText)
+                .Func("setText", &InputBox::SetText)
+                .Func("getText", [](InputBox *self){ return self->GetText().c_str(); });
+
+            scriptEngine.Func("Textbox", [this](const std::string &name)
+            {
+                InputBox::Ptr textbox = InputBox::Create(defaultFont);
+                textbox->SetName(name);
+                components.push_back(textbox);
+                return textbox.get();
+            });
+
             scriptEngine.Class<Graphics::TextMetrics>("TextMetrics")
                 .Var("width", &Graphics::TextMetrics::width)
                 .Var("height", &Graphics::TextMetrics::height);
@@ -248,7 +268,7 @@ namespace RIS
             else
                 fpsLabel->SetText(std::to_string(static_cast<int>(1 / frameTime)));
             if(activeMenu)
-                activeMenu->Update();
+                activeMenu->Update(timer);
             console.Update(timer);
         }
 

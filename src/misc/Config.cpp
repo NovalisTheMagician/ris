@@ -26,6 +26,7 @@ namespace RIS
 		std::string line;
 		while (std::getline(inputStream, line))
 		{
+			trim(line);
 			if (line[0] == '/' && line[1] == '/') continue;
 
 			std::stringstream ss(line);

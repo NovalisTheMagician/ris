@@ -134,8 +134,8 @@ namespace RIS
                 return out;
             }
 
-            template<typename T, std::size_t Size = sizeof T>
-            std::vector<T> VectorCast(const std::vector<unsigned char> &in)
+            template<typename InType, typename OutType, std::size_t Size = sizeof InType>
+            std::vector<OutType> VectorCast(const std::vector<unsigned char> &in)
             {
                 if(in.size() % Size != 0) throw std::runtime_error("input size mismatch");
                 std::vector<OutType> out;

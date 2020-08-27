@@ -6,8 +6,10 @@
 #include "misc/Version.hpp"
 #include "script/ScriptEngine.hpp"
 #include "graphics/Renderer.hpp"
+#include "ui/Userinterface.hpp"
 
 #include <exception>
+#include <charconv>
 
 #include <glm/glm.hpp>
 #include <gli/gli.hpp>
@@ -101,7 +103,29 @@ namespace RIS
 
         void Window::PostInit()
         {
-            
+            auto &console = GetUserinterface().GetConsole();
+            console.BindFunc("exit", [this](std::vector<std::string> params){ Exit(0); return ""; });
+            console.BindFunc("vsync", [this](std::vector<std::string> params)
+            { 
+                if(params.size() == 0)
+                {
+                    const auto &config = GetConfig();
+                    return std::to_string(config.GetValue("r_vsync", false));
+                }
+                else
+                {
+                    try
+                    {
+                        bool value = std::stoi(params.at(0));
+                        SetVsync(value);
+                    }
+                    catch(const std::exception& e)
+                    {
+                        return "Invalid Value"s;
+                    }
+                }
+                return std::string(); 
+            });
         }
 
         void Window::RegisterScriptFunctions()
@@ -185,6 +209,31 @@ namespace RIS
         GLFWwindow *Window::GetWindowHandle() const
         {
             return window;
+        }
+
+        std::string Window::GetClipboard() const
+        {
+            auto clipString = glfwGetClipboardString(nullptr);
+            if(clipString)
+                return std::string(clipString);
+            return std::string();
+        }
+
+        void Window::SetClipboard(const std::string &str) const
+        {
+            glfwSetClipboardString(nullptr, str.c_str());
+        }
+
+        void Window::RequestAttention()
+        {
+            glfwRequestWindowAttention(window);
+        }
+
+        void Window::SetVsync(bool vsync)
+        {
+            auto &config = GetConfig();
+            config.SetValue("r_vsync", vsync);
+            glfwSwapInterval(vsync);
         }
     }
 }

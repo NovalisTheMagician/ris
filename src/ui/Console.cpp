@@ -33,9 +33,7 @@ namespace RIS
             maxLineHeight = consoleFont->GetMaxHeight(consoleFontSize);
             maxLines = 512;
 
-            auto& wnd = GetWindow();
             BindFunc("con", [this](std::vector<std::string> params){ return SetParam(params); });
-            BindFunc("exit", [&wnd](std::vector<std::string> params){ wnd.Exit(0); return ""; });
             BindFunc("clear", [this](std::vector<std::string> params){ Clear(); return ""; });
         }
 

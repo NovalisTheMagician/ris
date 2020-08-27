@@ -43,6 +43,13 @@ namespace RIS
             void SetWindowIcon(std::shared_ptr<Graphics::Image> icon);
             void SetCursorIcon(std::shared_ptr<Graphics::Image> cursor, int xHot, int yHot);
 
+            std::string GetClipboard() const;
+            void SetClipboard(const std::string &str) const;
+
+            void RequestAttention();
+
+            void SetVsync(bool vsync);
+
             void Exit(int exitCode);
 
             void RegisterScriptFunctions();

@@ -77,18 +77,19 @@ namespace RIS
             auto &scriptEngine = GetScriptEngine();
             auto &loader = GetLoader();
 
-            scriptEngine.Func("openConsole", [this](){ console.Open(); });
-            scriptEngine.Func("closeConsole", [this](){ console.Close(); });
-            scriptEngine.Func("toggleConsole", [this](){ console.Toggle(); });
+            scriptEngine.Func("print", [this](const std::string &msg){ console.Print(msg); });
+            scriptEngine.Namespace("Console")
+                .Func("openConsole", [this](){ console.Open(); })
+                .Func("closeConsole", [this](){ console.Close(); })
+                .Func("toggleConsole", [this](){ console.Toggle(); });
 
-            scriptEngine.Func("getUIWidth", [this](){ return static_cast<float>(uiWidth); });
-            scriptEngine.Func("getUIHeight", [this](){ return static_cast<float>(uiHeight); });
+            scriptEngine.Namespace("UI")
+                .Func("getUIWidth", [this](){ return static_cast<float>(uiWidth); })
+                .Func("getUIHeight", [this](){ return static_cast<float>(uiHeight); });
 
             scriptEngine.Class<Component>("Component")
                 .Func("setPosition", [](Component *self, float x, float y){ self->SetPosition({x, y}); })
                 .Func("setSize", [](Component *self, float w, float h){ self->SetSize({w, h}); });
-
-            scriptEngine.Class<Container, Component>("Container");
 
             scriptEngine.Class<Image, Component>("Image")
                 .Func("setImage", [&loader](Image *self, const std::string &image)
@@ -97,64 +98,81 @@ namespace RIS
                     self->SetImage(texture);
                 });
 
-            scriptEngine.Func("Image", [this](const std::string &name)
-            {
-                Image::Ptr image = Image::Create();
-                image->SetName(name);
-                components.push_back(image);
-                return image.get();
-            });
+            scriptEngine.Namespace("UI")
+                .Func("Image", [this](const std::string &name)
+                {
+                    Image::Ptr image = Image::Create();
+                    image->SetName(name);
+                    components.push_back(image);
+                    return image.get();
+                });
 
             scriptEngine.Class<Button, Component>("Button")
                 .Func("setText", &Button::SetText)
                 .Func("setFont", [&loader](Button *self, const std::string &fontName)
                 {
-                    auto font = loader.Load<Graphics::Font>(fontName);
+                    auto font = loader.Load<Graphics::Font, false>(fontName);
                     if(font)
                         self->SetFont(font);
                 })
                 .Func("setFontSize", &Button::SetFontSize)
                 .Func("setCallback", &Button::SetCallback);
 
-            scriptEngine.Func("Button", [this](const std::string &name)
-            {
-                Button::Ptr button = Button::Create(defaultFont);
-                button->SetName(name);
-                components.push_back(button);
-                return button.get();
-            });
+            scriptEngine.Namespace("UI")
+                .Func("Button", [this](const std::string &name)
+                {
+                    Button::Ptr button = Button::Create(defaultFont);
+                    button->SetName(name);
+                    components.push_back(button);
+                    return button.get();
+                });
 
-            scriptEngine.Class<Panel, Container>("Panel")
-                .Func("add", [this](Panel *self, Component *component)
-                {
-                    auto comp = std::find_if(std::begin(components), std::end(components), 
-                    [&component](const Component::Ptr &elem) { return component == elem.get(); });
-                    if(comp != std::end(components))
-                        self->Add(*comp);
-                })
-                .Func("remove", [this](Panel *self, Component *component)
-                {
-                    auto comp = std::find_if(std::begin(components), std::end(components), 
-                    [&component](const Component::Ptr &elem) { return component == elem.get(); });
-                    if(comp != std::end(components))
-                        self->Remove(*comp);
-                })
+            auto panelAdd = [this](Panel *self, Component *component)
+            {
+                auto comp = std::find_if(std::begin(components), std::end(components), 
+                [&component](const Component::Ptr &elem) { return component == elem.get(); });
+                if(comp != std::end(components))
+                    self->Add(*comp);
+            };
+
+            auto panelRemove = [this](Panel *self, Component *component)
+            {
+                auto comp = std::find_if(std::begin(components), std::end(components), 
+                [&component](const Component::Ptr &elem) { return component == elem.get(); });
+                if(comp != std::end(components))
+                    self->Remove(*comp);
+            };
+
+            auto panelAddButton = [panelAdd](Panel *self, Button *component){ panelAdd(self, component); };
+            auto panelAddLabel = [panelAdd](Panel *self, Label *component){ panelAdd(self, component); };
+            auto panelAddImage = [panelAdd](Panel *self, Image *component){ panelAdd(self, component); };
+            auto panelAddTextBox = [panelAdd](Panel *self, InputBox *component){ panelAdd(self, component); };
+
+            auto panelRemoveButton = [panelRemove](Panel *self, Button *component){ panelRemove(self, component); };
+            auto panelRemoveLabel = [panelRemove](Panel *self, Label *component){ panelRemove(self, component); };
+            auto panelRemoveImage = [panelRemove](Panel *self, Image *component){ panelRemove(self, component); };
+            auto panelRemoveTextBox = [panelRemove](Panel *self, InputBox *component){ panelRemove(self, component); };
+
+            scriptEngine.Class<Panel, Component>("Panel")
+                .FuncOverload("add", panelAddButton, panelAddLabel, panelAddImage, panelAddTextBox)
+                .FuncOverload("remove", panelRemoveButton, panelRemoveLabel, panelRemoveImage, panelRemoveTextBox)
                 .Func("removeAll", &Panel::RemoveAll);
 
-            scriptEngine.Func("Panel", [this](const std::string &name)
-            {
-                Panel::Ptr panel = Panel::Create();
-                panel->SetName(name);
-                panel->SetPosition({0, 0});
-                panel->SetSize({static_cast<float>(uiWidth), static_cast<float>(uiHeight)});
-                components.push_back(panel);
-                return panel.get();
-            });
+            scriptEngine.Namespace("UI")
+                .Func("Panel", [this](const std::string &name)
+                {
+                    Panel::Ptr panel = Panel::Create();
+                    panel->SetName(name);
+                    panel->SetPosition({0, 0});
+                    panel->SetSize({static_cast<float>(uiWidth), static_cast<float>(uiHeight)});
+                    components.push_back(panel);
+                    return panel.get();
+                });
 
             scriptEngine.Class<Label, Component>("Label")
                 .Func("setFont", [&loader](Label *self, const std::string &fontName)
                 {
-                    auto font = loader.Load<Graphics::Font>(fontName);
+                    auto font = loader.Load<Graphics::Font, false>(fontName);
                     if(font)
                         self->SetFont(font);
                 })
@@ -165,83 +183,81 @@ namespace RIS
                     self->SetTextColor({ r, g, b, a });
                 });
 
-            scriptEngine.Func("Label", [this](const std::string &name)
-            {
-                Label::Ptr label = Label::Create(defaultFont);
-                label->SetName(name);
-                components.push_back(label);
-                return label.get();
-            });
+            scriptEngine.Namespace("UI")
+                .Func("Label", [this](const std::string &name)
+                {
+                    Label::Ptr label = Label::Create(defaultFont);
+                    label->SetName(name);
+                    components.push_back(label);
+                    return label.get();
+                });
 
             scriptEngine.Class<InputBox, Component>("Textbox")
                 .Func("setFont", [&loader](InputBox *self, const std::string &fontName)
                 {
-                    auto font = loader.Load<Graphics::Font>(fontName);
+                    auto font = loader.Load<Graphics::Font, false>(fontName);
                     if(font)
                         self->SetFont(font);
                 })
-                .Func("setFontSize", &Label::SetFontSize)
+                .Func("setFontSize", &InputBox::SetFontSize)
                 .Func("setPreviewText", &InputBox::SetPreviewText)
                 .Func("setText", &InputBox::SetText)
-                .Func("getText", [](InputBox *self){ return self->GetText().c_str(); });
+                .Func("getText", &InputBox::GetText);
 
-            scriptEngine.Func("Textbox", [this](const std::string &name)
-            {
-                InputBox::Ptr textbox = InputBox::Create(defaultFont);
-                textbox->SetName(name);
-                components.push_back(textbox);
-                return textbox.get();
-            });
+            scriptEngine.Namespace("UI")
+                .Func("Textbox", [this](const std::string &name)
+                {
+                    InputBox::Ptr textbox = InputBox::Create(defaultFont);
+                    textbox->SetName(name);
+                    components.push_back(textbox);
+                    return textbox.get();
+                });
 
             scriptEngine.Class<Graphics::TextMetrics>("TextMetrics")
                 .Var("width", &Graphics::TextMetrics::width)
                 .Var("height", &Graphics::TextMetrics::height);
 
-            scriptEngine.Func("measureText", [&loader](const std::string &fontName, const std::string &text, float fontSize) -> Graphics::TextMetrics
-            {
-                auto font = loader.Load<Graphics::Font>(fontName);
-                if(font)
-                    return font->MeasureString(text, fontSize);
-                return { 0, 0 };
-            });
-
-            scriptEngine.Func("registerMenu", [this](const std::string &menuName, Component *component)
-            {
-                auto comp = std::find_if(std::begin(components), std::end(components), 
-                    [&component](const Component::Ptr &elem) { return component == elem.get(); });
-                if(comp != std::end(components))
-                    menus.insert_or_assign(menuName, *comp);
-            });
-
-            scriptEngine.Func("menuExists", [this](const std::string &menuName)
-            {
-                return menus.count(menuName) > 0;
-            });
-
-            scriptEngine.Func("getMenu", [this](const std::string &menuName) -> Component*
-            {
-                if(menus.count(menuName) > 0)
-                    return menus.at(menuName).get();
-                return nullptr;
-            });
-
-            scriptEngine.Func("getActiveMenu", [this]()
-            {
-                return activeMenu.get();
-            });
-
-            scriptEngine.Func("setActiveMenu", [this](const std::string &menuName)
-            {
-                if(menus.count(menuName) > 0)
+            scriptEngine.Namespace("UI")
+                .Func("measureText", [&loader](const std::string &fontName, const std::string &text, float fontSize) -> Graphics::TextMetrics
                 {
-                    auto& comp = menus.at(menuName);
-                    activeMenu = comp;
-                }
-                else
+                    auto font = loader.Load<Graphics::Font>(fontName);
+                    if(font)
+                        return font->MeasureString(text, fontSize);
+                    return { 0, 0 };
+                })
+                .Func("registerMenu", [this](const std::string &menuName, Component *component)
                 {
-                    activeMenu = nullptr;
-                }
-            });
+                    auto comp = std::find_if(std::begin(components), std::end(components), 
+                        [&component](const Component::Ptr &elem) { return component == elem.get(); });
+                    if(comp != std::end(components))
+                        menus.insert_or_assign(menuName, *comp);
+                })
+                .Func("menuExists", [this](const std::string &menuName)
+                {
+                    return menus.count(menuName) > 0;
+                })
+                .Func("getMenu", [this](const std::string &menuName) -> Component*
+                {
+                    if(menus.count(menuName) > 0)
+                        return menus.at(menuName).get();
+                    return nullptr;
+                })
+                .Func("getActiveMenu", [this]()
+                {
+                    return activeMenu.get();
+                })
+                .Func("setActiveMenu", [this](const std::string &menuName)
+                {
+                    if(menus.count(menuName) > 0)
+                    {
+                        auto& comp = menus.at(menuName);
+                        activeMenu = comp;
+                    }
+                    else
+                    {
+                        activeMenu = nullptr;
+                    }
+                });
         }
 
         Console &Userinterface::GetConsole()

@@ -132,15 +132,17 @@ namespace RIS
         {
             auto &scriptEngine = GetScriptEngine();
 
-            scriptEngine.Func("exit", [this](){ Exit(0); });
-            scriptEngine.Func("logInfo", [](const std::string &msg){ Logger::Instance().Info(msg); });
-            scriptEngine.Func("logWarning", [](const std::string &msg){ Logger::Instance().Warning(msg); });
-            scriptEngine.Func("logError", [](const std::string &msg){ Logger::Instance().Error(msg); });
-            scriptEngine.Func("setRelativeMouse", [this](int relative){ SetRelativeMouse(relative); });
+            scriptEngine.Namespace("Window")
+                .Func("exit", [this](){ Exit(0); })
+                .Func("logInfo", [](const std::string &msg){ Logger::Instance().Info(msg); })
+                .Func("logWarning", [](const std::string &msg){ Logger::Instance().Warning(msg); })
+                .Func("logError", [](const std::string &msg){ Logger::Instance().Error(msg); })
+                .Func("setRelativeMouse", [this](int relative){ SetRelativeMouse(relative); });
             
-            scriptEngine.Func("getGameName", [](){ return Version::GAME_NAME.c_str(); });
-            scriptEngine.Func("getVersionMajor", [](){ return Version::MAJOR; });
-            scriptEngine.Func("getVersionMinor", [](){ return Version::MINOR; });
+            scriptEngine.Namespace("Game")
+                .Func("getGameName", [](){ return Version::GAME_NAME; })
+                .Func("getVersionMajor", [](){ return Version::MAJOR; })
+                .Func("getVersionMinor", [](){ return Version::MINOR; });
         }
 
         void Window::SetRelativeMouse(bool setRelative)

@@ -12,10 +12,10 @@
 #include <vector>
 #include <functional>
 #include <memory>
+#include <utility>
+#include <optional>
 
-#include <squall/squall_vmstd.hpp>
-#include <squall/squall_klass.hpp>
-#include <squall/squall_table.hpp>
+#include <sol/sol.hpp>
 
 namespace RIS
 {
@@ -30,7 +30,13 @@ namespace RIS
         class ScriptClass
         {
         public:
-            ScriptClass(squall::VMStd *vm, const std::string &name) : vm(vm), klass(*vm, name) {}
+            ScriptClass(sol::state &vm, const std::string &name) : state(vm), userType(vm.new_usertype<C>(name)) 
+            {
+                if constexpr (!std::is_void<Base>::value)
+                {
+                    userType[sol::base_classes] = sol::bases<Base>();
+                }
+            }
             ~ScriptClass() = default;
 
             ScriptClass(const ScriptClass&) = delete;
@@ -38,47 +44,76 @@ namespace RIS
             ScriptClass& operator=(const ScriptClass&) = delete;
             ScriptClass& operator=(ScriptClass&&) = delete;
 
+            template<typename... C>
+            ScriptClass& Ctors()
+            {
+                userType.set_function("new", sol::constructors<C...>());
+                return *this;
+            }
+
+            template<typename... T>
+            ScriptClass& FuncOverload(const std::string &name, T... func)
+            {
+                userType.set_function(name, sol::overload(func...));
+                return *this;
+            }
+
             template<typename T>
             ScriptClass& Func(const std::string &name, T func)
             {
-                klass.func(name, func);
+                userType.set_function(name, func);
                 return *this;
             }
 
             template<typename T>
             ScriptClass& Var(const std::string &name, T C::* var)
             {
-                klass.var(name, var);
+                //userType[name] = var;
+                userType.set(name, var);
                 return *this;
             }
 
         private:
-            squall::VMStd *vm;
-            squall::Klass<C, Base> klass;
+            sol::state &state;
+            sol::usertype<C> userType;
 
         };
 
-        class ScriptTable
+        class ScriptNamespace
         {
         public:
-            ScriptTable(squall::VMStd *vm, const std::string &name) : vm(vm), table(*vm) { vm->root_table().set(name, table); }
-            ~ScriptTable() = default;
+            ScriptNamespace(sol::state &vm, const std::string &name) : state(vm), table(vm[name].get_or_create<sol::table>()) {}
+            ~ScriptNamespace() = default;
 
-            ScriptTable(const ScriptTable&) = delete;
-            ScriptTable(ScriptTable&&) = delete;
-            ScriptTable& operator=(const ScriptTable&) = delete;
-            ScriptTable& operator=(ScriptTable&&) = delete;
+            ScriptNamespace(const ScriptNamespace&) = delete;
+            ScriptNamespace(ScriptNamespace&&) = delete;
+            ScriptNamespace& operator=(const ScriptNamespace&) = delete;
+            ScriptNamespace& operator=(ScriptNamespace&&) = delete;
 
             template<typename T>
-            ScriptTable& Func(const std::string &name, T func)
+            ScriptNamespace& Func(const std::string &name, T func)
             {
-                table.defun(name, func);
+                //table[name] = func;
+                table.set_function(name, func);
                 return *this;
             }
 
+            template<typename... T>
+            ScriptNamespace& FuncOverload(const std::string &name, T... func)
+            {
+                table.set_function(name, sol::overload(func...));
+                return *this;
+            }
+
+            template<typename C, typename B = void>
+            ScriptClass<C, B> Class(const std::string &name)
+            {
+
+            }
+
         private:
-            squall::VMStd *vm;
-            squall::Table table;
+            sol::state &state;
+            sol::table table;
 
         };
 
@@ -99,38 +134,59 @@ namespace RIS
             template<typename T>
             void Func(const std::string &name, T func)
             {
-                vm->defun(name, func);
+                vm.set_function(name, func);
+            }
+
+            template<typename... T>
+            void FuncOverload(const std::string &name, T... func)
+            {
+                vm.set_function(name, sol::overload(func...));
+            }
+
+            ScriptNamespace Namespace(const std::string &name)
+            {
+                return ScriptNamespace(vm, name);
             }
 
             template<typename C, typename Base = void>
             ScriptClass<C, Base> Class(const std::string &name)
             {
-                return ScriptClass<C, Base>(vm.get(), name);
+                return ScriptClass<C, Base>(vm, name);
             }
 
             template<typename T>
-            void Var(const std::string &name, T *var)
+            void Var(const std::string &name, T &&var)
             {
-                vm->root_table().set(name, var);
+                //vm[name] = var;
+                vm.set(name, std::forward(var));
             }
 
             template<typename Ret, typename... Args>
-            Ret Call(const std::string &name, Args... args)
+            Ret Call(const std::string &name, Args&&... args)
             {
-                try
+                std::optional<sol::protected_function> opt = vm[name];
+                if(opt)
                 {
-                    return vm->call<Ret>(name, args...);
+                    auto fun = opt.value();
+                    sol::protected_function_result result = fun(std::forward(args)...);
+                    if(result.valid())
+                    {
+                        if constexpr (!std::is_void<Ret>::value)
+                            return result;
+                    }
+                    else
+                    {
+                        sol::error err = result;
+                        std::string what = err.what();
+                        Logger::Instance().Error(what);
+                        GetConsole().Print(what);
+                    }
                 }
-                catch(const std::exception& e)
-                {
-                    GetConsole().Print(e.what());
-                    return Ret();
-                }
+                return Ret();
             }
 
         private:
-            //only a pointer so we can reset the vm when we hotreload scripts
-            std::unique_ptr<squall::VMStd> vm;
+            sol::state vm;
 
         };
         

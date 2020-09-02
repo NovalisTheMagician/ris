@@ -48,7 +48,7 @@ namespace RIS
             void OnKey(Input::InputKey key, bool repeat);
 
         private:
-            std::string previewText = "", text = "";
+            std::string previewText, text;
 
             glm::vec4 previewTextColor = glm::vec4(0.6f, 0.6f, 0.6f, 1.0f), textColor = glm::vec4(0, 0, 0, 1);
             glm::vec4 backColor = glm::vec4(1, 1, 1, 1);

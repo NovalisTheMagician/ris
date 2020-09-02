@@ -72,7 +72,7 @@ namespace RIS
             glm::vec2 textPos = pos + glm::vec2(2, size.y / 4);
 
             renderer.DrawRect(pos, size, backColor);
-            if(text.size() == 0 && !hasFocus)
+            if(text.empty() && !hasFocus)
                 renderer.DrawString(previewText, *font, fontSize, textPos, previewTextColor);
             else
                 renderer.DrawString(text + caret, *font, fontSize, textPos, textColor);
@@ -110,14 +110,12 @@ namespace RIS
 
         void InputBox::OnKeyRepeat(Input::InputKey keyCode)
         {
-            if(hasFocus)
-                OnKey(keyCode, true);
+            OnKey(keyCode, true);
         }
 
         void InputBox::OnKeyDown(Input::InputKey keyCode)
         {
-            if(hasFocus)
-                OnKey(keyCode, false);
+            OnKey(keyCode, false);
         }
 
         void InputBox::OnKeyUp(Input::InputKey keyCode)
@@ -128,7 +126,7 @@ namespace RIS
 
         void InputBox::OnKey(Input::InputKey keyCode, bool repeat)
         {
-            if(keyCode == Input::InputKey::BACKSPACE)
+            if(keyCode == Input::InputKey::BACKSPACE && hasFocus)
             {
                 if(text.size() > 0)
                 {
@@ -137,12 +135,12 @@ namespace RIS
                     text.erase(it, text.end());
                 }
             }
-            else if(keyCode == Input::InputKey::LEFT)
+            else if(keyCode == Input::InputKey::LEFT && hasFocus)
             {
                 caretPosition--;
                 caretPosition = std::max(0, caretPosition);
             }
-            else if(keyCode == Input::InputKey::RIGHT)
+            else if(keyCode == Input::InputKey::RIGHT && hasFocus)
             {
                 caretPosition++;
                 caretPosition = std::min(static_cast<int>(text.size()), caretPosition);

@@ -276,13 +276,27 @@ namespace RIS
             renderer->End();
         }
 
+        int nFrames = 0;
+        float lastTime = 0;
+
         void Userinterface::Update(const Timer &timer)
         {
             frameTime = timer.Delta();
-            if(showFrametime)
-                fpsLabel->SetText(std::to_string(frameTime));
-            else
-                fpsLabel->SetText(std::to_string(static_cast<int>(1 / frameTime)));
+
+            nFrames++;
+            lastTime += frameTime;
+            if(lastTime >= 1.0f)
+            {
+                float fps = static_cast<float>(nFrames);
+                nFrames = 0;
+                lastTime -= 1.0f;
+
+                if(!showFrametime)
+                    fpsLabel->SetText(std::to_string(static_cast<int>(fps)));
+                else
+                    fpsLabel->SetText(std::to_string(1 / fps));
+            }
+            
             if(activeMenu)
                 activeMenu->Update(timer);
             console.Update(timer);

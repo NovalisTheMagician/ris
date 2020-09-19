@@ -30,9 +30,16 @@ namespace RIS
         class ScriptClass
         {
         public:
-            ScriptClass(sol::state &vm, const std::string &name) : state(vm), userType(vm.new_usertype<C>(name)) 
+            ScriptClass(sol::table &table, const std::string &name) : userType(table.new_usertype<C>(name)) 
             {
-                if constexpr (!std::is_void<Base>::value)
+                if constexpr (!std::is_void_v<Base>)
+                {
+                    userType[sol::base_classes] = sol::bases<Base>();
+                }
+            }
+            ScriptClass(sol::state &vm, const std::string &name) : userType(vm.new_usertype<C>(name)) 
+            {
+                if constexpr (!std::is_void_v<Base>)
                 {
                     userType[sol::base_classes] = sol::bases<Base>();
                 }
@@ -68,13 +75,11 @@ namespace RIS
             template<typename T>
             ScriptClass& Var(const std::string &name, T C::* var)
             {
-                //userType[name] = var;
                 userType.set(name, var);
                 return *this;
             }
 
         private:
-            sol::state &state;
             sol::usertype<C> userType;
 
         };
@@ -82,7 +87,8 @@ namespace RIS
         class ScriptNamespace
         {
         public:
-            ScriptNamespace(sol::state &vm, const std::string &name) : state(vm), table(vm[name].get_or_create<sol::table>()) {}
+            ScriptNamespace(sol::table &parent, const std::string &name) : table(parent[name].get_or_create<sol::table>()) {}
+            ScriptNamespace(sol::state &vm, const std::string &name) : table(vm[name].get_or_create<sol::table>()) {}
             ~ScriptNamespace() = default;
 
             ScriptNamespace(const ScriptNamespace&) = delete;
@@ -93,7 +99,6 @@ namespace RIS
             template<typename T>
             ScriptNamespace& Func(const std::string &name, T func)
             {
-                //table[name] = func;
                 table.set_function(name, func);
                 return *this;
             }
@@ -105,14 +110,42 @@ namespace RIS
                 return *this;
             }
 
+            ScriptNamespace Namespace(const std::string &name)
+            {
+                return ScriptNamespace(table, name);
+            }
+
+            template<typename Ret, typename... Args>
+            Ret Call(const std::string &name, Args&&... args)
+            {
+                std::optional<sol::protected_function> opt = table[name];
+                if(opt)
+                {
+                    auto fun = opt.value();
+                    sol::protected_function_result result = fun(std::forward(args)...);
+                    if(result.valid())
+                    {
+                        if constexpr (!std::is_void_v<Ret>)
+                            return result;
+                    }
+                    else
+                    {
+                        sol::error err = result;
+                        std::string what = err.what();
+                        Logger::Instance().Error(what);
+                        GetConsole().Print(what);
+                    }
+                }
+                return Ret();
+            }
+
             template<typename C, typename B = void>
             ScriptClass<C, B> Class(const std::string &name)
             {
-
+                return ScriptClass<C, B>(table, name);
             }
 
         private:
-            sol::state &state;
             sol::table table;
 
         };
@@ -157,7 +190,6 @@ namespace RIS
             template<typename T>
             void Var(const std::string &name, T &&var)
             {
-                //vm[name] = var;
                 vm.set(name, std::forward(var));
             }
 

@@ -137,7 +137,7 @@ namespace RIS
                 .Func("logInfo", [](const std::string &msg){ Logger::Instance().Info(msg); })
                 .Func("logWarning", [](const std::string &msg){ Logger::Instance().Warning(msg); })
                 .Func("logError", [](const std::string &msg){ Logger::Instance().Error(msg); })
-                .Func("setRelativeMouse", [this](int relative){ SetRelativeMouse(relative); });
+                .Func("setRelativeMouse", [this](bool relative){ SetRelativeMouse(relative); });
             
             scriptEngine.Namespace("Game")
                 .Func("getGameName", [](){ return Version::GAME_NAME; })

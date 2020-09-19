@@ -47,6 +47,8 @@ namespace RIS
         private:
             void OnKey(Input::InputKey key, bool repeat);
 
+            void RecalcCharWidths();
+
         private:
             std::string previewText, text;
 
@@ -55,8 +57,10 @@ namespace RIS
             std::shared_ptr<Graphics::Font> font;
             float fontSize = 16;
 
+            float fontHeight;
+            std::vector<float> charWidths;
+
             bool isInBounds;
-            glm::vec2 parentPos;
 
             bool hasFocus = false;
             int caretPosition = 0;

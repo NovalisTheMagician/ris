@@ -94,8 +94,6 @@ namespace RIS
 
         void Button::Draw(Graphics::SpriteRenderer &renderer, const glm::vec2 &parentPosition)
         {
-            parentPos = parentPosition;
-
             glm::vec2 pos = parentPosition + position;
             Graphics::TextMetrics metrics = font->MeasureString(text, fontSize);
             glm::vec2 textPos = pos + ((size / glm::vec2(2)) - (glm::vec2(metrics.width, metrics.height) / glm::vec2(2)));
@@ -123,10 +121,8 @@ namespace RIS
 
         void Button::OnMouseMove(float x, float y)
         {
-            glm::vec2 pos = parentPos + position;
-
-            if( x > pos.x && x < pos.x + size.x &&
-                y > pos.y && y < pos.y + size.y)
+            if( x > position.x && x < position.x + size.x &&
+                y > position.y && y < position.y + size.y)
                 isInBounds = true;
             else 
                 isInBounds = false;

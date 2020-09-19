@@ -76,7 +76,9 @@ namespace RIS
 
         void Panel::OnMouseMove(float x, float y)
         {
-            std::for_each(components.begin(), components.end(), [x, y](auto component){ component->OnMouseMove(x, y); });
+            float relX = x - position.x;
+            float relY = y - position.y;
+            std::for_each(components.begin(), components.end(), [relX, relY](auto component){ component->OnMouseMove(relX, relY); });
         }
 
         void Panel::OnMouseDown(Input::InputKey mouseCode)

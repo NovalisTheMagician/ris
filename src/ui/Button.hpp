@@ -67,8 +67,6 @@ namespace RIS
             glm::vec4 downColor = glm::vec4(0.5f, 0.5f, 0.5f, 1);
             std::shared_ptr<Graphics::Texture> normalImage, hoverImage, downImage;
 
-            glm::vec2 parentPos;
-
             bool isInBounds = false;
             bool isClickedDown = false;
 

@@ -73,12 +73,12 @@ namespace RIS
             glBindFramebuffer(GL_FRAMEBUFFER, id);
         }
 
-        Texture& Framebuffer::GetColorTexture()
+        Texture& Framebuffer::ColorTexture()
         {
             return colorTexture;
         }
 
-        Texture& Framebuffer::GetDepthTexture()
+        Texture& Framebuffer::DepthTexture()
         {
             return depthTexture;
         }

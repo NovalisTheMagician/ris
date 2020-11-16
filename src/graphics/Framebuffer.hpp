@@ -30,8 +30,8 @@ namespace RIS
             void Bind();
             void Clear(const glm::vec4 &color, float depth);
 
-            Texture& GetColorTexture();
-            Texture& GetDepthTexture();
+            Texture& ColorTexture();
+            Texture& DepthTexture();
 
         private:
             Texture colorTexture;

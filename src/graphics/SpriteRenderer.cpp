@@ -85,8 +85,8 @@ namespace RIS
             texture.Bind(0);
 
             glm::mat4 world(1.0f);
-            world = glm::translate(world, glm::vec3(position, 0.0f));
-            world = glm::scale(world, glm::vec3(size, 1.0f));
+            world = glm::translate(world, glm::vec3(glm::floor(position), 0.0f));
+            world = glm::scale(world, glm::vec3(glm::floor(size), 1.0f));
 
             worldBuffer.UpdateData<WorldBufferData>({world, tint});
             worldBuffer.Bind(GL_UNIFORM_BUFFER, 1);
@@ -102,8 +102,8 @@ namespace RIS
             white.Bind(0);
 
             glm::mat4 world(1.0f);
-            world = glm::translate(world, glm::vec3(position, 0.0f));
-            world = glm::scale(world, glm::vec3(size, 1.0f));
+            world = glm::translate(world, glm::vec3(glm::floor(position), 0.0f));
+            world = glm::scale(world, glm::vec3(glm::floor(size), 1.0f));
 
             worldBuffer.UpdateData<WorldBufferData>({world, tint});
             worldBuffer.Bind(GL_UNIFORM_BUFFER, 1);
@@ -181,7 +181,7 @@ namespace RIS
             font.GetTexture()->Bind(0);
 
             glm::mat4 world(1.0f);
-            world = glm::translate(world, glm::vec3(position, 0.0f));
+            world = glm::translate(world, glm::vec3(glm::floor(position), 0.0f));
 
             worldBuffer.UpdateData<WorldBufferData>({world, tint});
             worldBuffer.Bind(GL_UNIFORM_BUFFER, 1);

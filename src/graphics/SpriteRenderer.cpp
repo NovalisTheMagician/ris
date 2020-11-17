@@ -23,16 +23,13 @@ namespace RIS
         SpriteRenderer::SpriteRenderer()
             : sampler(GL_LINEAR, GL_LINEAR, 1.0f)
             , pipeline()
-            , vertexLayout()
+            , vertexLayout(VertexType::SpriteVertexFormat)
             , viewProjectionBuffer(sizeof glm::mat4, GL_DYNAMIC_STORAGE_BIT)
             , worldBuffer(sizeof WorldBufferData, GL_DYNAMIC_STORAGE_BIT)
             , vertexSpriteBuffer(6 * sizeof VertexType::SpriteVertex, GL_DYNAMIC_STORAGE_BIT)
             , vertexTextBuffer(6 * MAX_STRING_LEN * sizeof VertexType::SpriteVertex, GL_DYNAMIC_STORAGE_BIT)
             , white({1, 1, 1, 1})
         {
-            vertexLayout.SetAttribFormat(0, 2, GL_FLOAT, offsetof(VertexType::SpriteVertex, position));
-            vertexLayout.SetAttribFormat(1, 2, GL_FLOAT, offsetof(VertexType::SpriteVertex, texCoords));
-
             auto &loader = GetLoader();
 
             vertexShader = loader.Load<Shader>("shaders/spriteVertex.glsl", ShaderType::VERTEX);
@@ -85,8 +82,8 @@ namespace RIS
             texture.Bind(0);
 
             glm::mat4 world(1.0f);
-            world = glm::translate(world, glm::vec3(glm::floor(position), 0.0f));
-            world = glm::scale(world, glm::vec3(glm::floor(size), 1.0f));
+            world = glm::translate(world, glm::vec3(glm::round(position), 0.0f));
+            world = glm::scale(world, glm::vec3(glm::round(size), 1.0f));
 
             worldBuffer.UpdateData<WorldBufferData>({world, tint});
             worldBuffer.Bind(GL_UNIFORM_BUFFER, 1);
@@ -102,8 +99,8 @@ namespace RIS
             white.Bind(0);
 
             glm::mat4 world(1.0f);
-            world = glm::translate(world, glm::vec3(glm::floor(position), 0.0f));
-            world = glm::scale(world, glm::vec3(glm::floor(size), 1.0f));
+            world = glm::translate(world, glm::vec3(glm::round(position), 0.0f));
+            world = glm::scale(world, glm::vec3(glm::round(size), 1.0f));
 
             worldBuffer.UpdateData<WorldBufferData>({world, tint});
             worldBuffer.Bind(GL_UNIFORM_BUFFER, 1);
@@ -152,10 +149,10 @@ namespace RIS
                     float glyphBearingY = glyph.bearingY * fontSize;
                     float glyphAdvanceX = glyph.advanceX * fontSize;
 
-                    float x = penX + glyphBearingX;
-                    float y = penY + (font[U'H'].bearingY - glyph.bearingY) * fontSize;
-                    float w = glyphWidth;
-                    float h = glyphHeight;
+                    float x = std::round(penX + glyphBearingX);
+                    float y = std::round(penY + (font[U'H'].bearingY - glyph.bearingY) * fontSize);
+                    float w = std::round(glyphWidth);
+                    float h = std::round(glyphHeight);
 
                     float s0 = glyph.s0;
                     float t0 = glyph.t0;
@@ -181,7 +178,7 @@ namespace RIS
             font.GetTexture()->Bind(0);
 
             glm::mat4 world(1.0f);
-            world = glm::translate(world, glm::vec3(glm::floor(position), 0.0f));
+            world = glm::translate(world, glm::vec3(glm::round(position), 0.0f));
 
             worldBuffer.UpdateData<WorldBufferData>({world, tint});
             worldBuffer.Bind(GL_UNIFORM_BUFFER, 1);

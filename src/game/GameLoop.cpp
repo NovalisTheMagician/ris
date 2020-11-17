@@ -58,12 +58,7 @@ namespace RIS
             Graphics::Animation::Skeleton::Ptr skeleton = loader.Load<Graphics::Animation::Skeleton>("meshes/john.glb");
             Graphics::Animation::Animation::Ptr animation = loader.Load<Graphics::Animation::Animation>("meshes/john.glb");
 
-            Graphics::VertexArray modelLayout;
-            modelLayout.SetAttribFormat(0, 3, GL_FLOAT, 0, false, 0);
-            modelLayout.SetAttribFormat(1, 3, GL_FLOAT, 0, false, 1);
-            modelLayout.SetAttribFormat(2, 2, GL_FLOAT, 0, false, 2);
-            modelLayout.SetAttribFormat(3, 4, GL_UNSIGNED_SHORT, 0, false, 3);
-            modelLayout.SetAttribFormat(4, 4, GL_FLOAT, 0, false, 4);
+            Graphics::VertexArray modelLayout(VertexType::ModelVertexFormat);
 
             Graphics::ProgramPipeline pipeline;
             pipeline.SetShader(*modelVertexShader);

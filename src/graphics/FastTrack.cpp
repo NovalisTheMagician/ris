@@ -46,8 +46,8 @@ namespace RIS
             template<typename T, unsigned int N>
             int FastTrack<T, N>::FrameIndex(float time, bool looping) const
             {
-                std::size_t numFrames = frames.size();
-                if(numFrames <= 1)
+                std::size_t size = frames.size();
+                if(size <= 1)
                     return -1;
 
                 if(looping)
@@ -59,14 +59,14 @@ namespace RIS
                     time = std::fmod(time - startTime, duration);
                     if(time < 0)
                         time += duration;
-                    time = time + startTime;
+                    time += startTime;
                 }
                 else
                 {
                     if(time <= frames.front().time)
                         return 0;
-                    if(time >= frames.at(numFrames - 2).time)
-                        return numFrames - 2;
+                    if(time >= frames.rbegin()[1].time) // second to last element
+                        return static_cast<int>(size) - 2;
                 }
                 
                 float duration = GetEndTime() - GetStartTime();

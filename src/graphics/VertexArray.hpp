@@ -12,7 +12,7 @@ namespace RIS
     {
         struct AttribFormat
         {
-            int attrib;
+            int id;
             int numComponents;
             GLenum type;
             std::size_t offset;
@@ -59,7 +59,7 @@ namespace RIS
         {
             for(const AttribFormat &attrib : attribs)
             {
-                SetAttribFormat(attrib.attrib, attrib.numComponents, attrib.type, attrib.offset, attrib.normalized, attrib.bindingPoint);
+                SetAttribFormat(attrib.id, attrib.numComponents, attrib.type, attrib.offset, attrib.normalized, attrib.bindingPoint);
             }
         }
 

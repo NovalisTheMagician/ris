@@ -52,6 +52,7 @@ namespace RIS
 
                 T Sample(float time, bool looping) const;
                 Frame<N>& operator[](std::size_t index);
+                const Frame<N>& operator[](std::size_t index) const;
 
                 float AdjustTimeToFitTrack(float time, bool looping) const;
 
@@ -61,11 +62,12 @@ namespace RIS
                 T SampleCubic(float time, bool looping) const;
                 T Hermite(float t, const T &p1, const T &s1, const T &p2, const T &s2) const;
 
-                int FrameIndex(float time, bool looping) const;
-
                 T Cast(const float *value) const;
 
-            private:
+            protected:
+                virtual int FrameIndex(float time, bool looping) const;
+
+            protected:
                 std::vector<Frame<N>> frames;
                 Interpolation interpolation;
                 
@@ -75,20 +77,42 @@ namespace RIS
             using VectorTrack       = Track<glm::vec3, 3>;
             using QuaternionTrack   = Track<glm::quat, 4>;
 
-            class TransformTrack
+            template<typename T, unsigned int N>
+            class FastTrack : public Track<T, N>
             {
             public:
-                TransformTrack();
+                void UpdateIndexLookupTable();
+
+            protected:
+                int FrameIndex(float time, bool looping) const override;
+
+            private:
+                std::vector<std::size_t> sampledFrames;
+
+            };
+
+            using FastScalarTrack       = FastTrack<float, 1>;
+            using FastVectorTrack       = FastTrack<glm::vec3, 3>;
+            using FastQuaternionTrack   = FastTrack<glm::quat, 4>;
+
+            template<typename T, unsigned int N>
+            FastTrack<T, N> OptimizeTrack(const Track<T, N>& input);
+
+            template<typename VTRACK, typename QTRACK>
+            class TTransformTrack
+            {
+            public:
+                TTransformTrack();
 
                 unsigned int GetId() const;
                 void SetId(unsigned int id);
 
-                VectorTrack& GetPositionTrack();
-                QuaternionTrack& GetRotationTrack();
-                VectorTrack& GetScaleTrack();
-                const VectorTrack& GetPositionTrack() const;
-                const QuaternionTrack& GetRotationTrack() const;
-                const VectorTrack& GetScaleTrack() const;
+                VTRACK& GetPositionTrack();
+                QTRACK& GetRotationTrack();
+                VTRACK& GetScaleTrack();
+                const VTRACK& GetPositionTrack() const;
+                const QTRACK& GetRotationTrack() const;
+                const VTRACK& GetScaleTrack() const;
 
                 float GetStartTime() const;
                 float GetEndTime() const;
@@ -99,11 +123,16 @@ namespace RIS
 
             private:
                 unsigned int id;
-                VectorTrack positionTrack;
-                QuaternionTrack rotationTrack;
-                VectorTrack scaleTrack;
+                VTRACK positionTrack;
+                QTRACK rotationTrack;
+                VTRACK scaleTrack;
 
             };
+
+            using TransformTrack = TTransformTrack<VectorTrack, QuaternionTrack>;
+            using FastTransformTrack = TTransformTrack<FastVectorTrack, FastQuaternionTrack>;
+
+            FastTransformTrack OptimizeTransformTrack(const TransformTrack &input);
 
             class Pose
             {
@@ -138,18 +167,19 @@ namespace RIS
 
             };
 
-            class Clip
+            template<typename TRACK>
+            class TClip
             {
             public:
-                Clip();
+                TClip();
 
                 std::size_t GetIdAtIndex(std::size_t index) const;
                 void SetIdAtIndex(std::size_t index, std::size_t id);
                 std::size_t Size() const;
 
                 float Sample(Pose &outPose, float inTime) const;
-                TransformTrack& operator[](std::size_t index);
-                //const TransformTrack& operator[](std::size_t index) const;
+                TRACK& operator[](std::size_t index);
+                const TRACK& operator[](std::size_t index) const;
 
                 void RecalculateDuration();
 
@@ -165,13 +195,18 @@ namespace RIS
                 float AdjustTimeToFitRange(float inTime) const;
 
             private:
-                std::vector<TransformTrack> tracks;
+                std::vector<TRACK> tracks;
                 std::string name;
                 float startTime;
                 float endTime;
                 bool looping;
 
             };
+
+            using Clip = TClip<TransformTrack>;
+            using FastClip = TClip<FastTransformTrack>;
+
+            FastClip OptimizeClip(const Clip &input);
 
             class Skeleton
             {
@@ -208,21 +243,21 @@ namespace RIS
             public:
                 using Ptr = std::shared_ptr<Animation>;
 
-                Animation(std::vector<Clip> &&clips);
+                Animation(std::vector<FastClip> &&clips);
 
-                Clip& GetByName(const std::string &clipName);
-                const Clip& GetByName(const std::string &clipName) const;
+                FastClip& GetByName(const std::string &clipName);
+                const FastClip& GetByName(const std::string &clipName) const;
 
-                Clip& GetByIndex(std::size_t index);
-                const Clip& GetByIndex(std::size_t index) const;
+                FastClip& GetByIndex(std::size_t index);
+                const FastClip& GetByIndex(std::size_t index) const;
 
-                Clip& operator[](const std::string &clipName);
-                const Clip& operator[](const std::string &clipName) const;
-                Clip& operator[](std::size_t index);
-                const Clip& operator[](std::size_t index) const;
+                FastClip& operator[](const std::string &clipName);
+                const FastClip& operator[](const std::string &clipName) const;
+                FastClip& operator[](std::size_t index);
+                const FastClip& operator[](std::size_t index) const;
 
             private:
-                std::vector<Clip> clips;
+                std::vector<FastClip> clips;
                 std::unordered_map<std::string, std::size_t> nameToIndex;
 
             };

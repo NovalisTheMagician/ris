@@ -6,56 +6,70 @@ namespace RIS
     {
         namespace Animation
         {
-            TransformTrack::TransformTrack()
+            template TTransformTrack<VectorTrack, QuaternionTrack>;
+            template TTransformTrack<FastVectorTrack, FastQuaternionTrack>;
+
+            template<typename VTRACK, typename QTRACK>
+            TTransformTrack<VTRACK, QTRACK>::TTransformTrack()
                 : id(0)
             {}
 
-            unsigned int TransformTrack::GetId() const
+            template<typename VTRACK, typename QTRACK>
+            unsigned int TTransformTrack<VTRACK, QTRACK>::GetId() const
             {
                 return id;
             }
 
-            void TransformTrack::SetId(unsigned int id)
+            template<typename VTRACK, typename QTRACK>
+            void TTransformTrack<VTRACK, QTRACK>::SetId(unsigned int id)
             {
                 this->id = id;
             }
 
-            VectorTrack& TransformTrack::GetPositionTrack()
+            template<typename VTRACK, typename QTRACK>
+            VTRACK& TTransformTrack<VTRACK, QTRACK>::GetPositionTrack()
             {
                 return positionTrack;
             }
 
-            QuaternionTrack& TransformTrack::GetRotationTrack()
+            template<typename VTRACK, typename QTRACK>
+            QTRACK& TTransformTrack<VTRACK, QTRACK>::GetRotationTrack()
             {
                 return rotationTrack;
             }
 
-            VectorTrack& TransformTrack::GetScaleTrack()
+            template<typename VTRACK, typename QTRACK>
+            VTRACK& TTransformTrack<VTRACK, QTRACK>::GetScaleTrack()
             {
                 return scaleTrack;
             }
 
-            const VectorTrack& TransformTrack::GetPositionTrack() const
+            template<typename VTRACK, typename QTRACK>
+            const VTRACK& TTransformTrack<VTRACK, QTRACK>::GetPositionTrack() const
             {
                 return positionTrack;
             }
 
-            const QuaternionTrack& TransformTrack::GetRotationTrack() const
+            template<typename VTRACK, typename QTRACK>
+            const QTRACK& TTransformTrack<VTRACK, QTRACK>::GetRotationTrack() const
             {
                 return rotationTrack;
             }
 
-            const VectorTrack& TransformTrack::GetScaleTrack() const
+            template<typename VTRACK, typename QTRACK>
+            const VTRACK& TTransformTrack<VTRACK, QTRACK>::GetScaleTrack() const
             {
                 return scaleTrack;
             }
 
-            bool TransformTrack::IsValid() const
+            template<typename VTRACK, typename QTRACK>
+            bool TTransformTrack<VTRACK, QTRACK>::IsValid() const
             {
                 return positionTrack.Size() > 1 || rotationTrack.Size() > 1 || scaleTrack.Size() > 1;
             }
 
-            float TransformTrack::GetStartTime() const
+            template<typename VTRACK, typename QTRACK>
+            float TTransformTrack<VTRACK, QTRACK>::GetStartTime() const
             {
                 float result = 0.0f;
                 bool isSet = false;
@@ -86,7 +100,8 @@ namespace RIS
                 return result;
             }
 
-            float TransformTrack::GetEndTime() const
+            template<typename VTRACK, typename QTRACK>
+            float TTransformTrack<VTRACK, QTRACK>::GetEndTime() const
             {
                 float result = 0.0f;
                 bool isSet = false;
@@ -117,7 +132,8 @@ namespace RIS
                 return result;
             }
 
-            Transform TransformTrack::Sample(const Transform &ref, float time, bool looping) const
+            template<typename VTRACK, typename QTRACK>
+            Transform TTransformTrack<VTRACK, QTRACK>::Sample(const Transform &ref, float time, bool looping) const
             {
                 Transform result = ref;
                 if(positionTrack.Size() > 1)
@@ -126,6 +142,16 @@ namespace RIS
                     result.rotation = rotationTrack.Sample(time, looping);
                 if(scaleTrack.Size() > 1)
                     result.scale = scaleTrack.Sample(time, looping);
+                return result;
+            }
+
+            FastTransformTrack OptimizeTransformTrack(const TransformTrack &input)
+            {
+                FastTransformTrack result;
+                result.SetId(input.GetId());
+                result.GetPositionTrack() = OptimizeTrack(input.GetPositionTrack());
+                result.GetRotationTrack() = OptimizeTrack(input.GetRotationTrack());
+                result.GetScaleTrack() = OptimizeTrack(input.GetScaleTrack());
                 return result;
             }
         }

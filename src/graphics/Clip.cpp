@@ -8,11 +8,16 @@ namespace RIS
     {
         namespace Animation
         {
-            Clip::Clip()
+            template TClip<TransformTrack>;
+            template TClip<FastTransformTrack>;
+
+            template<typename TRACK>
+            TClip<TRACK>::TClip()
                 : name("No Name"), startTime(0.0f), endTime(0.0f), looping(true)
             {}
 
-            float Clip::Sample(Pose &outPose, float time) const
+            template<typename TRACK>
+            float TClip<TRACK>::Sample(Pose &outPose, float time) const
             {
                 if(GetDuration() == 0.0f)
                     return 0.0f;
@@ -30,7 +35,8 @@ namespace RIS
                 return time;
             }
 
-            float Clip::AdjustTimeToFitRange(float inTime) const
+            template<typename TRACK>
+            float TClip<TRACK>::AdjustTimeToFitRange(float inTime) const
             {
                 if (looping) 
                 {
@@ -57,7 +63,8 @@ namespace RIS
                 return inTime;
             }
 
-            void Clip::RecalculateDuration()
+            template<typename TRACK>
+            void TClip<TRACK>::RecalculateDuration()
             {
                 startTime = std::numeric_limits<float>::max(); // 0.0f
                 endTime = std::numeric_limits<float>::min(); // 0.0f
@@ -85,7 +92,8 @@ namespace RIS
                 }
             }
 
-            TransformTrack& Clip::operator[](std::size_t joint)
+            template<typename TRACK>
+            TRACK& TClip<TRACK>::operator[](std::size_t joint)
             {
                 for(auto it = tracks.begin(); it != tracks.end(); ++it)
                 {
@@ -99,54 +107,92 @@ namespace RIS
                 return tracks.back();
             }
 
-            const std::string& Clip::GetName() const
+            template<typename TRACK>
+            const TRACK& TClip<TRACK>::operator[](std::size_t joint) const
+            {
+                for(auto it = tracks.begin(); it != tracks.end(); ++it)
+                {
+                    auto &track = *it;
+                    if(track.GetId() == joint)
+                        return track;
+                }
+
+                throw std::exception("ERROR"); // do better
+            }
+
+            template<typename TRACK>
+            const std::string& TClip<TRACK>::GetName() const
             {
                 return name;
             }
 
-            std::size_t Clip::GetIdAtIndex(std::size_t index) const
+            template<typename TRACK>
+            std::size_t TClip<TRACK>::GetIdAtIndex(std::size_t index) const
             {
                 return tracks.at(index).GetId();
             }
 
-            std::size_t Clip::Size() const
+            template<typename TRACK>
+            std::size_t TClip<TRACK>::Size() const
             {
                 return tracks.size();
             }
 
-            float Clip::GetDuration() const
+            template<typename TRACK>
+            float TClip<TRACK>::GetDuration() const
             {
                 return endTime - startTime;
             }
 
-            float Clip::GetStartTime() const
+            template<typename TRACK>
+            float TClip<TRACK>::GetStartTime() const
             {
                 return startTime;
             }
 
-            float Clip::GetEndTime() const
+            template<typename TRACK>
+            float TClip<TRACK>::GetEndTime() const
             {
                 return endTime;
             }
 
-            bool Clip::GetLooping() const
+            template<typename TRACK>
+            bool TClip<TRACK>::GetLooping() const
             {
                 return looping;
             }
 
-            void Clip::SetName(const std::string &newName)
+            template<typename TRACK>
+            void TClip<TRACK>::SetName(const std::string &newName)
             {
                 name = newName;
             }
 
-            void Clip::SetIdAtIndex(std::size_t index, std::size_t id)
+            template<typename TRACK>
+            void TClip<TRACK>::SetIdAtIndex(std::size_t index, std::size_t id)
             {
                 tracks.at(index).SetId(id);
             }
 
-            void Clip::SetLooping(bool newLooping)
+            template<typename TRACK>
+            void TClip<TRACK>::SetLooping(bool newLooping)
             {
                 looping = newLooping;
+            }
+
+            FastClip OptimizeClip(const Clip &input)
+            {
+                FastClip result;
+                result.SetName(input.GetName());
+                result.SetLooping(input.GetLooping());
+                std::size_t size = input.Size();
+                for(std::size_t i = 0; i < size; ++i)
+                {
+                    std::size_t joint = input.GetIdAtIndex(i);
+                    result[joint] = OptimizeTransformTrack(input[joint]);
+                }
+                result.RecalculateDuration();
+                return result;
             }
         }
     }

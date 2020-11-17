@@ -4,7 +4,6 @@
 #include <string>
 #include <functional>
 #include <vector>
-#include <memory>
 
 #include "input/KeyDefs.hpp"
 
@@ -90,7 +89,7 @@ namespace RIS
             float maxY;
             float offsetY = 7.5f;
 
-            std::shared_ptr<Graphics::Font> consoleFont;
+            Graphics::Font::Ptr consoleFont;
             float consoleFontSize = 22.0f;
             glm::vec4 backgroundColor = glm::vec4(0, 0, 0, 0.95f);
             glm::vec4 fontColor = glm::vec4(0.7f, 0.7f, 0.7f, 1);

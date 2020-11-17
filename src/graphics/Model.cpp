@@ -581,7 +581,11 @@ namespace RIS
                     clip.RecalculateDuration();
                 }
 
-                return std::make_shared<Graphics::Animation::Animation>(std::move(clips));
+                std::vector<Graphics::Animation::FastClip> fastClips(clips.size());
+                for(std::size_t i = 0; i < clips.size(); ++i)
+                    fastClips[i] = Graphics::Animation::OptimizeClip(clips.at(i));
+
+                return std::make_shared<Graphics::Animation::Animation>(std::move(fastClips));
             }
             else
             {

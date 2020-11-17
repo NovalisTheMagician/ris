@@ -98,6 +98,12 @@ namespace RIS
             }
 
             template<typename T, unsigned int N>
+            const Frame<N>& Track<T, N>::operator[](std::size_t index) const
+            {
+                return frames.at(index);
+            }
+
+            template<typename T, unsigned int N>
             void Track<T, N>::Resize(std::size_t size)
             {
                 frames.resize(size);

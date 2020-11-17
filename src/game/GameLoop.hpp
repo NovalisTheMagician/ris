@@ -1,5 +1,7 @@
 #pragma once
 
+#include "loader/ResourcePack.hpp"
+
 namespace RIS
 {
     namespace Game
@@ -7,7 +9,7 @@ namespace RIS
         class GameLoop
         {
         public:
-            GameLoop() = default;
+            GameLoop(Loader::ResourcePack &&resourcePack);
             ~GameLoop() = default;
             GameLoop(const GameLoop &) = delete;
             GameLoop &operator=(const GameLoop &) = delete;
@@ -17,6 +19,7 @@ namespace RIS
             int Start();
 
         private:
+            Loader::ResourcePack resourcePack;
 
         };
     }

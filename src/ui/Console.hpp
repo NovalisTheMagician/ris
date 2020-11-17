@@ -13,6 +13,8 @@
 
 #include "misc/Timer.hpp"
 
+#include "loader/ResourcePack.hpp"
+
 namespace RIS
 {
     namespace UI
@@ -49,7 +51,7 @@ namespace RIS
         class Console
         {
         public:
-            void InitLimits(const glm::vec2 &viewSize);
+            void InitLimits(const glm::vec2 &viewSize, const Loader::ResourcePack &resourcePack);
 
             void Open();
             void Close();

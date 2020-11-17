@@ -2,27 +2,6 @@
 
 #include "RisExcept.hpp"
 
-#include <glad/glad.h>
-#include <glm/glm.hpp>
-
-#include <unordered_map>
-#include <vector>
-#include <memory>
-
-#include "graphics/VertexTypes.hpp"
-
-#include "graphics/Buffer.hpp"
-#include "graphics/Texture.hpp"
-#include "graphics/Framebuffer.hpp"
-#include "graphics/Sampler.hpp"
-#include "graphics/VertexArray.hpp"
-#include "graphics/Shader.hpp"
-#include "graphics/ProgramPipeline.hpp"
-
-#include "graphics/Mesh.hpp"
-#include "graphics/Model.hpp"
-#include "graphics/Font.hpp"
-#include "graphics/Animation.hpp"
 
 namespace RIS
 {
@@ -45,25 +24,9 @@ namespace RIS
 
             void PostInit();
 
-            void ClearCacheTextures();
-            void ClearCacheMeshes();
-            void ClearCacheModels();
-            void ClearCacheShaders();
-            void ClearCacheFonts();
-            void ClearCacheSkeletons();
-            void ClearCacheAnimations();
-            void ClearCache();
-
             void Resize(int width, int height);
 
         private:
-            std::unordered_map<std::string, std::shared_ptr<Texture>> loadedTextures;
-            std::unordered_map<std::string, std::shared_ptr<Mesh>> loadedMeshes;
-            std::unordered_map<std::string, std::shared_ptr<Model>> loadedModels;
-            std::unordered_map<std::string, std::shared_ptr<Shader>> loadedShaders;
-            std::unordered_map<std::string, std::shared_ptr<Font>> loadedFonts;
-            std::unordered_map<std::string, std::shared_ptr<Animation::Skeleton>> loadedSkeletons;
-            std::unordered_map<std::string, std::shared_ptr<Animation::Animation>> loadedAnimations;
 
         };
     }

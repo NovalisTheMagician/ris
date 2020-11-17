@@ -9,6 +9,11 @@
 #include <vector>
 #include <memory>
 
+#include "graphics/ShaderSourceBuilder.hpp"
+
+#include "loader/LoadFunc.hpp"
+#include "loader/TextLoad.hpp"
+
 namespace RIS
 {
     namespace Graphics
@@ -66,5 +71,11 @@ namespace RIS
             GLuint location;
 
         };
+    }
+
+    namespace Loader
+    {
+        template<>
+        std::shared_ptr<Graphics::Shader> Load<Graphics::Shader>(const std::vector<std::byte> &bytes, const std::string &name, std::any param, const ResourcePack &resourcePack);
     }
 }

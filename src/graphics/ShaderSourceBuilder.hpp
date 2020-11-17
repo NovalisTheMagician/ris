@@ -21,7 +21,7 @@ namespace RIS
         {
         public:
             template<typename T>
-            std::string BuildSource(const std::string &src, const std::string &fileName, T includeCallback, int level = 0);
+            std::string BuildSource(const std::string &src, T includeCallback, int level = 0);
 
         private:
             static constexpr auto INCLUDE_PATTERN = ctll::fixed_string{ "^[ ]*#[ ]*include[ ]+[\"<](.*)[\">].*" };
@@ -30,7 +30,7 @@ namespace RIS
         };
 
         template<typename T>
-        std::string ShaderSourceBuilder::BuildSource(const std::string &src, const std::string &fileName, T includeCallback, int level)
+        std::string ShaderSourceBuilder::BuildSource(const std::string &src, T includeCallback, int level)
         {
             if(level > MAX_INCLUDE_DEPTH)
             {
@@ -57,7 +57,7 @@ namespace RIS
                     {
                         throw ShaderSourceBuilderException("include file " + file + " not found");
                     }
-                    out << BuildSource(includeContent, file, includeCallback, level+1) << "\n";
+                    out << BuildSource(includeContent, includeCallback, level+1) << "\n";
                     out << "#line " << (lineNr+1) << "\n";
                 }
                 else

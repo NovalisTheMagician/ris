@@ -13,6 +13,8 @@
 
 #include <memory>
 
+#include "loader/ResourcePack.hpp"
+
 namespace RIS
 {
     namespace Graphics
@@ -20,7 +22,7 @@ namespace RIS
         class SpriteRenderer
         {
         public:
-            SpriteRenderer();
+            SpriteRenderer(const Loader::ResourcePack &resourcePack);
             ~SpriteRenderer() = default;
             SpriteRenderer(const SpriteRenderer&) = delete;
             SpriteRenderer& operator=(const SpriteRenderer&) = delete;

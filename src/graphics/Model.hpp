@@ -7,6 +7,8 @@
 #include <vector>
 #include <memory>
 
+#include "loader/LoadFunc.hpp"
+
 namespace RIS
 {
     namespace Graphics
@@ -32,5 +34,20 @@ namespace RIS
             std::shared_ptr<Texture> texture;
 
         };
+    }
+
+    namespace Loader
+    {
+        template<>
+        std::shared_ptr<Graphics::Mesh> Load(const std::vector<std::byte> &bytes, const std::string &name, std::any param, const ResourcePack &resourcePack);
+
+        template<>
+        std::shared_ptr<Graphics::Animation::Skeleton> Load(const std::vector<std::byte> &bytes, const std::string &name, std::any param, const ResourcePack &resourcePack);
+
+        template<>
+        std::shared_ptr<Graphics::Animation::Animation> Load(const std::vector<std::byte> &bytes, const std::string &name, std::any param, const ResourcePack &resourcePack);
+
+        template<>
+        std::shared_ptr<Graphics::Model> Load(const std::vector<std::byte> &bytes, const std::string &name, std::any param, const ResourcePack &resourcePack);
     }
 }

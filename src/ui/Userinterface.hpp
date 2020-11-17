@@ -26,6 +26,8 @@
 #include "ui/Button.hpp"
 #include "ui/Inputbox.hpp"
 
+#include "loader/ResourcePack.hpp"
+
 namespace RIS
 {
     namespace UI
@@ -36,7 +38,7 @@ namespace RIS
             Userinterface();
             ~Userinterface() = default;
 
-            void PostInit();
+            void PostInit(Loader::ResourcePack &resourcePack);
             void RegisterScriptFunctions();
 
             void ReleaseScriptReferences();

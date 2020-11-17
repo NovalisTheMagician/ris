@@ -21,15 +21,13 @@ namespace RIS
 {
     namespace UI
     {
-        void Console::InitLimits(const glm::vec2 &viewSize)
+        void Console::InitLimits(const glm::vec2 &viewSize, const Loader::ResourcePack &resourcePack)
         {
-            auto &loader = GetLoader();
-
             this->viewSize = viewSize;
             maxY = 0;
             currentY = -(viewSize.y * 0.5f);
 
-            consoleFont = loader.Load<Graphics::Font>("fonts/immortal.json");
+            consoleFont = Loader::Load<Graphics::Font>("fonts/immortal.json", resourcePack);
             maxLineHeight = consoleFont->GetMaxHeight(consoleFontSize);
             maxLines = 512;
 
@@ -299,23 +297,6 @@ namespace RIS
                     fontColor.a = std::stof(params[4]);
                 }
                 catch(const std::invalid_argument &e)
-                {
-                    Print(e.what());
-                }
-            }
-            else if(params[0] == "font")
-            {
-                if(params.size() < 2)
-                    return "no font specified";
-                
-                auto &loader = GetLoader();
-
-                try
-                {
-                    consoleFont = loader.Load<Graphics::Font>(params[1]);
-                    maxLineHeight = consoleFont->GetMaxHeight(consoleFontSize);
-                }
-                catch(const RISException& e)
                 {
                     Print(e.what());
                 }

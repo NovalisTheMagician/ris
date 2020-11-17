@@ -20,7 +20,7 @@ namespace RIS
     {
         const int SpriteRenderer::MAX_STRING_LEN = 1024;
 
-        SpriteRenderer::SpriteRenderer()
+        SpriteRenderer::SpriteRenderer(const Loader::ResourcePack &resourcePack)
             : sampler(GL_LINEAR, GL_LINEAR, 1.0f)
             , pipeline()
             , vertexLayout(VertexType::SpriteVertexFormat)
@@ -30,11 +30,9 @@ namespace RIS
             , vertexTextBuffer(6 * MAX_STRING_LEN * sizeof VertexType::SpriteVertex, GL_DYNAMIC_STORAGE_BIT)
             , white({1, 1, 1, 1})
         {
-            auto &loader = GetLoader();
-
-            vertexShader = loader.Load<Shader>("shaders/spriteVertex.glsl", ShaderType::VERTEX);
-            fragmentSpriteShader = loader.Load<Shader>("shaders/spriteFragment.glsl", ShaderType::FRAGMENT);
-            fragmentTextShader = loader.Load<Shader>("shaders/textFragment.glsl", ShaderType::FRAGMENT);
+            vertexShader = Loader::Load<Shader>("shaders/spriteVertex.glsl", resourcePack, ShaderType::VERTEX);
+            fragmentSpriteShader = Loader::Load<Shader>("shaders/spriteFragment.glsl", resourcePack, ShaderType::FRAGMENT);
+            fragmentTextShader = Loader::Load<Shader>("shaders/textFragment.glsl", resourcePack, ShaderType::FRAGMENT);
 
             pipeline.SetShader(*vertexShader);
 

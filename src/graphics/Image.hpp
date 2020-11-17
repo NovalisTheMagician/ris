@@ -5,6 +5,8 @@
 
 #include <gli/gli.hpp>
 
+#include "loader/LoadFunc.hpp"
+
 namespace RIS
 {
     namespace Graphics
@@ -26,5 +28,11 @@ namespace RIS
             gli::texture texture;
 
         };
+    }
+
+    namespace Loader
+    {
+        template<>
+        std::shared_ptr<Graphics::Image> Load<Graphics::Image>(const std::vector<std::byte> &bytes, const std::string &name, std::any param, const ResourcePack &resourcePack);
     }
 }

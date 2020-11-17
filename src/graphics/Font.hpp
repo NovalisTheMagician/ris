@@ -2,11 +2,9 @@
 
 #include <string>
 #include <unordered_map>
-#include <tuple>
 
 #include "graphics/Texture.hpp"
-
-#include <memory>
+#include "loader/LoadFunc.hpp"
 
 namespace RIS
 {
@@ -64,5 +62,11 @@ namespace RIS
 
             std::shared_ptr<Texture> texture;
         };
+    }
+
+    namespace Loader
+    {
+        template<>
+        std::shared_ptr<Graphics::Font> Load(const std::vector<std::byte> &bytes, const std::string &name, std::any param, const ResourcePack &resourcePack);
     }
 }

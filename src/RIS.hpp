@@ -6,7 +6,6 @@
 namespace RIS
 {
     namespace Graphics { class Renderer; }
-    namespace Loader { class Loader; }
     namespace UI { class Userinterface; class Console; }
     namespace Audio { class AudioEngine; }
     namespace Window { class Window; }
@@ -14,7 +13,6 @@ namespace RIS
     namespace Input { class Input; }
 
     Graphics::Renderer&     GetRenderer();
-    Loader::Loader&         GetLoader();
     UI::Userinterface&      GetUserinterface();
     UI::Console&            GetConsole();
     Audio::AudioEngine&     GetAudioEngine();

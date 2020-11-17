@@ -23,8 +23,12 @@
 #include "audio/AudioEngine.hpp"
 #include "ui/Userinterface.hpp"
 #include "input/Input.hpp"
-#include "loader/Loader.hpp"
 #include "script/ScriptEngine.hpp"
+
+#include "loader/Loader.hpp"
+#include "loader/ResourcePack.hpp"
+#include "loader/ZipPack.hpp"
+#include "loader/FilesystemPack.hpp"
 
 #include "graphics/Image.hpp"
 
@@ -43,7 +47,6 @@ namespace
     static Graphics::Renderer       *globalRenderer;
     static Window::Window           *globalWindow;
     static Audio::AudioEngine       *globalAudio;
-    static Loader::Loader           *globalLoader;
     static Input::Input             *globalInput;
     static UI::Userinterface        *globalUserinterface;
     static Script::ScriptEngine     *globalScriptEngine;
@@ -72,13 +75,31 @@ int main(int argc, char *argv[])
         configPath = args.GetParameter("-config");
     Config config(configPath);
 
-    std::string assetFolder = "";
+    Loader::ResourcePack resourcePack;
+
+    std::string baseArchive = "main.zip";
     if(args.IsSet("-debug"))
     {
+        baseArchive = "";
+        std::string assetFolder = "assets";
         if(args.IsSet("-assetpath"))
             assetFolder = args.GetParameter("-assetpath");
-        else
-            assetFolder = "assets";
+        resourcePack.PushFront(Loader::FilesystemPack(assetFolder));
+    }
+    if(args.IsSet("-base"))
+    {
+        baseArchive = args.GetParameter("-base");
+    }
+    if(!baseArchive.empty())
+        resourcePack.PushBack(Loader::ZipPack(baseArchive));
+
+    if(args.IsSet("-file"))
+    {
+        const auto &params = args.GetParameters("-file");
+        std::for_each(params.begin(), params.end(), [&](const std::string &archiveFile)
+        {
+            resourcePack.PushBack(Loader::ZipPack(archiveFile));
+        });
     }
 
     ::globalConfig = std::move(config);
@@ -91,9 +112,8 @@ int main(int argc, char *argv[])
     std::unique_ptr<Script::ScriptEngine> scriptEngine;
     std::unique_ptr<Audio::AudioEngine> audio;
     std::unique_ptr<UI::Userinterface> userinterface;
-    std::unique_ptr<Loader::Loader> loader;
     std::unique_ptr<Input::Input> input;
-    
+
     try
     {
         window = std::make_unique<Window::Window>(Version::GAME_NAME);
@@ -101,42 +121,19 @@ int main(int argc, char *argv[])
         scriptEngine = std::make_unique<Script::ScriptEngine>();
         audio = std::make_unique<Audio::AudioEngine>();
         userinterface = std::make_unique<UI::Userinterface>();
-        loader = std::make_unique<Loader::Loader>(assetFolder);
         input = std::make_unique<Input::Input>(*window);
-
-        std::string baseArchive = "main.zip";
-        if(args.IsSet("-debug"))
-        {
-            baseArchive = "";
-        }
-        if(args.IsSet("-base"))
-        {
-            baseArchive = args.GetParameter("-base");
-        }
-        loader->AddOverlay(baseArchive);
-
-        if(args.IsSet("-file"))
-        {
-            const auto &params = args.GetParameters("-file");
-            std::for_each(params.begin(), params.end(), [&](const std::string &archiveFile)
-            {
-                loader->AddOverlay(archiveFile);
-            });
-        }
 
         ::globalWindow = window.get();
         ::globalRenderer = renderer.get();
-        ::globalLoader = loader.get();
         ::globalAudio = audio.get();
         ::globalInput = input.get();
         ::globalScriptEngine = scriptEngine.get();
         ::globalUserinterface = userinterface.get();
 
-        loader->PostInit();
         window->PostInit();
         renderer->PostInit();
         audio->PostInit();
-        userinterface->PostInit();
+        userinterface->PostInit(resourcePack);
         scriptEngine->PostInit();
 
         scriptEngine->LoadScripts();
@@ -151,8 +148,8 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    auto windowIcon = loader->Load<Graphics::Image, false>("cat_icon.dds");
-    auto windowCursor = loader->Load<Graphics::Image, false>("cat_cursor.dds");
+    auto windowIcon = Loader::Load<Graphics::Image>("cat_icon.dds", resourcePack);
+    auto windowCursor = Loader::Load<Graphics::Image>("cat_cursor.dds", resourcePack);
 
     if(windowIcon)
         window->SetWindowIcon(windowIcon);
@@ -161,7 +158,7 @@ int main(int argc, char *argv[])
 
     logger.Info("System init OK");
 
-    Game::GameLoop loop;
+    Game::GameLoop loop(std::move(resourcePack));
     int res = 0;
     try
     {
@@ -185,11 +182,6 @@ namespace RIS
     Graphics::Renderer& GetRenderer()
     {
         return *::globalRenderer;
-    }
-
-    Loader::Loader& GetLoader()
-    {
-        return *::globalLoader;
     }
 
     UI::Userinterface& GetUserinterface()

@@ -28,6 +28,7 @@
 #include "graphics/Buffer.hpp"
 #include "graphics/Animation.hpp"
 #include "graphics/Transform.hpp"
+#include "graphics/Model.hpp"
 
 using namespace std::literals;
 
@@ -35,6 +36,10 @@ namespace RIS
 {
     namespace Game
     {
+        GameLoop::GameLoop(Loader::ResourcePack &&resourcePack)
+            : resourcePack(std::move(resourcePack))
+        {}
+
         int GameLoop::Start()
         {
             auto &window = GetWindow();
@@ -43,20 +48,19 @@ namespace RIS
             auto &interface = GetUserinterface();
             auto &audio = GetAudioEngine();
             auto &scriptEngine = GetScriptEngine();
-            auto &loader = GetLoader();
 
             bool god = false;
             interface.GetConsole().BindFunc("god", UI::Helpers::BoolFunc(god, "Godmode ON", "Godmode OFF"));
 
-            Graphics::Texture::Ptr catTexture = loader.Load<Graphics::Texture>("textures/meow.dds");
-            Graphics::Font::Ptr font = loader.Load<Graphics::Font>("fonts/immortal.json");
-            Graphics::Model::Ptr cubeModel = loader.Load<Graphics::Model>("models/john.json");
+            Graphics::Texture::Ptr catTexture = Loader::Load<Graphics::Texture>("textures/meow.dds", resourcePack);
+            Graphics::Font::Ptr font = Loader::Load<Graphics::Font>("fonts/immortal.json", resourcePack);
+            Graphics::Model::Ptr cubeModel = Loader::Load<Graphics::Model>("models/john.json", resourcePack);
 
-            Graphics::Shader::Ptr modelVertexShader = loader.Load<Graphics::Shader>("shaders/mAnim.glsl", Graphics::ShaderType::VERTEX);
-            Graphics::Shader::Ptr modelFragmentShader = loader.Load<Graphics::Shader>("shaders/mUnlit.glsl", Graphics::ShaderType::FRAGMENT);
+            Graphics::Shader::Ptr modelVertexShader = Loader::Load<Graphics::Shader>("shaders/mAnim.glsl", resourcePack, Graphics::ShaderType::VERTEX);
+            Graphics::Shader::Ptr modelFragmentShader = Loader::Load<Graphics::Shader>("shaders/mUnlit.glsl", resourcePack, Graphics::ShaderType::FRAGMENT);
 
-            Graphics::Animation::Skeleton::Ptr skeleton = loader.Load<Graphics::Animation::Skeleton>("meshes/john.glb");
-            Graphics::Animation::Animation::Ptr animation = loader.Load<Graphics::Animation::Animation>("meshes/john.glb");
+            Graphics::Animation::Skeleton::Ptr skeleton = Loader::Load<Graphics::Animation::Skeleton>("meshes/john.glb", resourcePack);
+            Graphics::Animation::Animation::Ptr animation = Loader::Load<Graphics::Animation::Animation>("meshes/john.glb", resourcePack);
 
             Graphics::VertexArray modelLayout(VertexType::ModelVertexFormat);
 
@@ -119,8 +123,8 @@ namespace RIS
 
 #pragma region DebugSetup
 
-            Graphics::Shader::Ptr debugVertexShader = loader.Load<Graphics::Shader>("shaders/debugVertex.glsl", Graphics::ShaderType::VERTEX);
-            Graphics::Shader::Ptr debugFragmentShader = loader.Load<Graphics::Shader>("shaders/debugFragment.glsl", Graphics::ShaderType::FRAGMENT);
+            Graphics::Shader::Ptr debugVertexShader = Loader::Load<Graphics::Shader>("shaders/debugVertex.glsl", resourcePack, Graphics::ShaderType::VERTEX);
+            Graphics::Shader::Ptr debugFragmentShader = Loader::Load<Graphics::Shader>("shaders/debugFragment.glsl", resourcePack, Graphics::ShaderType::FRAGMENT);
 
             Graphics::ProgramPipeline debugPipeline;
             debugPipeline.SetShader(*debugVertexShader);

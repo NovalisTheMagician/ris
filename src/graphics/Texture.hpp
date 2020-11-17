@@ -10,6 +10,8 @@
 
 #include <memory>
 
+#include "loader/LoadFunc.hpp"
+
 namespace RIS
 {
     namespace Graphics
@@ -37,5 +39,11 @@ namespace RIS
             void Bind(GLuint textureUnit);
 
         };
+    }
+
+    namespace Loader
+    {
+        template<>
+        std::shared_ptr<Graphics::Texture> Load(const std::vector<std::byte> &bytes, const std::string &name, std::any param, const ResourcePack &resourcePack);
     }
 }

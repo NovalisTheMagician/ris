@@ -26,18 +26,17 @@ namespace RIS
             rootContainer = Panel::Create();
         }
 
-        void Userinterface::PostInit()
+        void Userinterface::PostInit(Loader::ResourcePack &resourcePack)
         {
-            renderer = std::make_unique<Graphics::SpriteRenderer>();
+            renderer = std::make_unique<Graphics::SpriteRenderer>(resourcePack);
 
-            auto &loader = GetLoader();
-            defaultFont = loader.Load<Graphics::Font>("fonts/unispace.json");
+            defaultFont = Loader::Load<Graphics::Font>("fonts/unispace.json", resourcePack);
 
             Config &config = GetConfig();
             uiWidth = config.GetValue("r_width", 800);
             uiHeight = config.GetValue("r_height", 600);
 
-            console.InitLimits(glm::vec2(uiWidth, uiHeight));
+            console.InitLimits(glm::vec2(uiWidth, uiHeight), resourcePack);
 
             fpsLabel = Label::Create(defaultFont);
             fpsLabel->SetPosition({0, 0});
@@ -75,8 +74,8 @@ namespace RIS
         void Userinterface::RegisterScriptFunctions()
         {
             auto &scriptEngine = GetScriptEngine();
-            auto &loader = GetLoader();
 
+            /*
             scriptEngine.Func("print", [this](const std::string &msg){ console.Print(msg); });
             scriptEngine.Namespace("Console")
                 .Func("openConsole", [this](){ console.Open(); })
@@ -259,6 +258,8 @@ namespace RIS
                         activeMenu = nullptr;
                     }
                 });
+
+            */
         }
 
         Console &Userinterface::GetConsole()

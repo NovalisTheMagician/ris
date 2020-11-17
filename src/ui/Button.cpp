@@ -87,6 +87,11 @@ namespace RIS
             callback = func;
         }
 
+        void Button::SetActive(bool isActive)
+        {
+            active = isActive;
+        }
+
         void Button::Update(const Timer &timer)
         {
             
@@ -100,6 +105,17 @@ namespace RIS
 
             glm::vec4 color = normalColor;
             std::shared_ptr<Graphics::Texture> image = normalImage;
+
+            if(!active)
+            {
+                glm::vec4 inactiveColor(0.7f);
+                if(image)
+                    renderer.DrawTexture(*image, pos, size, inactiveColor);
+                else
+                    renderer.DrawRect(pos, size, inactiveColor);
+                renderer.DrawString(text, *font.get(), fontSize, textPos, textColor);
+                return;
+            }
 
             if(isClickedDown)
             {
@@ -140,7 +156,7 @@ namespace RIS
         {
             if(button == Input::InputKey::MOUSE_LEFT && isClickedDown)
             {
-                if(isInBounds)
+                if(active && isInBounds)
                 {
                     callback();
                 }

@@ -116,7 +116,8 @@ namespace RIS
                         self->SetFont(font);
                 })
                 .Func("setFontSize", &Button::SetFontSize)
-                .Func("setCallback", &Button::SetCallback);
+                .Func("setCallback", &Button::SetCallback)
+                .Func("setActive", &Button::SetActive);
 
             scriptEngine.Namespace("UI")
                 .Func("Button", [this](const std::string &name)

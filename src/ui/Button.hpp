@@ -48,6 +48,8 @@ namespace RIS
 
             void SetCallback(ButtonFunc func);
 
+            void SetActive(bool isActive);
+
             void Update(const Timer &timer) override;
             void Draw(Graphics::SpriteRenderer &renderer, const glm::vec2 &parentPosition) override;
 
@@ -71,6 +73,8 @@ namespace RIS
             bool isClickedDown = false;
 
             ButtonFunc callback;
+
+            bool active = true;
 
         };
     }

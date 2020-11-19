@@ -20,7 +20,7 @@ namespace RIS
                     return;
 
                 float duration = GetEndTime() - GetStartTime();
-                std::size_t numSamples = static_cast<std::size_t>(duration * 60.0f);
+                std::size_t numSamples = static_cast<std::size_t>(duration * SAMPLES_PER_SECOND);
                 sampledFrames.resize(numSamples);
 
                 for(std::size_t i = 0; i < numSamples; ++i)
@@ -59,7 +59,7 @@ namespace RIS
                     time = std::fmod(time - startTime, duration);
                     if(time < 0)
                         time += duration;
-                    time += startTime;
+                    //time += startTime;
                 }
                 else
                 {
@@ -71,7 +71,8 @@ namespace RIS
                 
                 float duration = GetEndTime() - GetStartTime();
                 float t = time / duration;
-                std::size_t numSamples = static_cast<std::size_t>(duration * 60.0f);
+
+                std::size_t numSamples = static_cast<std::size_t>(duration * SAMPLES_PER_SECOND);
                 std::size_t index = static_cast<std::size_t>(t * numSamples);
                 if(index >= sampledFrames.size())
                     return -1;

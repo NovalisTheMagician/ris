@@ -88,6 +88,7 @@ namespace RIS
 
             private:
                 std::vector<std::size_t> sampledFrames;
+                static constexpr float SAMPLES_PER_SECOND = 60.0f;
 
             };
 
@@ -241,23 +242,24 @@ namespace RIS
             class Animation
             {
             public:
+                using ClipType = FastClip;
                 using Ptr = std::shared_ptr<Animation>;
 
                 Animation(std::vector<FastClip> &&clips);
 
-                FastClip& GetByName(const std::string &clipName);
-                const FastClip& GetByName(const std::string &clipName) const;
+                ClipType& GetByName(const std::string &clipName);
+                const ClipType& GetByName(const std::string &clipName) const;
 
-                FastClip& GetByIndex(std::size_t index);
-                const FastClip& GetByIndex(std::size_t index) const;
+                ClipType& GetByIndex(std::size_t index);
+                const ClipType& GetByIndex(std::size_t index) const;
 
-                FastClip& operator[](const std::string &clipName);
-                const FastClip& operator[](const std::string &clipName) const;
-                FastClip& operator[](std::size_t index);
-                const FastClip& operator[](std::size_t index) const;
+                ClipType& operator[](const std::string &clipName);
+                const ClipType& operator[](const std::string &clipName) const;
+                ClipType& operator[](std::size_t index);
+                const ClipType& operator[](std::size_t index) const;
 
             private:
-                std::vector<FastClip> clips;
+                std::vector<ClipType> clips;
                 std::unordered_map<std::string, std::size_t> nameToIndex;
 
             };

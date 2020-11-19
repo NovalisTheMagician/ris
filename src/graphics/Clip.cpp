@@ -41,13 +41,13 @@ namespace RIS
                 if (looping) 
                 {
                     float duration = endTime - startTime;
-                    if (duration <= 0) { 0.0f; }
+                    if (duration <= 0) { return 0.0f; }
                     inTime = std::fmod(inTime - startTime, duration);
                     if (inTime < 0.0f) 
                     {
                         inTime += duration;
                     }
-                    inTime = inTime + startTime;
+                    inTime += startTime;
                 }
                 else 
                 {

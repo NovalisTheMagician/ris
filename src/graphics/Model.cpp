@@ -21,6 +21,8 @@
 #include <rapidjson/error/en.h>
 #include <rapidjson/document.h>
 
+#include <type_traits>
+
 namespace RIS
 {
     namespace Graphics
@@ -581,11 +583,18 @@ namespace RIS
                     clip.RecalculateDuration();
                 }
 
-                std::vector<Graphics::Animation::FastClip> fastClips(clips.size());
-                for(std::size_t i = 0; i < clips.size(); ++i)
-                    fastClips[i] = Graphics::Animation::OptimizeClip(clips.at(i));
+                if constexpr (std::is_same_v<Graphics::Animation::Animation::ClipType, Graphics::Animation::FastClip>)
+                {
+                    std::vector<Graphics::Animation::FastClip> fastClips(clips.size());
+                    for(std::size_t i = 0; i < clips.size(); ++i)
+                        fastClips[i] = Graphics::Animation::OptimizeClip(clips.at(i));
 
-                return std::make_shared<Graphics::Animation::Animation>(std::move(fastClips));
+                    return std::make_shared<Graphics::Animation::Animation>(std::move(fastClips));
+                }
+                else
+                {
+                    return std::make_shared<Graphics::Animation::Animation>(std::move(clips));
+                }
             }
             else
             {

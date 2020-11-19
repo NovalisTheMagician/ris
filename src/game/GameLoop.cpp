@@ -112,7 +112,7 @@ namespace RIS
             std::vector<glm::mat4> matrixPalette;
             float playbackTime = 0.0f;
 
-            Graphics::Animation::FastClip &clip = animation->GetByIndex(0);
+            auto &clip = animation->GetByIndex(0);
             Graphics::Animation::Pose &animPose = skeleton->GetBindPose();
 
             Graphics::Buffer skeletonBuffer(sizeof glm::mat4 * 120, GL_DYNAMIC_STORAGE_BIT);
@@ -167,6 +167,8 @@ namespace RIS
             {
                 timer.Update();
                 input.Update();
+
+                float dt = timer.Delta();
 
                 playbackTime = clip.Sample(animPose, playbackTime + timer.Delta() * animSpeed);
                 animPose.GetMatrixPalette(matrixPalette);

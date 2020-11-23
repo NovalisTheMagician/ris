@@ -5,15 +5,15 @@ game = 'Game'
 env = Environment(ENV=os.environ)
 
 cl_flags = ['/EHsc', '/std:c++17', '/FS']
-lk_flags = ['/nologo', '/INCREMENTAL:NO', '/LTCG:NOSTATUS', '/MACHINE:X64']
+lk_flags = ['/nologo', '/INCREMENTAL:NO', '/MACHINE:X64'] # removed '/LTCG:NOSTATUS',
 
 dyn_libs = []
 
 inc_path = ['#src', os.environ['INC_PATH']]
 lib_path = [os.environ['LIB_PATH']]
 
-libs_rel = ['glfw3', 'soloud', 'libz', 'libzip', 'fmt', 'glad', 'boxer', 'lua54']
-libs_deb = ['glfw3d', 'soloudd', 'libzd', 'libzipd', 'fmtd', 'gladd', 'boxerd', 'lua54']
+libs_rel = ['glfw3', 'soloud', 'libz', 'libzip', 'fmt', 'glad', 'boxer', 'base64', 'lua54']
+libs_deb = ['glfw3d', 'soloudd', 'libzd', 'libzipd', 'fmtd', 'gladd', 'boxerd', 'base64d', 'lua54d']
 
 libs = ['user32', 'kernel32', 'gdi32', 'shell32', 'opengl32', 'ws2_32', 'advapi32']
 

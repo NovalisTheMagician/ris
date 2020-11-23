@@ -29,6 +29,7 @@
 #include "loader/ResourcePack.hpp"
 #include "loader/ZipPack.hpp"
 #include "loader/FilesystemPack.hpp"
+#include "loader/EmbeddedPack.hpp"
 
 #include "graphics/Image.hpp"
 
@@ -102,6 +103,8 @@ int main(int argc, char *argv[])
         });
     }
 
+    resourcePack.PushFront(Loader::EmbeddedPack());
+
     ::globalConfig = std::move(config);
     ::globalArgs = args;
 
@@ -166,7 +169,7 @@ int main(int argc, char *argv[])
     }
     catch(const RISException &e)
     {
-        //logger.Error(e.what());
+        logger.Error(e.what());
 
         boxer::show(e.what(), "Game Error", boxer::Style::Error);
     }

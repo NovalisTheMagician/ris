@@ -30,6 +30,8 @@
 #include "graphics/Transform.hpp"
 #include "graphics/Model.hpp"
 
+#include "loader/TextLoad.hpp"
+
 using namespace std::literals;
 
 namespace RIS
@@ -51,6 +53,10 @@ namespace RIS
 
             bool god = false;
             interface.GetConsole().BindFunc("god", UI::Helpers::BoolFunc(god, "Godmode ON", "Godmode OFF"));
+
+            auto test = Loader::Load<std::string>("test", resourcePack);
+            if(test)
+                interface.GetConsole().Print(*test);
 
             Graphics::Texture::Ptr catTexture = Loader::Load<Graphics::Texture>("textures/meow.dds", resourcePack);
             Graphics::Font::Ptr font = Loader::Load<Graphics::Font>("fonts/immortal.json", resourcePack);

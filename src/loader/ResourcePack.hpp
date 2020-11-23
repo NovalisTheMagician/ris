@@ -6,12 +6,13 @@
 
 #include "loader/ZipPack.hpp"
 #include "loader/FilesystemPack.hpp"
+#include "loader/EmbeddedPack.hpp"
 
 namespace RIS
 {
     namespace Loader
     {
-        using PackType = std::variant<ZipPack, FilesystemPack>;
+        using PackType = std::variant<ZipPack, FilesystemPack, EmbeddedPack>;
 
         class ResourcePack
         {

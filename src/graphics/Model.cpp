@@ -1,5 +1,3 @@
-#include "graphics/Model.hpp"
-
 #define TINYGLTF_IMPLEMENTATION
 #define TINYGLTF_NO_EXTERNAL_IMAGE
 #define TINYGLTF_USE_RAPIDJSON
@@ -9,6 +7,8 @@
 #define TINYGLTF_NO_STB_IMAGE_WRITE
 #define TINYGLTF_NO_STB_IMAGE
 #include <tiny_gltf.h>
+
+#include "graphics/Model.hpp"
 
 #include "misc/Logger.hpp"
 
@@ -45,7 +45,7 @@ namespace RIS
     namespace GLTFHelper
     {
         template<typename T, std::size_t Size = sizeof T>
-        std::vector<T>& VectorReinterpret(const std::vector<unsigned char> &in, std::vector<T> &out)
+        static std::vector<T>& VectorReinterpret(const std::vector<unsigned char> &in, std::vector<T> &out)
         {
             if(in.size() % Size != 0) throw std::runtime_error("input size mismatch");
             out.resize(in.size() / Size);
@@ -68,7 +68,7 @@ namespace RIS
         }
 
         template<typename T, std::size_t Size = sizeof T>
-        std::vector<T> VectorReinterpret(const std::vector<unsigned char> &in)
+        static std::vector<T> VectorReinterpret(const std::vector<unsigned char> &in)
         {
             if(in.size() % Size != 0) throw std::runtime_error("input size mismatch");
             std::vector<T> out(in.size() / Size);
@@ -91,7 +91,7 @@ namespace RIS
         }
 
         template<typename InType, typename OutType, std::size_t Size = sizeof InType>
-        std::vector<OutType>& VectorCast(const std::vector<unsigned char> &in, std::vector<OutType> &out)
+        static std::vector<OutType>& VectorCast(const std::vector<unsigned char> &in, std::vector<OutType> &out)
         {
             if(in.size() % Size != 0) throw std::runtime_error("input size mismatch");
             out.clear();
@@ -112,7 +112,7 @@ namespace RIS
         }
 
         template<typename InType, typename OutType, std::size_t Size = sizeof InType>
-        std::vector<OutType> VectorCast(const std::vector<unsigned char> &in)
+        static std::vector<OutType> VectorCast(const std::vector<unsigned char> &in)
         {
             if(in.size() % Size != 0) throw std::runtime_error("input size mismatch");
             std::vector<OutType> out;
@@ -132,7 +132,7 @@ namespace RIS
             return out;
         }
 
-        std::unordered_map<std::size_t, std::size_t> CreateNodeBoneMap(const tinygltf::Model &model, const tinygltf::Skin &skin)
+        static std::unordered_map<std::size_t, std::size_t> CreateNodeBoneMap(const tinygltf::Model &model, const tinygltf::Skin &skin)
         {
             std::unordered_map<std::size_t, std::size_t> nodeBoneMap;
             std::size_t boneId = 0;
@@ -141,7 +141,7 @@ namespace RIS
             return nodeBoneMap;
         }
 
-        std::size_t GetCompCount(const tinygltf::Accessor &accessor)
+        static std::size_t GetCompCount(const tinygltf::Accessor &accessor)
         {
             switch(accessor.type)
             {
@@ -155,7 +155,7 @@ namespace RIS
         }
 
         template<typename T, std::size_t Size = sizeof T>
-        void GetScalarValues(const tinygltf::Model &model, std::vector<T> &out, std::size_t compCount, const tinygltf::Accessor &accessor)
+        static void GetScalarValues(const tinygltf::Model &model, std::vector<T> &out, std::size_t compCount, const tinygltf::Accessor &accessor)
         {
             out.resize(accessor.count * compCount);
             const auto &bufferView = model.bufferViews.at(accessor.bufferView);
@@ -177,7 +177,7 @@ namespace RIS
         };
 
         template<typename T, std::size_t Size = sizeof T>
-        void GetValues(const tinygltf::Model &model, const tinygltf::Accessor &accessor, std::vector<T> &out)
+        static void GetValues(const tinygltf::Model &model, const tinygltf::Accessor &accessor, std::vector<T> &out)
         {
             out.resize(accessor.count);
             const auto &bufferView = model.bufferViews.at(accessor.bufferView);
@@ -245,7 +245,7 @@ namespace RIS
             }
         }
 
-        RIS::Graphics::Animation::Pose LoadRestPose(const tinygltf::Model &model, const tinygltf::Skin &skin, std::vector<std::string> &jointNames, RIS::Logger &logger)
+        static RIS::Graphics::Animation::Pose LoadRestPose(const tinygltf::Model &model, const tinygltf::Skin &skin, std::vector<std::string> &jointNames, RIS::Logger &logger)
         {
             auto nodeToTransform = [](const tinygltf::Node &node)
             {
@@ -300,7 +300,7 @@ namespace RIS
             return pose;
         }
 
-        RIS::Graphics::Animation::Pose LoadBindPose(const tinygltf::Model &model, const tinygltf::Skin &skin, RIS::Graphics::Animation::Pose &restPose, RIS::Logger &logger)
+        static RIS::Graphics::Animation::Pose LoadBindPose(const tinygltf::Model &model, const tinygltf::Skin &skin, RIS::Graphics::Animation::Pose &restPose, RIS::Logger &logger)
         {
             std::size_t numBones = restPose.Size();
             std::vector<RIS::Graphics::Transform> worldBindPose(numBones);

@@ -23,6 +23,7 @@ namespace RIS
 
             Texture();
             Texture(const std::vector<std::byte> &data, bool flip = false);
+            Texture(const std::byte *rawData, int width, int height);
             Texture(GLenum format, int width, int height);
             Texture(const glm::vec4 color);
             Texture(GLenum type);
@@ -36,7 +37,7 @@ namespace RIS
 
             void SetBuffer(const Buffer &buffer, GLenum format);
 
-            void Bind(GLuint textureUnit);
+            void Bind(GLuint textureUnit) const;
 
         };
     }

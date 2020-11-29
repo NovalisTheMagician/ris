@@ -67,6 +67,14 @@ namespace RIS
             }
         }
 
+        Texture::Texture(const std::byte *rawData, int width, int height)
+        {
+            glCreateTextures(GL_TEXTURE_2D, 1, &id);
+            glTextureStorage2D(id, 1, GL_RGBA8, width, height);
+            glTextureSubImage2D(id, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, rawData);
+            glGenerateTextureMipmap(id);
+        }
+
         Texture::Texture(GLenum format, int width, int height)
         {
             glCreateTextures(GL_TEXTURE_2D, 1, &id);
@@ -103,7 +111,7 @@ namespace RIS
             glDeleteTextures(1, &id);
         }
 
-        void Texture::Bind(GLuint textureUnit)
+        void Texture::Bind(GLuint textureUnit) const
         {
             glBindTextureUnit(textureUnit, id);
         }

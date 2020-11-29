@@ -7,6 +7,8 @@
 
 #include "loader/LoadFunc.hpp"
 
+#include "graphics/Texture.hpp"
+
 namespace RIS
 {
     namespace Graphics
@@ -19,6 +21,8 @@ namespace RIS
             int GetWidth() const;
             int GetHeight() const;
             std::uint32_t GetPixel(int x, int y) const;
+
+            std::shared_ptr<Texture> MakeTexture() const;
 
             unsigned char* GetPixels();
 

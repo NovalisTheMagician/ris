@@ -1,5 +1,7 @@
 #include "graphics/Image.hpp"
 
+#include <vector>
+
 namespace RIS
 {
     namespace Graphics
@@ -35,6 +37,11 @@ namespace RIS
         unsigned char* Image::GetPixels()
         {
             return reinterpret_cast<unsigned char*>(pixels);
+        }
+
+        std::shared_ptr<Texture> Image::MakeTexture() const
+        {
+            return std::make_shared<Texture>(reinterpret_cast<const std::byte*>(pixels), width, height);
         }
     }
 

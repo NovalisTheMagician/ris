@@ -32,7 +32,7 @@ namespace RIS
             void Begin(float viewWidth, float viewHeight);
             void End();
 
-            void DrawTexture(Texture &texture, const glm::vec2 &position = {}, const glm::vec2 &size = {1, 1}, const glm::vec4 &tint = {1, 1, 1, 1});
+            void DrawTexture(const Texture &texture, const glm::vec2 &position = {}, const glm::vec2 &size = {1, 1}, const glm::vec4 &tint = {1, 1, 1, 1});
             void DrawRect(const glm::vec2 &position = {}, const glm::vec2 &size = {1, 1}, const glm::vec4 &tint = {1, 1, 1, 1});
             void DrawString(const std::string &string, const Font &font, float size, const glm::vec2 &position = {}, const glm::vec4 &tint = {1, 1, 1, 1});
 
@@ -46,12 +46,12 @@ namespace RIS
             };
 
         private:
-            Buffer vertexSpriteBuffer, vertexTextBuffer;
+            DynamicVertexBuffer vertexSpriteBuffer, vertexTextBuffer;
             Sampler sampler;
             std::shared_ptr<Shader> vertexShader, fragmentSpriteShader, fragmentTextShader;
             ProgramPipeline pipeline;
             VertexArray vertexLayout;
-            Buffer viewProjectionBuffer, worldBuffer;
+            UniformBuffer viewProjectionBuffer, worldBuffer;
             Texture white;
 
         };

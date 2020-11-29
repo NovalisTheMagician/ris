@@ -8,16 +8,31 @@ namespace RIS
 {
     namespace Graphics
     {
+        Sampler Sampler::Bilinear(float maxAniso)
+        {
+            return Sampler(MinFilter::LINEAR, MagFilter::LINEAR, maxAniso);
+        }
+
+        Sampler Sampler::Trilinear(float maxAniso)
+        {
+            return Sampler(MinFilter::LINEAR_MIPMAP_LINEAR, MagFilter::LINEAR, maxAniso);
+        }
+
+        Sampler Sampler::Nearest(float maxAniso)
+        {
+            return Sampler(MinFilter::NEAREST, MagFilter::NEAREST, maxAniso);
+        }
+
         Sampler::Sampler()
             : GLObject(0)
         {
         }
 
-        Sampler::Sampler(GLenum minFilter, GLenum magFilter, float maxAniso)
+        Sampler::Sampler(MinFilter minFilter, MagFilter magFilter, float maxAniso)
         {
             glGenSamplers(1, &id);
-            glSamplerParameteri(id, GL_TEXTURE_MIN_FILTER, minFilter);
-            glSamplerParameteri(id, GL_TEXTURE_MAG_FILTER, magFilter);
+            glSamplerParameteri(id, GL_TEXTURE_MIN_FILTER, static_cast<GLenum>(minFilter));
+            glSamplerParameteri(id, GL_TEXTURE_MAG_FILTER, static_cast<GLenum>(magFilter));
             glSamplerParameterfv(id, GL_TEXTURE_MAX_ANISOTROPY, &maxAniso);
         }
 
@@ -37,14 +52,14 @@ namespace RIS
             return *this;
         }
 
-        void Sampler::SetMinFilter(GLenum minFilter)
+        void Sampler::SetMinFilter(MinFilter minFilter)
         {
-            glSamplerParameteri(id, GL_TEXTURE_MIN_FILTER, minFilter);
+            glSamplerParameteri(id, GL_TEXTURE_MIN_FILTER, static_cast<GLenum>(minFilter));
         }
 
-        void Sampler::SetMagFilter(GLenum magFilter)
+        void Sampler::SetMagFilter(MagFilter magFilter)
         {
-            glSamplerParameteri(id, GL_TEXTURE_MAG_FILTER, magFilter);
+            glSamplerParameteri(id, GL_TEXTURE_MAG_FILTER, static_cast<GLenum>(magFilter));
         }
 
         void Sampler::SetMaxAnisotropy(float maxAniso)
@@ -52,7 +67,7 @@ namespace RIS
             glSamplerParameterfv(id, GL_TEXTURE_MAX_ANISOTROPY, &maxAniso);
         }
 
-        void Sampler::Bind(int textureUnit)
+        void Sampler::Bind(int textureUnit) const
         {
             glBindSampler(textureUnit, id);
         }

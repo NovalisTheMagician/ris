@@ -138,8 +138,6 @@ int main(int argc, char *argv[])
         audio->PostInit();
         userinterface->PostInit(resourcePack);
         scriptEngine->PostInit();
-
-        scriptEngine->LoadScripts();
     }
     catch(const RISException& e)
     {

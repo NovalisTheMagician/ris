@@ -47,7 +47,7 @@ namespace RIS
             glNamedBufferSubData(id, offset, size, data);
         }
 
-        void Buffer::Bind(GLenum target, int bindBase) 
+        void Buffer::Bind(GLenum target, int bindBase) const
         { 
             glBindBufferBase(target, bindBase, id); 
         }

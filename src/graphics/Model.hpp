@@ -3,6 +3,7 @@
 #include "graphics/Mesh.hpp"
 #include "graphics/Animation.hpp"
 #include "graphics/Texture.hpp"
+#include "graphics/VertexArray.hpp"
 
 #include <vector>
 #include <memory>
@@ -28,6 +29,8 @@ namespace RIS
 
             std::shared_ptr<Mesh> GetMesh();
             std::shared_ptr<Texture> GetTexture();
+
+            void Bind(VertexArray &vao) const;
 
         private:
             std::shared_ptr<Mesh> mesh;

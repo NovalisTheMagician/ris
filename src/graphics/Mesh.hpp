@@ -22,8 +22,8 @@ namespace RIS
             void Bind(VertexArray &vao) const;
             void Draw() const;
 
-            const Buffer& VertexBuffer() const;
-            const Buffer& IndexBuffer() const;
+            const Buffer& GetVertexBuffer() const;
+            const Buffer& GetIndexBuffer() const;
             int NumIndices() const;
 
         private:

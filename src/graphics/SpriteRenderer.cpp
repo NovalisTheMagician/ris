@@ -21,13 +21,13 @@ namespace RIS
         const int SpriteRenderer::MAX_STRING_LEN = 1024;
 
         SpriteRenderer::SpriteRenderer(const Loader::ResourcePack &resourcePack)
-            : sampler(GL_LINEAR, GL_LINEAR, 1.0f)
+            : sampler(MinFilter::LINEAR, MagFilter::LINEAR)
             , pipeline()
             , vertexLayout(VertexType::SpriteVertexFormat)
-            , viewProjectionBuffer(sizeof glm::mat4, GL_DYNAMIC_STORAGE_BIT)
-            , worldBuffer(sizeof WorldBufferData, GL_DYNAMIC_STORAGE_BIT)
-            , vertexSpriteBuffer(6 * sizeof VertexType::SpriteVertex, GL_DYNAMIC_STORAGE_BIT)
-            , vertexTextBuffer(6 * MAX_STRING_LEN * sizeof VertexType::SpriteVertex, GL_DYNAMIC_STORAGE_BIT)
+            , viewProjectionBuffer(sizeof glm::mat4)
+            , worldBuffer(sizeof WorldBufferData)
+            , vertexSpriteBuffer(6 * sizeof VertexType::SpriteVertex)
+            , vertexTextBuffer(6 * MAX_STRING_LEN * sizeof VertexType::SpriteVertex)
             , white({1, 1, 1, 1})
         {
             vertexShader = Loader::Load<Shader>("shaders/spriteVertex.glsl", resourcePack, ShaderType::VERTEX);
@@ -72,7 +72,7 @@ namespace RIS
             glEnable(GL_DEPTH_TEST);
         }
 
-        void SpriteRenderer::DrawTexture(Texture &texture, const glm::vec2 &position, const glm::vec2 &size, const glm::vec4 &tint)
+        void SpriteRenderer::DrawTexture(const Texture &texture, const glm::vec2 &position, const glm::vec2 &size, const glm::vec4 &tint)
         {
             pipeline.SetShader(*fragmentSpriteShader);
             vertexLayout.SetVertexBuffer<VertexType::SpriteVertex>(vertexSpriteBuffer);
@@ -118,6 +118,7 @@ namespace RIS
                 fontSize = font.GetSize();
 
             std::vector<VertexType::SpriteVertex> vertices;
+            vertices.reserve(MAX_STRING_LEN * 6);
 
             bool first = true;
             for(auto &it = str.begin(); it != str.end();)
@@ -132,8 +133,8 @@ namespace RIS
                     const Glyph &glyph = font[c];
                     if(!first)
                     {
-                        uint32_t kernChar = utf8::prior(it, str.begin());
-                        utf8::advance(it, 1, str.end());
+                        auto tmpIt = it;
+                        uint32_t kernChar = utf8::prior(tmpIt, str.begin());
                         if(glyph.kernings.count(kernChar) > 0)
                         {
                             float kernVal = glyph.kernings.at(kernChar);

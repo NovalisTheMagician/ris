@@ -40,6 +40,12 @@ namespace RIS
         {
             return texture;
         }
+
+        void Model::Bind(VertexArray &vao) const
+        {
+            mesh->Bind(vao);
+            texture->Bind(0);
+        }
     }
 
     namespace GLTFHelper
@@ -203,13 +209,13 @@ namespace RIS
         static void TrackFromChannel(const tinygltf::Model &model, RIS::Graphics::Animation::Track<T, N> &result, const tinygltf::AnimationChannel &channel, const tinygltf::Animation &animation)
         {
             const tinygltf::AnimationSampler &sampler = animation.samplers.at(channel.sampler);
-            RIS::Graphics::Animation::Interpolation interpolation = RIS::Graphics::Animation::Interpolation::CONSTANT;
+            Graphics::Animation::Interpolation interpolation = Graphics::Animation::Interpolation::CONSTANT;
             if(sampler.interpolation == "LINEAR")
-                interpolation = RIS::Graphics::Animation::Interpolation::LINEAR;
+                interpolation = Graphics::Animation::Interpolation::LINEAR;
             else if(sampler.interpolation == "CUBICSPLINE")
-                interpolation = RIS::Graphics::Animation::Interpolation::CUBIC;
+                interpolation = Graphics::Animation::Interpolation::CUBIC;
 
-            bool isSamplerCubic = interpolation == RIS::Graphics::Animation::Interpolation::CUBIC;
+            bool isSamplerCubic = interpolation == Graphics::Animation::Interpolation::CUBIC;
             result.SetInterpolation(interpolation);
 
             const auto &inAccessor = model.accessors.at(sampler.input);
@@ -245,15 +251,15 @@ namespace RIS
             }
         }
 
-        static RIS::Graphics::Animation::Pose LoadRestPose(const tinygltf::Model &model, const tinygltf::Skin &skin, std::vector<std::string> &jointNames, RIS::Logger &logger)
+        static Graphics::Animation::Pose LoadRestPose(const tinygltf::Model &model, const tinygltf::Skin &skin, std::vector<std::string> &jointNames, Logger &logger)
         {
             auto nodeToTransform = [](const tinygltf::Node &node)
             {
-                RIS::Graphics::Transform transform;
+                Graphics::Transform transform;
                 if(node.matrix.size() > 0)
                 {
                     glm::mat4 matrix = glm::make_mat4(node.matrix.data());
-                    transform = RIS::Graphics::Mat4ToTransform(matrix);
+                    transform = Graphics::Mat4ToTransform(matrix);
                 }
                 if(node.translation.size() > 0)
                     transform.position = glm::make_vec3(node.translation.data());
@@ -264,10 +270,10 @@ namespace RIS
                 return transform;
             };
 
-            const auto &nodeBoneMap = GLTFHelper::CreateNodeBoneMap(model, skin);
+            const auto &nodeBoneMap = CreateNodeBoneMap(model, skin);
 
             std::size_t boneCount = skin.joints.size();
-            RIS::Graphics::Animation::Pose pose(boneCount);
+            Graphics::Animation::Pose pose(boneCount);
             const auto &joints = skin.joints;
             std::vector<std::string> names(boneCount, "No Name");
 
@@ -286,7 +292,7 @@ namespace RIS
             {
                 std::size_t boneId = nodeBoneMap.at(i);
                 const auto &node = model.nodes.at(i);
-                RIS::Graphics::Transform t = nodeToTransform(node);
+                Graphics::Transform t = nodeToTransform(node);
                 pose.SetLocalTransform(boneId, t);
                 int parent = getParent(i);
 
@@ -300,21 +306,21 @@ namespace RIS
             return pose;
         }
 
-        static RIS::Graphics::Animation::Pose LoadBindPose(const tinygltf::Model &model, const tinygltf::Skin &skin, RIS::Graphics::Animation::Pose &restPose, RIS::Logger &logger)
+        static Graphics::Animation::Pose LoadBindPose(const tinygltf::Model &model, const tinygltf::Skin &skin, RIS::Graphics::Animation::Pose &restPose, Logger &logger)
         {
             std::size_t numBones = restPose.Size();
-            std::vector<RIS::Graphics::Transform> worldBindPose(numBones);
+            std::vector<Graphics::Transform> worldBindPose(numBones);
             for(std::size_t i = 0; i < numBones; ++i)
                 worldBindPose[i] = restPose.GetGlobalTransform(i);
 
             const tinygltf::Accessor &matAccessor = model.accessors.at(skin.inverseBindMatrices);
 
             std::vector<float> invBindAccessor;
-            auto compCount = GLTFHelper::GetCompCount(matAccessor);
+            auto compCount = GetCompCount(matAccessor);
 
             if(compCount != 16) throw std::runtime_error("compCount mismatch");
 
-            GLTFHelper::GetScalarValues(model, invBindAccessor, compCount, matAccessor);
+            GetScalarValues(model, invBindAccessor, compCount, matAccessor);
 
             std::size_t numJoints = skin.joints.size();
             for(std::size_t i = 0; i < numJoints; ++i)
@@ -322,18 +328,18 @@ namespace RIS
                 float *matrix = invBindAccessor.data() + i * compCount;
                 glm::mat4 invBindMatrix = glm::make_mat4(matrix);
                 glm::mat4 bindMatrix = glm::inverse(invBindMatrix);
-                RIS::Graphics::Transform bindTransform = RIS::Graphics::Mat4ToTransform(bindMatrix);
+                Graphics::Transform bindTransform = Graphics::Mat4ToTransform(bindMatrix);
                 worldBindPose[i] = bindTransform;
             }
 
-            RIS::Graphics::Animation::Pose bindPose(restPose);
+            Graphics::Animation::Pose bindPose(restPose);
             for(std::size_t i = 0; i < numBones; ++i)
             {
-                RIS::Graphics::Transform current = worldBindPose.at(i);
+                Graphics::Transform current = worldBindPose.at(i);
                 int parentId = bindPose.GetParent(i);
                 if(parentId >= 0)
                 {
-                    RIS::Graphics::Transform parent = worldBindPose.at(parentId);
+                    Graphics::Transform parent = worldBindPose.at(parentId);
                     current = Combine(Inverse(parent), current);
                 }
                 bindPose.SetLocalTransform(i, current);
@@ -478,12 +484,12 @@ namespace RIS
                 const tinygltf::Accessor &indexAccessor = model.accessors.at(primitive.indices);
                 GLTFHelper::GetValues(model, indexAccessor, indices);
 
-                Graphics::Buffer positionBuffer(positions, 0);
-                Graphics::Buffer normalBuffer(normals, 0);
-                Graphics::Buffer texCoordBuffer(texCoords, 0);
-                Graphics::Buffer jointsBuffer(joints, 0);
-                Graphics::Buffer weightsBuffer(weights, 0);
-                Graphics::Buffer indexBuffer(indices, 0);
+                Graphics::VertexBuffer positionBuffer(positions);
+                Graphics::VertexBuffer normalBuffer(normals);
+                Graphics::VertexBuffer texCoordBuffer(texCoords);
+                Graphics::VertexBuffer jointsBuffer(joints);
+                Graphics::VertexBuffer weightsBuffer(weights);
+                Graphics::IndexBuffer indexBuffer(indices);
                 
                 int numIndices = model.accessors.at(primitive.indices).count;
 

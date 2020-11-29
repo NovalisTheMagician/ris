@@ -26,12 +26,12 @@ namespace RIS
             vao.SetIndexBuffer(indexBuffer);
         }
 
-        const Buffer& Mesh::VertexBuffer() const
+        const Buffer& Mesh::GetVertexBuffer() const
         {
             return positionBuffer;
         }
 
-        const Buffer& Mesh::IndexBuffer() const
+        const Buffer& Mesh::GetIndexBuffer() const
         {
             return indexBuffer;
         }

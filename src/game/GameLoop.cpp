@@ -74,10 +74,11 @@ namespace RIS
             pipeline.SetShader(*modelVertexShader);
             pipeline.SetShader(*modelFragmentShader);
 
-            Graphics::Sampler sampler(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, 16.0f);
+            //Graphics::Sampler sampler(Graphics::MinFilter::LINEAR_MIPMAP_LINEAR, Graphics::MagFilter::LINEAR, 16.0f);
+            Graphics::Sampler sampler = Graphics::Sampler::Trilinear(16.0f);
 
-            Graphics::Buffer viewProjBuffer(glm::mat4(), GL_DYNAMIC_STORAGE_BIT);
-            Graphics::Buffer worldBuffer(glm::mat4(), GL_DYNAMIC_STORAGE_BIT);
+            Graphics::UniformBuffer viewProjBuffer(glm::mat4{});
+            Graphics::UniformBuffer worldBuffer(glm::mat4{});
 
             auto &config = GetConfig();
             float width = config.GetValue("r_width", 800.0f);
@@ -121,7 +122,7 @@ namespace RIS
             auto &clip = animation->GetByIndex(0);
             Graphics::Animation::Pose &animPose = skeleton->GetBindPose();
 
-            Graphics::Buffer skeletonBuffer(sizeof glm::mat4 * 120, GL_DYNAMIC_STORAGE_BIT);
+            Graphics::UniformBuffer skeletonBuffer(sizeof glm::mat4 * 120);
 
             const std::vector<glm::mat4> &invBindPose = skeleton->GetInvBindPose();
 
@@ -196,13 +197,14 @@ namespace RIS
                 defaultFramebuffer.Clear(clearColor, 1.0f);
 
                 pipeline.Use();
-                viewProjBuffer.Bind(GL_UNIFORM_BUFFER, 0);
-                worldBuffer.Bind(GL_UNIFORM_BUFFER, 1);
-                skeletonBuffer.Bind(GL_UNIFORM_BUFFER, 2);
+                viewProjBuffer.Bind(0);
+                worldBuffer.Bind(1);
+                skeletonBuffer.Bind(2);
 
                 modelLayout.Bind();
-                cubeModel->GetMesh()->Bind(modelLayout);
-                cubeModel->GetTexture()->Bind(0);
+                //cubeModel->GetMesh()->Bind(modelLayout);
+                //cubeModel->GetTexture()->Bind(0);
+                cubeModel->Bind(modelLayout);
                 sampler.Bind(0);
                 cubeModel->GetMesh()->Draw();
 

@@ -16,7 +16,7 @@ namespace RIS
             : ascender(ascender), descender(descender), height(height), maxAdvance(maxAdvance), name(name), size(size), spaceAdvance(spaceAdvance), glyphs(glyphs), texture(texture)
         {}
 
-        TextMetrics Font::MeasureString(const std::string &str, float fontSize) const
+        TextMetrics Font::MeasureString(const std::string_view str, float fontSize) const
         {
             float penX = 0.0f;
             float penY = 0.0f;

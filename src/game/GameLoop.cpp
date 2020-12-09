@@ -12,6 +12,7 @@
 #include "misc/Timer.hpp"
 #include "misc/Logger.hpp"
 #include "misc/Config.hpp"
+#include "misc/Version.hpp"
 
 #include "graphics/Framebuffer.hpp"
 
@@ -29,6 +30,7 @@
 #include "graphics/Animation.hpp"
 #include "graphics/Transform.hpp"
 #include "graphics/Model.hpp"
+#include "graphics/Font.hpp"
 
 #include "loader/TextLoad.hpp"
 
@@ -50,6 +52,8 @@ namespace RIS
             auto &interface = GetUserinterface();
             auto &audio = GetAudioEngine();
             auto &scriptEngine = GetScriptEngine();
+
+            InitMenus();
 
             bool god = false;
             interface.GetConsole().BindFunc("god", UI::Helpers::BoolFunc(god, "Godmode ON", "Godmode OFF"));
@@ -257,6 +261,91 @@ namespace RIS
             }
 
             return 0;
+        }
+
+        void GameLoop::InitMenus()
+        {
+            std::string version = "V"s + std::to_string(Version::MAJOR) + "."s + std::to_string(Version::MINOR);
+            auto &ui = GetUserinterface();
+
+            GetConsole().Print(version);
+
+            float w = ui.GetWidth();
+            float h = ui.GetHeight() - 24;
+
+            auto font = Loader::Load<Graphics::Font>("fonts/immortal.json", resourcePack);
+
+            float titleFontSize = 60;
+
+            auto titleMetrics = font->MeasureString(Version::GAME_NAME, titleFontSize);
+
+            auto titleLabel = UI::Label::Create(font);
+            titleLabel->SetName("title");
+            titleLabel->SetFontSize(titleFontSize);
+            titleLabel->SetText(std::string(Version::GAME_NAME));
+            titleLabel->SetPosition({(w / 2.0f) - (titleMetrics.width / 2.0f), titleMetrics.height + 10.0f});
+
+            auto versionMetrics = font->MeasureString(version, 16);
+
+            auto versionLabel = UI::Label::Create(font);
+            versionLabel->SetName("version");
+            versionLabel->SetFontSize(16);
+            versionLabel->SetTextColor({1, 1, 0, 1});
+            versionLabel->SetPosition({w - versionMetrics.width, h - versionMetrics.height});
+            versionLabel->SetText(version);
+
+            auto catImage = Loader::Load<Graphics::Texture>("textures/meow.dds", resourcePack);
+
+            auto img = UI::Image::Create();
+            img->SetName("img");
+            img->SetPosition({w - 100, 0});
+            img->SetImage(catImage);
+
+            auto btn = UI::Button::Create(font);
+            btn->SetName("btn1");
+            btn->SetPosition({10, h - 10});
+            btn->SetSize({74, 24});
+            btn->SetText("Quit");
+            btn->SetFontSize(16);
+            btn->SetCallback([](){ GetWindow().Exit(0); });
+
+            auto btn2 = UI::Button::Create(font);
+            btn2->SetName("btn2");
+            btn2->SetPosition({10, h - 36});
+            btn2->SetSize({74, 24});
+            btn2->SetText("Options");
+            btn2->SetFontSize(16);
+            //btn2->SetCallback([](){});
+            btn2->SetActive(false);
+
+            auto textBox = UI::InputBox::Create(font);
+            textBox->SetName("txtbox");
+            textBox->SetPreviewText("Hello World");
+            textBox->SetText("Hah");
+            textBox->SetPosition({100, 100});
+            textBox->SetSize({128, 32});
+            textBox->SetFontSize(16);
+
+            auto btn3 = UI::Button::Create(font);
+            btn3->SetName("btn2");
+            btn3->SetPosition({10, h - 36 - 26});
+            btn3->SetSize({74, 24});
+            btn3->SetText("Play");
+            btn3->SetFontSize(16);
+            btn3->SetCallback([textBox](){ GetConsole().Print(textBox->GetText()); });
+
+            auto panel = UI::Panel::Create();
+            panel->SetName("panel");
+            panel->Add(img);
+            panel->Add(btn);
+            panel->Add(btn2);
+            panel->Add(btn3);
+            panel->Add(titleLabel);
+            panel->Add(versionLabel);
+            panel->Add(textBox);
+
+            ui.RegisterMenu("mainMenu", panel);
+            ui.SetActiveMenu("mainMenu");
         }
     }
 }

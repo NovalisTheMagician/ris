@@ -84,7 +84,8 @@
         "unordered_set": "cpp",
         "span": "cpp",
         "clocale": "cpp",
-        "compare": "cpp"
+        "compare": "cpp",
+        "charconv": "cpp"
     },
     "python.linting.enabled": false,
     "python.pythonPath": "D:\\python38\\python.exe",

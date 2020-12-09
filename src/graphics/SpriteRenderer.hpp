@@ -12,6 +12,7 @@
 #include <glm/glm.hpp>
 
 #include <memory>
+#include <string_view>
 
 #include "loader/ResourcePack.hpp"
 
@@ -34,10 +35,10 @@ namespace RIS
 
             void DrawTexture(const Texture &texture, const glm::vec2 &position = {}, const glm::vec2 &size = {1, 1}, const glm::vec4 &tint = {1, 1, 1, 1});
             void DrawRect(const glm::vec2 &position = {}, const glm::vec2 &size = {1, 1}, const glm::vec4 &tint = {1, 1, 1, 1});
-            void DrawString(const std::string &string, const Font &font, float size, const glm::vec2 &position = {}, const glm::vec4 &tint = {1, 1, 1, 1});
+            void DrawString(const std::string_view string, const Font &font, float size, const glm::vec2 &position = {}, const glm::vec4 &tint = {1, 1, 1, 1});
 
         private:
-            static const int MAX_STRING_LEN;
+            static constexpr int MAX_STRING_LEN = 1024;
 
             struct WorldBufferData
             {

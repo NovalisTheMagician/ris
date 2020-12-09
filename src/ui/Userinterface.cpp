@@ -304,6 +304,34 @@ namespace RIS
             console.Update(timer);
         }
 
+        int Userinterface::GetWidth() const
+        {
+            return uiWidth;
+        }
+
+        int Userinterface::GetHeight() const
+        {
+            return uiHeight;
+        }
+
+        void Userinterface::RegisterMenu(std::string name, Component::Ptr component)
+        {
+            menus.insert_or_assign(name, component);
+        }
+
+        void Userinterface::SetActiveMenu(std::string name)
+        {
+            if(menus.count(name) > 0)
+            {
+                auto& comp = menus.at(name);
+                activeMenu = comp;
+            }
+            else
+            {
+                activeMenu = nullptr;
+            }
+        }
+
         bool Userinterface::OnChar(uint32_t character)
         {
             if(console.IsOpen())

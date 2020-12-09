@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <string_view>
 #include <unordered_map>
 
 #include "graphics/Texture.hpp"
@@ -38,7 +39,7 @@ namespace RIS
             Font(Font&&) = default;
             Font& operator=(Font&&) = default;
 
-            TextMetrics MeasureString(const std::string &str, float fontSize = -1) const;
+            TextMetrics MeasureString(const std::string_view str, float fontSize = -1) const;
 
             std::shared_ptr<Texture> GetTexture() const;
 

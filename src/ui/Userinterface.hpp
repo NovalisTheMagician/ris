@@ -49,6 +49,12 @@ namespace RIS
             void Draw();
             void Update(const Timer &timer);
 
+            int GetWidth() const;
+            int GetHeight() const;
+
+            void RegisterMenu(std::string name, Component::Ptr component);
+            void SetActiveMenu(std::string name);
+
         private:
             bool OnChar(uint32_t character);
             bool OnMouseMove(float x, float y);

@@ -19,6 +19,9 @@ namespace RIS
             int Start();
 
         private:
+            void InitMenus();
+
+        private:
             Loader::ResourcePack resourcePack;
 
         };

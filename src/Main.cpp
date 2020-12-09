@@ -39,6 +39,8 @@
 
 #include <boxer/boxer.h>
 
+#include <fmt/format.h>
+
 using namespace std::literals::string_literals;
 
 using namespace RIS;
@@ -67,7 +69,8 @@ int main(int argc, char *argv[])
 #endif
 
     Logger &logger = Logger::Instance();
-    logger.Info("Starting " + Version::GAME_NAME + " Version " + std::to_string(Version::MAJOR) + "." + std::to_string(Version::MINOR));
+    //logger.Info("Starting "s + Version::GAME_NAME + " Version "s + std::to_string(Version::MAJOR) + "."s + std::to_string(Version::MINOR));
+    logger.Info(fmt::format("Starting {} Version {}.{}", Version::GAME_NAME, Version::MAJOR, Version::MINOR));
 
     Args args(argc, argv);
 
@@ -108,7 +111,7 @@ int main(int argc, char *argv[])
     ::globalConfig = std::move(config);
     ::globalArgs = args;
 
-    logger.Info("Using config " + configPath);
+    logger.Info(fmt::format("Using config {}", configPath));
 
     std::unique_ptr<Window::Window> window;
     std::unique_ptr<Graphics::Renderer> renderer;
@@ -119,7 +122,7 @@ int main(int argc, char *argv[])
 
     try
     {
-        window = std::make_unique<Window::Window>(Version::GAME_NAME);
+        window = std::make_unique<Window::Window>(std::string(Version::GAME_NAME));
         renderer = std::make_unique<Graphics::Renderer>();
         scriptEngine = std::make_unique<Script::ScriptEngine>();
         audio = std::make_unique<Audio::AudioEngine>();
@@ -141,7 +144,7 @@ int main(int argc, char *argv[])
     }
     catch(const RISException& e)
     {
-        logger.Error("Failed to init system: "s + e.what());
+        logger.Error(fmt::format("Failed to init system: {}", e.what()));
         Logger::Destroy();
 
         boxer::show(e.what(), "Failed to launch game", boxer::Style::Error);

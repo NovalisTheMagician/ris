@@ -18,7 +18,7 @@ namespace RIS
 {
     namespace Graphics
     {
-        const int SpriteRenderer::MAX_STRING_LEN = 1024;
+        //const int SpriteRenderer::MAX_STRING_LEN = 1024;
 
         SpriteRenderer::SpriteRenderer(const Loader::ResourcePack &resourcePack)
             : sampler(MinFilter::LINEAR, MagFilter::LINEAR)
@@ -60,7 +60,7 @@ namespace RIS
             vertexLayout.Bind();
 
             viewProjectionBuffer.UpdateData(glm::ortho(0.0f, viewWidth, viewHeight, 0.0f, -1.0f, 1.0f));
-            viewProjectionBuffer.Bind(GL_UNIFORM_BUFFER, 0);
+            viewProjectionBuffer.Bind(0);
 
             pipeline.Use();
         }
@@ -84,7 +84,7 @@ namespace RIS
             world = glm::scale(world, glm::vec3(glm::round(size), 1.0f));
 
             worldBuffer.UpdateData<WorldBufferData>({world, tint});
-            worldBuffer.Bind(GL_UNIFORM_BUFFER, 1);
+            worldBuffer.Bind(1);
 
             glDrawArrays(GL_TRIANGLES, 0, 6);
         }
@@ -101,12 +101,12 @@ namespace RIS
             world = glm::scale(world, glm::vec3(glm::round(size), 1.0f));
 
             worldBuffer.UpdateData<WorldBufferData>({world, tint});
-            worldBuffer.Bind(GL_UNIFORM_BUFFER, 1);
+            worldBuffer.Bind(1);
 
             glDrawArrays(GL_TRIANGLES, 0, 6);
         }
 
-        void SpriteRenderer::DrawString(const std::string &str, const Font &font, float size, const glm::vec2 &position, const glm::vec4 &tint)
+        void SpriteRenderer::DrawString(const std::string_view str, const Font &font, float size, const glm::vec2 &position, const glm::vec4 &tint)
         {
             pipeline.SetShader(*fragmentTextShader);
             vertexLayout.SetVertexBuffer<VertexType::SpriteVertex>(vertexTextBuffer);
@@ -180,7 +180,7 @@ namespace RIS
             world = glm::translate(world, glm::vec3(glm::round(position), 0.0f));
 
             worldBuffer.UpdateData<WorldBufferData>({world, tint});
-            worldBuffer.Bind(GL_UNIFORM_BUFFER, 1);
+            worldBuffer.Bind(1);
 
             vertexTextBuffer.UpdateData(vertices);
             std::size_t numVertices = vertices.size();

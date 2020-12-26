@@ -75,10 +75,10 @@ namespace RIS
             glGenerateTextureMipmap(id);
         }
 
-        Texture::Texture(GLenum format, int width, int height)
+        Texture::Texture(TextureFormat format, int width, int height)
         {
             glCreateTextures(GL_TEXTURE_2D, 1, &id);
-            glTextureStorage2D(id, 1, format, width, height);
+            glTextureStorage2D(id, 1, static_cast<GLenum>(format), width, height);
             glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         }
@@ -116,9 +116,9 @@ namespace RIS
             glBindTextureUnit(textureUnit, id);
         }
 
-        void Texture::SetBuffer(const Buffer &buffer, GLenum format)
+        void Texture::SetBuffer(const Buffer &buffer, TextureFormat format)
         {
-            glTextureBuffer(id, format, buffer.GetId());
+            glTextureBuffer(id, static_cast<GLenum>(format), buffer.GetId());
         }
     }
 

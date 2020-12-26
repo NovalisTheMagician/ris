@@ -28,61 +28,60 @@
 
 #include "loader/ResourcePack.hpp"
 
-namespace RIS
+namespace RIS::UI
 {
-    namespace UI
+    class Userinterface
     {
-        class Userinterface
-        {
-        public:
-            Userinterface();
-            ~Userinterface() = default;
+    public:
+        Userinterface();
+        ~Userinterface() = default;
 
-            void PostInit(Loader::ResourcePack &resourcePack);
-            void RegisterScriptFunctions();
+        void PostInit(Loader::ResourcePack &resourcePack);
+        void RegisterScriptFunctions();
 
-            void ReleaseScriptReferences();
-            void Invalidate();
+        void ReleaseScriptReferences();
+        void Invalidate();
 
-            Console& GetConsole();
+        Console& GetConsole();
 
-            void Draw();
-            void Update(const Timer &timer);
+        void Draw();
+        void Update(const Timer &timer);
 
-            int GetWidth() const;
-            int GetHeight() const;
+        int GetWidth() const;
+        int GetHeight() const;
 
-            void RegisterMenu(std::string name, Component::Ptr component);
-            void SetActiveMenu(std::string name);
+        void RegisterMenu(std::string name, Component::Ptr component);
+        void SetActiveMenu(std::string name);
 
-        private:
-            bool OnChar(uint32_t character);
-            bool OnMouseMove(float x, float y);
-            bool OnMouseDown(Input::InputKey button);
-            bool OnMouseUp(Input::InputKey button);
-            bool OnMouseWheel(float x, float y);
-            bool OnKeyDown(Input::InputKey key);
-            bool OnKeyUp(Input::InputKey key);
-            bool OnKeyRepeat(Input::InputKey key);
+        Graphics::Font::Ptr GetDefaultFont() const;
 
-        private:
-            Console console;
-            std::unique_ptr<Graphics::SpriteRenderer> renderer;
+    private:
+        bool OnChar(uint32_t character);
+        bool OnMouseMove(float x, float y);
+        bool OnMouseDown(Input::InputKey button);
+        bool OnMouseUp(Input::InputKey button);
+        bool OnMouseWheel(float x, float y);
+        bool OnKeyDown(Input::InputKey key);
+        bool OnKeyUp(Input::InputKey key);
+        bool OnKeyRepeat(Input::InputKey key);
 
-            std::shared_ptr<Graphics::Font> defaultFont;
+    private:
+        Console console;
+        std::unique_ptr<Graphics::SpriteRenderer> renderer;
 
-            int uiWidth, uiHeight;
-            Container::Ptr rootContainer;
+        std::shared_ptr<Graphics::Font> defaultFont;
 
-            Label::Ptr fpsLabel;
-            bool showFps = false;
-            bool showFrametime = false;
-            float frameTime;
+        int uiWidth, uiHeight;
+        Container::Ptr rootContainer;
 
-            Component::Ptr activeMenu;
+        Label::Ptr fpsLabel;
+        bool showFps = false;
+        bool showFrametime = false;
+        float frameTime;
 
-            std::unordered_map<std::string, Component::Ptr> menus;
-            std::vector<Component::Ptr> components;
-        };
-    }
+        Component::Ptr activeMenu;
+
+        std::unordered_map<std::string, Component::Ptr> menus;
+        std::vector<Component::Ptr> components;
+    };
 }

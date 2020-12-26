@@ -6,33 +6,30 @@
 
 #include <soloud.h>
 
-namespace RIS
+namespace RIS::Audio
 {
-    namespace Audio
+    struct AudioException : public RISException
     {
-        struct AudioException : public RISException
-        {
-            AudioException(const std::string &reason) : RISException(reason) {}
-        };
+        AudioException(const std::string &reason) : RISException(reason) {}
+    };
 
-        class AudioEngine
-        {
-        public:
-            AudioEngine();
-            ~AudioEngine();
+    class AudioEngine
+    {
+    public:
+        AudioEngine();
+        ~AudioEngine();
 
-            AudioEngine(const AudioEngine &) = delete;
-            AudioEngine(AudioEngine &&) = delete;
-            AudioEngine &operator=(const AudioEngine &) = delete;
-            AudioEngine &operator=(AudioEngine &&) = delete;
+        AudioEngine(const AudioEngine &) = delete;
+        AudioEngine(AudioEngine &&) = delete;
+        AudioEngine &operator=(const AudioEngine &) = delete;
+        AudioEngine &operator=(AudioEngine &&) = delete;
 
-            void PostInit();
+        void PostInit();
 
-            void PlaySound(const int &soundId);
+        void PlaySound(const int &soundId);
 
-        private:
-            SoLoud::Soloud soloud;
+    private:
+        SoLoud::Soloud soloud;
 
-        };
-    }
+    };
 }

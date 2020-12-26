@@ -17,311 +17,308 @@
 
 #include <cmath>
 
-namespace RIS
+namespace RIS::UI
 {
-    namespace UI
+    void Console::InitLimits(const glm::vec2 &viewSize, const Loader::ResourcePack &resourcePack)
     {
-        void Console::InitLimits(const glm::vec2 &viewSize, const Loader::ResourcePack &resourcePack)
+        this->viewSize = viewSize;
+        maxY = 0;
+        currentY = -(viewSize.y * 0.5f);
+
+        consoleFont = Loader::Load<Graphics::Font>("fonts/immortal.json", resourcePack);
+        maxLineHeight = consoleFont->GetMaxHeight(consoleFontSize);
+        maxLines = 512;
+
+        BindFunc("con", [this](std::vector<std::string> params){ return SetParam(params); });
+        BindFunc("clear", [this](std::vector<std::string> params){ Clear(); return ""; });
+    }
+
+    void Console::Open()
+    {
+        if(!isOpen)
         {
-            this->viewSize = viewSize;
-            maxY = 0;
-            currentY = -(viewSize.y * 0.5f);
+            isOpen = true;
+            isMoving = true;
+        }
+    }
 
-            consoleFont = Loader::Load<Graphics::Font>("fonts/immortal.json", resourcePack);
-            maxLineHeight = consoleFont->GetMaxHeight(consoleFontSize);
-            maxLines = 512;
+    void Console::Close()
+    {
+        if(isOpen)
+        {
+            isOpen = false;
+            isMoving = true;
+        }
+    }
 
-            BindFunc("con", [this](std::vector<std::string> params){ return SetParam(params); });
-            BindFunc("clear", [this](std::vector<std::string> params){ Clear(); return ""; });
+    void Console::Toggle()
+    {
+        if(isOpen)
+            Close();
+        else 
+            Open();
+    }
+
+    void Console::Print(const std::string &msg)
+    {
+        auto msgs = split(msg, "\n");
+        while(lines.size() >= maxLines - (msgs.size() + 1))
+            lines.pop_back();
+        
+        for(auto& m : msgs)
+            lines.insert(lines.begin(), m);
+    }
+
+    void Console::BindFunc(const std::string &name, ConsoleFunc func)
+    {
+        funcVars.insert_or_assign(lowerCase(name), func);
+    }
+
+    bool Console::IsOpen()
+    {
+        return isOpen;
+    }
+
+    void Console::Clear()
+    {
+        lines.clear();
+        viewOffset = 0;
+    }
+
+    int roundHalf(float f)
+    {
+        return static_cast<int>(std::floorf(f + 0.5f));
+    }
+
+    void Console::Update(const Timer &timer)
+    {
+        // cursor blink
+        if(roundHalf(timer.Total()) % 2)
+        {
+            cursor = "_";
+        }
+        else
+        {
+            cursor = "";
         }
 
-        void Console::Open()
+        if(isMoving)
         {
+            float dir = 1;
             if(!isOpen)
             {
-                isOpen = true;
-                isMoving = true;
-            }
-        }
-
-        void Console::Close()
-        {
-            if(isOpen)
-            {
-                isOpen = false;
-                isMoving = true;
-            }
-        }
-
-        void Console::Toggle()
-        {
-            if(isOpen)
-                Close();
-            else 
-                Open();
-        }
-
-        void Console::Print(const std::string &msg)
-        {
-            auto msgs = split(msg, "\n");
-            while(lines.size() >= maxLines - (msgs.size() + 1))
-                lines.pop_back();
-            
-            for(auto& m : msgs)
-                lines.insert(lines.begin(), m);
-        }
-
-        void Console::BindFunc(const std::string &name, ConsoleFunc func)
-        {
-            funcVars.insert_or_assign(lowerCase(name), func);
-        }
-
-        bool Console::IsOpen()
-        {
-            return isOpen;
-        }
-
-        void Console::Clear()
-        {
-            lines.clear();
-            viewOffset = 0;
-        }
-
-        int roundHalf(float f)
-        {
-            return static_cast<int>(std::floorf(f + 0.5f));
-        }
-
-        void Console::Update(const Timer &timer)
-        {
-            // cursor blink
-            if(roundHalf(timer.Total()) % 2)
-            {
-                cursor = "_";
-            }
-            else
-            {
-                cursor = "";
+                dir = -dir;
             }
 
-            if(isMoving)
+            currentY += dir * openSpeed * timer.Delta();
+
+            if(isOpen && currentY >= maxY)
             {
-                float dir = 1;
-                if(!isOpen)
-                {
-                    dir = -dir;
-                }
-
-                currentY += dir * openSpeed * timer.Delta();
-
-                if(isOpen && currentY >= maxY)
-                {
-                    isMoving = false;
-                    currentY = maxY;
-                }
-                else if(!isOpen && currentY <= -(viewSize.y * 0.5f))
-                {
-                    isMoving = false;
-                    currentY = -(viewSize.y * 0.5f);
-                }
+                isMoving = false;
+                currentY = maxY;
+            }
+            else if(!isOpen && currentY <= -(viewSize.y * 0.5f))
+            {
+                isMoving = false;
+                currentY = -(viewSize.y * 0.5f);
             }
         }
+    }
 
-        glm::vec2 Console::GetPosForLine(int lineNr)
-        {
-            float maxHeight = viewSize.y * 0.5f;
-            return {0, currentY + (maxHeight - maxLineHeight - (lineNr * maxLineHeight) - offsetY)};
-        }
+    glm::vec2 Console::GetPosForLine(int lineNr)
+    {
+        float maxHeight = viewSize.y * 0.5f;
+        return {0, currentY + (maxHeight - maxLineHeight - (lineNr * maxLineHeight) - offsetY)};
+    }
 
-        void Console::Draw(Graphics::SpriteRenderer &renderer)
+    void Console::Draw(Graphics::SpriteRenderer &renderer)
+    {
+        if(isOpen || isMoving)
         {
-            if(isOpen || isMoving)
+            renderer.DrawRect({0, currentY}, {viewSize.x, viewSize.y * 0.5f}, backgroundColor);
+
+            auto it = lines.begin() + viewOffset;
+            for(int i = 1; it != lines.end(); ++it, ++i)
             {
-                renderer.DrawRect({0, currentY}, {viewSize.x, viewSize.y * 0.5f}, backgroundColor);
-
-                auto it = lines.begin() + viewOffset;
-                for(int i = 1; it != lines.end(); ++it, ++i)
-                {
-                    const std::string &msg = *it;
-                    glm::vec2 pos = GetPosForLine(i);
-                    renderer.DrawString(msg, *consoleFont.get(), consoleFontSize, pos, fontColor);
-                }
-                renderer.DrawString(">" + inputLine + cursor, *consoleFont.get(), consoleFontSize, GetPosForLine(0), fontColor);
+                const std::string &msg = *it;
+                glm::vec2 pos = GetPosForLine(i);
+                renderer.DrawString(msg, *consoleFont.get(), consoleFontSize, pos, fontColor);
             }
+            renderer.DrawString(">" + inputLine + cursor, *consoleFont.get(), consoleFontSize, GetPosForLine(0), fontColor);
         }
+    }
 
-        void Console::OnChar(uint32_t c)
+    void Console::OnChar(uint32_t c)
+    {
+        if(isOpen)
         {
-            if(isOpen)
+            //maybe check exception
+            utf8::append(c, std::back_inserter(inputLine));
+        }
+    }
+
+    void Console::OnKeyRepeat(Input::InputKey key)
+    {
+        OnKey(key, true);
+    }
+
+    void Console::OnKeyDown(Input::InputKey key)
+    {
+        OnKey(key, false);
+    }
+
+    void Console::OnKey(Input::InputKey key, bool repeat)
+    {
+        if(isOpen)
+        {
+            if(key == Input::InputKey::ENTER || key == Input::InputKey::KP_ENTER)
             {
-                //maybe check exception
-                utf8::append(c, std::back_inserter(inputLine));
+                if(inputLine.empty())
+                    return;
+
+                inputHistory.insert(inputHistory.begin(), inputLine);
+                historyIndex = 0;
+
+                Print(inputLine);
+                if(!ProcessLine(inputLine))
+                    Print("Unknown command: \"" + inputLine + "\"");
+                inputLine = "";
             }
-        }
-
-        void Console::OnKeyRepeat(Input::InputKey key)
-        {
-            OnKey(key, true);
-        }
-
-        void Console::OnKeyDown(Input::InputKey key)
-        {
-            OnKey(key, false);
-        }
-
-        void Console::OnKey(Input::InputKey key, bool repeat)
-        {
-            if(isOpen)
+            else if(key == Input::InputKey::BACKSPACE)
             {
-                if(key == Input::InputKey::ENTER || key == Input::InputKey::KP_ENTER)
+                if(inputLine.size() > 0)
                 {
-                    if(inputLine.empty())
-                        return;
-
-                    inputHistory.insert(inputHistory.begin(), inputLine);
-                    historyIndex = 0;
-
-                    Print(inputLine);
-                    if(!ProcessLine(inputLine))
-                        Print("Unknown command: \"" + inputLine + "\"");
-                    inputLine = "";
+                    auto it = inputLine.end();
+                    utf8::prior(it, inputLine.begin());
+                    inputLine.erase(it, inputLine.end());
                 }
-                else if(key == Input::InputKey::BACKSPACE)
+            }
+            else if(key == Input::InputKey::UP)
+            {
+                if(!inputHistory.empty())
                 {
-                    if(inputLine.size() > 0)
-                    {
-                        auto it = inputLine.end();
-                        utf8::prior(it, inputLine.begin());
-                        inputLine.erase(it, inputLine.end());
-                    }
+                    inputLine = inputHistory[historyIndex++];
+                    historyIndex = Clamp(0, static_cast<int>(inputHistory.size())-1, historyIndex);
                 }
-                else if(key == Input::InputKey::UP)
+            }
+            else if(key == Input::InputKey::DOWN)
+            {
+                if(!inputHistory.empty())
                 {
-                    if(!inputHistory.empty())
-                    {
-                        inputLine = inputHistory[historyIndex++];
-                        historyIndex = Clamp(0, static_cast<int>(inputHistory.size())-1, historyIndex);
-                    }
+                    inputLine = inputHistory[historyIndex--];
+                    historyIndex = Clamp(0, static_cast<int>(inputHistory.size())-1, historyIndex);
                 }
-                else if(key == Input::InputKey::DOWN)
-                {
-                    if(!inputHistory.empty())
-                    {
-                        inputLine = inputHistory[historyIndex--];
-                        historyIndex = Clamp(0, static_cast<int>(inputHistory.size())-1, historyIndex);
-                    }
-                }
-                else if(key == Input::InputKey::PAGE_UP)
-                {
-                    viewOffset++;
-                    if(viewOffset > lines.size() - 1)
-                        viewOffset = lines.size() - 1;
-                }
-                else if(key == Input::InputKey::PAGE_DOWN)
-                {
-                    viewOffset--;
-                    if(viewOffset < 0)
-                        viewOffset = 0;
-                }
-                else if(key == Input::InputKey::HOME)
-                {
+            }
+            else if(key == Input::InputKey::PAGE_UP)
+            {
+                viewOffset++;
+                if(viewOffset > lines.size() - 1)
                     viewOffset = lines.size() - 1;
-                }
-                else if(key == Input::InputKey::END)
-                {
+            }
+            else if(key == Input::InputKey::PAGE_DOWN)
+            {
+                viewOffset--;
+                if(viewOffset < 0)
                     viewOffset = 0;
-                }
+            }
+            else if(key == Input::InputKey::HOME)
+            {
+                viewOffset = lines.size() - 1;
+            }
+            else if(key == Input::InputKey::END)
+            {
+                viewOffset = 0;
             }
         }
+    }
 
-        void Console::OnMouseWheel(float x, float y)
+    void Console::OnMouseWheel(float x, float y)
+    {
+        viewOffset += 1 * Signum(y);
+        int max = static_cast<int>(lines.size()) - 1;
+        viewOffset = Clamp(0, max, viewOffset);
+    }
+
+    bool Console::ProcessLine(const std::string &lineToProcess)
+    {
+        std::istringstream sstream(lineToProcess);
+        std::vector<std::string> tokens{std::istream_iterator<std::string>{sstream},
+                            std::istream_iterator<std::string>{}};
+
+        std::string keyword = lowerCase(tokens[0]);
+        tokens.erase(tokens.begin());
+        
+        if(funcVars.count(keyword) > 0)
         {
-            viewOffset += 1 * Signum(y);
-            int max = static_cast<int>(lines.size()) - 1;
-            viewOffset = Clamp(0, max, viewOffset);
+            auto func = funcVars.at(keyword);
+            auto &msg = func(tokens);
+            if(!msg.empty())
+                Print(msg);
+            return true;
         }
 
-        bool Console::ProcessLine(const std::string &lineToProcess)
-        {
-            std::istringstream sstream(lineToProcess);
-            std::vector<std::string> tokens{std::istream_iterator<std::string>{sstream},
-                                std::istream_iterator<std::string>{}};
+        return false;
+    }
 
-            std::string keyword = lowerCase(tokens[0]);
-            tokens.erase(tokens.begin());
+    std::string Console::SetParam(std::vector<std::string> params)
+    {
+        if(params.size() < 1)
+            return "no param specified!";
+
+        if(params[0] == "background")
+        {
+            if(params.size() < 5)
+                return "not enough color data";
             
-            if(funcVars.count(keyword) > 0)
+            try 
             {
-                auto func = funcVars.at(keyword);
-                auto &msg = func(tokens);
-                if(!msg.empty())
-                    Print(msg);
-                return true;
+                backgroundColor.r = std::stof(params[1]);
+                backgroundColor.g = std::stof(params[2]);
+                backgroundColor.b = std::stof(params[3]);
+                backgroundColor.a = std::stof(params[4]);
             }
-
-            return false;
+            catch(const std::invalid_argument &e)
+            {
+                Print(e.what());
+            }
         }
-
-        std::string Console::SetParam(std::vector<std::string> params)
+        else if(params[0] == "forground")
         {
-            if(params.size() < 1)
-                return "no param specified!";
-
-            if(params[0] == "background")
+            if(params.size() < 5)
+                return "not enough color data";
+            
+            try 
             {
-                if(params.size() < 5)
-                    return "not enough color data";
-                
-                try 
-                {
-                    backgroundColor.r = std::stof(params[1]);
-                    backgroundColor.g = std::stof(params[2]);
-                    backgroundColor.b = std::stof(params[3]);
-                    backgroundColor.a = std::stof(params[4]);
-                }
-                catch(const std::invalid_argument &e)
-                {
-                    Print(e.what());
-                }
+                fontColor.r = std::stof(params[1]);
+                fontColor.g = std::stof(params[2]);
+                fontColor.b = std::stof(params[3]);
+                fontColor.a = std::stof(params[4]);
             }
-            else if(params[0] == "forground")
+            catch(const std::invalid_argument &e)
             {
-                if(params.size() < 5)
-                    return "not enough color data";
-                
-                try 
-                {
-                    fontColor.r = std::stof(params[1]);
-                    fontColor.g = std::stof(params[2]);
-                    fontColor.b = std::stof(params[3]);
-                    fontColor.a = std::stof(params[4]);
-                }
-                catch(const std::invalid_argument &e)
-                {
-                    Print(e.what());
-                }
+                Print(e.what());
             }
-            else if(params[0] == "fontsize")
-            {
-                if(params.size() < 2)
-                    return "no size specified";
-                
-                try
-                {
-                    consoleFontSize = std::stof(params[1]);
-                    maxLineHeight = consoleFont->GetMaxHeight(consoleFontSize);
-                }
-                catch(const std::invalid_argument &e)
-                {
-                    Print(e.what());
-                }
-            }
-            else
-            {
-                return "unkown param " + params[0];
-            }
-
-            return "";
         }
+        else if(params[0] == "fontsize")
+        {
+            if(params.size() < 2)
+                return "no size specified";
+            
+            try
+            {
+                consoleFontSize = std::stof(params[1]);
+                maxLineHeight = consoleFont->GetMaxHeight(consoleFontSize);
+            }
+            catch(const std::invalid_argument &e)
+            {
+                Print(e.what());
+            }
+        }
+        else
+        {
+            return "unkown param " + params[0];
+        }
+
+        return "";
     }
 }

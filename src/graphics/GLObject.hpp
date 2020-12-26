@@ -2,25 +2,22 @@
 
 #include <glad/glad.h>
 
-namespace RIS
+namespace RIS::Graphics
 {
-    namespace Graphics
+    class GLObject
     {
-        class GLObject
-        {
-        public:
-            GLObject() : id(0) {};
-            GLObject(GLuint id) : id(id) {};
-            virtual ~GLObject() = default;
+    public:
+        GLObject() : id(0) {};
+        GLObject(GLuint id) : id(id) {};
+        virtual ~GLObject() = default;
 
-            GLuint GetId() const { return id; };
+        GLuint GetId() const { return id; };
 
-            bool operator==(const GLObject &other) const { return id == other.id; };
-            bool operator!=(const GLObject &other) const { return !(*this == other); };
+        bool operator==(const GLObject &other) const { return id == other.id; };
+        bool operator!=(const GLObject &other) const { return !(*this == other); };
 
-        protected:
-            GLuint id;
+    protected:
+        GLuint id;
 
-        };
-    }
+    };
 }

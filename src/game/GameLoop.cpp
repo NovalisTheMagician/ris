@@ -36,316 +36,312 @@
 
 using namespace std::literals;
 
-namespace RIS
+namespace RIS::Game
 {
-    namespace Game
+    GameLoop::GameLoop(Loader::ResourcePack &&resourcePack)
+        : resourcePack(std::move(resourcePack))
+    {}
+
+    int GameLoop::Start()
     {
-        GameLoop::GameLoop(Loader::ResourcePack &&resourcePack)
-            : resourcePack(std::move(resourcePack))
-        {}
+        auto &window = GetWindow();
+        auto &renderer = GetRenderer();
+        auto &input = GetInput();
+        auto &interface = GetUserinterface();
+        auto &audio = GetAudioEngine();
 
-        int GameLoop::Start()
+        InitMenus();
+
+        bool god = false;
+        interface.GetConsole().BindFunc("god", UI::Helpers::BoolFunc(god, "Godmode ON", "Godmode OFF"));
+
+        auto test = Loader::Load<std::string>("test", resourcePack);
+        if(test)
+            interface.GetConsole().Print(*test);
+
+        Graphics::Texture::Ptr catTexture = Loader::Load<Graphics::Texture>("textures/meow.dds", resourcePack);
+        Graphics::Font::Ptr font = Loader::Load<Graphics::Font>("fonts/immortal.json", resourcePack);
+        Graphics::Model::Ptr cubeModel = Loader::Load<Graphics::Model>("models/john.json", resourcePack);
+
+        Graphics::Shader::Ptr modelVertexShader = Loader::Load<Graphics::Shader>("shaders/mAnim.glsl", resourcePack, Graphics::ShaderType::VERTEX);
+        Graphics::Shader::Ptr modelFragmentShader = Loader::Load<Graphics::Shader>("shaders/mUnlit.glsl", resourcePack, Graphics::ShaderType::FRAGMENT);
+
+        Graphics::Animation::Skeleton::Ptr skeleton = Loader::Load<Graphics::Animation::Skeleton>("meshes/john.glb", resourcePack);
+        Graphics::Animation::Animation::Ptr animation = Loader::Load<Graphics::Animation::Animation>("meshes/john.glb", resourcePack);
+
+        Graphics::VertexArray modelLayout(VertexType::ModelVertexFormat);
+
+        Graphics::ProgramPipeline pipeline;
+        pipeline.SetShader(*modelVertexShader);
+        pipeline.SetShader(*modelFragmentShader);
+
+        //Graphics::Sampler sampler(Graphics::MinFilter::LINEAR_MIPMAP_LINEAR, Graphics::MagFilter::LINEAR, 16.0f);
+        Graphics::Sampler sampler = Graphics::Sampler::Trilinear(16.0f);
+
+        Graphics::UniformBuffer viewProjBuffer(glm::mat4{});
+        Graphics::UniformBuffer worldBuffer(glm::mat4{});
+
+        auto &config = GetConfig();
+        float width = config.GetValue("r_width", 800.0f);
+        float height = config.GetValue("r_height", 600.0f);
+
+        glm::mat4 projection = glm::perspective(glm::radians(60.0f), width / height, 0.1f, 1000.0f);
+        glm::mat4 view = glm::lookAt(glm::vec3(5, 5, 5), glm::vec3(), glm::vec3(0, 1, 0));
+        glm::mat4 world = glm::mat4(1.0f);
+
+        float dist = 5;
+        interface.GetConsole().BindFunc("dist", [&dist](std::vector<std::string> params)
         {
-            auto &window = GetWindow();
-            auto &renderer = GetRenderer();
-            auto &input = GetInput();
-            auto &interface = GetUserinterface();
-            auto &audio = GetAudioEngine();
-            auto &scriptEngine = GetScriptEngine();
+            if(params.size() > 0)
+                dist = std::stof(params.at(0));
+            return "";
+        });
 
-            InitMenus();
+        float animSpeed = 1.0f;
+        interface.GetConsole().BindFunc("anim_speed", [&animSpeed](std::vector<std::string> params)
+        {
+            if(params.size() > 0)
+                animSpeed = std::stof(params.at(0));
+            return "";
+        });
 
-            bool god = false;
-            interface.GetConsole().BindFunc("god", UI::Helpers::BoolFunc(god, "Godmode ON", "Godmode OFF"));
+        bool debugDraw = false;
+        interface.GetConsole().BindFunc("debug_draw", UI::Helpers::BoolFunc(debugDraw, "Show debug stuff", "Dont show debug stuff"));
 
-            auto test = Loader::Load<std::string>("test", resourcePack);
-            if(test)
-                interface.GetConsole().Print(*test);
+        glm::vec3 camPos(std::cos(0.0f) * dist, 5, std::sin(0.0f) * dist);
+        float x = 0;
 
-            Graphics::Texture::Ptr catTexture = Loader::Load<Graphics::Texture>("textures/meow.dds", resourcePack);
-            Graphics::Font::Ptr font = Loader::Load<Graphics::Font>("fonts/immortal.json", resourcePack);
-            Graphics::Model::Ptr cubeModel = Loader::Load<Graphics::Model>("models/john.json", resourcePack);
+        glm::vec4 clearColor(0.392f, 0.584f, 0.929f, 1.0f);
 
-            Graphics::Shader::Ptr modelVertexShader = Loader::Load<Graphics::Shader>("shaders/mAnim.glsl", resourcePack, Graphics::ShaderType::VERTEX);
-            Graphics::Shader::Ptr modelFragmentShader = Loader::Load<Graphics::Shader>("shaders/mUnlit.glsl", resourcePack, Graphics::ShaderType::FRAGMENT);
+        Timer timer;
 
-            Graphics::Animation::Skeleton::Ptr skeleton = Loader::Load<Graphics::Animation::Skeleton>("meshes/john.glb", resourcePack);
-            Graphics::Animation::Animation::Ptr animation = Loader::Load<Graphics::Animation::Animation>("meshes/john.glb", resourcePack);
+        Graphics::Framebuffer defaultFramebuffer;
 
-            Graphics::VertexArray modelLayout(VertexType::ModelVertexFormat);
+        std::vector<glm::mat4> matrixPalette;
+        float playbackTime = 0.0f;
 
-            Graphics::ProgramPipeline pipeline;
-            pipeline.SetShader(*modelVertexShader);
-            pipeline.SetShader(*modelFragmentShader);
+        auto &clip = animation->GetByIndex(0);
+        Graphics::Animation::Pose &animPose = skeleton->GetBindPose();
 
-            //Graphics::Sampler sampler(Graphics::MinFilter::LINEAR_MIPMAP_LINEAR, Graphics::MagFilter::LINEAR, 16.0f);
-            Graphics::Sampler sampler = Graphics::Sampler::Trilinear(16.0f);
+        Graphics::UniformBuffer skeletonBuffer(sizeof glm::mat4 * 120);
 
-            Graphics::UniformBuffer viewProjBuffer(glm::mat4{});
-            Graphics::UniformBuffer worldBuffer(glm::mat4{});
+        const std::vector<glm::mat4> &invBindPose = skeleton->GetInvBindPose();
 
-            auto &config = GetConfig();
-            float width = config.GetValue("r_width", 800.0f);
-            float height = config.GetValue("r_height", 600.0f);
-
-            glm::mat4 projection = glm::perspective(glm::radians(60.0f), width / height, 0.1f, 1000.0f);
-            glm::mat4 view = glm::lookAt(glm::vec3(5, 5, 5), glm::vec3(), glm::vec3(0, 1, 0));
-            glm::mat4 world = glm::mat4(1.0f);
-
-            float dist = 5;
-            interface.GetConsole().BindFunc("dist", [&dist](std::vector<std::string> params)
-            {
-                if(params.size() > 0)
-                    dist = std::stof(params.at(0));
-                return "";
-            });
-
-            float animSpeed = 1.0f;
-            interface.GetConsole().BindFunc("anim_speed", [&animSpeed](std::vector<std::string> params)
-            {
-                if(params.size() > 0)
-                    animSpeed = std::stof(params.at(0));
-                return "";
-            });
-
-            bool debugDraw = false;
-            interface.GetConsole().BindFunc("debug_draw", UI::Helpers::BoolFunc(debugDraw, "Show debug stuff", "Dont show debug stuff"));
-
-            glm::vec3 camPos(std::cos(0.0f) * dist, 5, std::sin(0.0f) * dist);
-            float x = 0;
-
-            glm::vec4 clearColor(0.392f, 0.584f, 0.929f, 1.0f);
-
-            Timer timer;
-
-            Graphics::Framebuffer defaultFramebuffer;
-
-            std::vector<glm::mat4> matrixPalette;
-            float playbackTime = 0.0f;
-
-            auto &clip = animation->GetByIndex(0);
-            Graphics::Animation::Pose &animPose = skeleton->GetBindPose();
-
-            Graphics::UniformBuffer skeletonBuffer(sizeof glm::mat4 * 120);
-
-            const std::vector<glm::mat4> &invBindPose = skeleton->GetInvBindPose();
-
-            clip.SetLooping(true);
+        clip.SetLooping(true);
 
 #pragma region DebugSetup
 
-            Graphics::Shader::Ptr debugVertexShader = Loader::Load<Graphics::Shader>("shaders/debugVertex.glsl", resourcePack, Graphics::ShaderType::VERTEX);
-            Graphics::Shader::Ptr debugFragmentShader = Loader::Load<Graphics::Shader>("shaders/debugFragment.glsl", resourcePack, Graphics::ShaderType::FRAGMENT);
+        Graphics::Shader::Ptr debugVertexShader = Loader::Load<Graphics::Shader>("shaders/debugVertex.glsl", resourcePack, Graphics::ShaderType::VERTEX);
+        Graphics::Shader::Ptr debugFragmentShader = Loader::Load<Graphics::Shader>("shaders/debugFragment.glsl", resourcePack, Graphics::ShaderType::FRAGMENT);
 
-            Graphics::ProgramPipeline debugPipeline;
-            debugPipeline.SetShader(*debugVertexShader);
-            debugPipeline.SetShader(*debugFragmentShader);
+        Graphics::ProgramPipeline debugPipeline;
+        debugPipeline.SetShader(*debugVertexShader);
+        debugPipeline.SetShader(*debugFragmentShader);
 
-            Graphics::VertexArray debugLayout;
-            debugLayout.SetAttribFormat(0, 3, GL_FLOAT, 0);
+        Graphics::VertexArray debugLayout;
+        debugLayout.SetAttribFormat(0, 3, GL_FLOAT, 0);
 
-            std::vector<glm::vec3> points;
-            std::vector<glm::vec3> lines;
-            for(std::size_t i = 0; i < animPose.Size(); ++i)
+        std::vector<glm::vec3> points;
+        std::vector<glm::vec3> lines;
+        for(std::size_t i = 0; i < animPose.Size(); ++i)
+        {
+            auto transform = animPose.GetGlobalTransform(i);
+            points.push_back(transform.position);
+
+            int parent = animPose.GetParent(i);
+            if(parent >= 0)
             {
-                auto transform = animPose.GetGlobalTransform(i);
-                points.push_back(transform.position);
-
-                int parent = animPose.GetParent(i);
-                if(parent >= 0)
-                {
-                    auto parentTrans = animPose.GetGlobalTransform(parent);
-                    lines.push_back(transform.position);
-                    lines.push_back(parentTrans.position);
-                }
-                else
-                {
-                    lines.push_back(transform.position);
-                    glm::vec3 nextPos = transform.position + (transform.rotation * (transform.scale * glm::vec3(0, 1, 0)));
-                    lines.push_back(nextPos);
-                }
+                auto parentTrans = animPose.GetGlobalTransform(parent);
+                lines.push_back(transform.position);
+                lines.push_back(parentTrans.position);
             }
+            else
+            {
+                lines.push_back(transform.position);
+                glm::vec3 nextPos = transform.position + (transform.rotation * (transform.scale * glm::vec3(0, 1, 0)));
+                lines.push_back(nextPos);
+            }
+        }
 
-            Graphics::Buffer bonePointBuffer(points, GL_DYNAMIC_STORAGE_BIT);
-            Graphics::Buffer boneLineBuffer(lines, GL_DYNAMIC_STORAGE_BIT);
+        Graphics::Buffer bonePointBuffer(points, GL_DYNAMIC_STORAGE_BIT);
+        Graphics::Buffer boneLineBuffer(lines, GL_DYNAMIC_STORAGE_BIT);
 
-            glDisable(GL_PROGRAM_POINT_SIZE);
-            glPointSize(6.0f);
+        glDisable(GL_PROGRAM_POINT_SIZE);
+        glPointSize(6.0f);
 
 #pragma endregion DebugSetup
 
-            while (!window.HandleMessages())
-            {
-                timer.Update();
-                input.Update();
+        while (!window.HandleMessages())
+        {
+            timer.Update();
+            input.Update();
 
-                float dt = timer.Delta();
+            float dt = timer.Delta();
 
-                playbackTime = clip.Sample(animPose, playbackTime + timer.Delta() * animSpeed);
-                animPose.GetMatrixPalette(matrixPalette);
+            playbackTime = clip.Sample(animPose, playbackTime + timer.Delta() * animSpeed);
+            animPose.GetMatrixPalette(matrixPalette);
 
-                for(std::size_t i = 0; i < matrixPalette.size(); ++i)
-                    matrixPalette[i] = matrixPalette[i] * invBindPose[i];
+            for(std::size_t i = 0; i < matrixPalette.size(); ++i)
+                matrixPalette[i] = matrixPalette[i] * invBindPose[i];
 
-                skeletonBuffer.UpdateData(matrixPalette);
+            skeletonBuffer.UpdateData(matrixPalette);
 
-                x += timer.Delta();
-                camPos = glm::vec3(std::cos(x) * dist, 5, std::sin(x) * dist);
+            x += timer.Delta();
+            camPos = glm::vec3(std::cos(x) * dist, 5, std::sin(x) * dist);
 
-                view = glm::lookAt(camPos, glm::vec3(), glm::vec3(0, 1, 0));
-                viewProjBuffer.UpdateData(projection * view);
-                worldBuffer.UpdateData(world);
+            view = glm::lookAt(camPos, glm::vec3(), glm::vec3(0, 1, 0));
+            viewProjBuffer.UpdateData(projection * view);
+            worldBuffer.UpdateData(world);
 
-                interface.Update(timer);
+            interface.Update(timer);
 
-                defaultFramebuffer.Clear(clearColor, 1.0f);
+            defaultFramebuffer.Clear(clearColor, 1.0f);
 
-                pipeline.Use();
-                viewProjBuffer.Bind(0);
-                worldBuffer.Bind(1);
-                skeletonBuffer.Bind(2);
+            pipeline.Use();
+            viewProjBuffer.Bind(0);
+            worldBuffer.Bind(1);
+            skeletonBuffer.Bind(2);
 
-                modelLayout.Bind();
-                //cubeModel->GetMesh()->Bind(modelLayout);
-                //cubeModel->GetTexture()->Bind(0);
-                cubeModel->Bind(modelLayout);
-                sampler.Bind(0);
-                cubeModel->GetMesh()->Draw();
+            modelLayout.Bind();
+            //cubeModel->GetMesh()->Bind(modelLayout);
+            //cubeModel->GetTexture()->Bind(0);
+            cubeModel->Bind(modelLayout);
+            sampler.Bind(0);
+            cubeModel->GetMesh()->Draw();
 
 #pragma region DebugDraw
 
-                if(debugDraw)
+            if(debugDraw)
+            {
+                lines.clear();
+                for(std::size_t i = 0; i < animPose.Size(); ++i)
                 {
-                    lines.clear();
-                    for(std::size_t i = 0; i < animPose.Size(); ++i)
+                    auto transform = animPose.GetGlobalTransform(i);
+                    points[i] = transform.position;
+
+                    int parent = animPose.GetParent(i);
+                    if(parent >= 0)
                     {
-                        auto transform = animPose.GetGlobalTransform(i);
-                        points[i] = transform.position;
-
-                        int parent = animPose.GetParent(i);
-                        if(parent >= 0)
-                        {
-                            auto parentTrans = animPose.GetGlobalTransform(parent);
-                            lines.push_back(transform.position);
-                            lines.push_back(parentTrans.position);
-                        }
-                        else
-                        {
-                            lines.push_back(transform.position);
-                            glm::vec3 nextPos = transform.position + (transform.rotation * (transform.scale * transform.position));
-                            lines.push_back(nextPos);
-                        }
+                        auto parentTrans = animPose.GetGlobalTransform(parent);
+                        lines.push_back(transform.position);
+                        lines.push_back(parentTrans.position);
                     }
-
-                    bonePointBuffer.UpdateData(points);
-                    boneLineBuffer.UpdateData(lines);
-
-                    glDisable(GL_DEPTH_TEST);
-
-                    debugPipeline.Use();
-                    debugLayout.Bind();
-                    debugLayout.SetVertexBuffer<glm::vec3>(bonePointBuffer);
-                    glDrawArrays(GL_POINTS, 0, points.size());
-
-                    debugLayout.SetVertexBuffer<glm::vec3>(boneLineBuffer);
-                    glDrawArrays(GL_LINES, 0, lines.size());
-
-                    glEnable(GL_DEPTH_TEST);
+                    else
+                    {
+                        lines.push_back(transform.position);
+                        glm::vec3 nextPos = transform.position + (transform.rotation * (transform.scale * transform.position));
+                        lines.push_back(nextPos);
+                    }
                 }
+
+                bonePointBuffer.UpdateData(points);
+                boneLineBuffer.UpdateData(lines);
+
+                glDisable(GL_DEPTH_TEST);
+
+                debugPipeline.Use();
+                debugLayout.Bind();
+                debugLayout.SetVertexBuffer<glm::vec3>(bonePointBuffer);
+                glDrawArrays(GL_POINTS, 0, points.size());
+
+                debugLayout.SetVertexBuffer<glm::vec3>(boneLineBuffer);
+                glDrawArrays(GL_LINES, 0, lines.size());
+
+                glEnable(GL_DEPTH_TEST);
+            }
 
 #pragma endregion DebugDraw
 
-                interface.Draw();
-                
-                window.Present();
-            }
-
-            return 0;
+            interface.Draw();
+            
+            window.Present();
         }
 
-        void GameLoop::InitMenus()
-        {
-            std::string version = "V"s + std::to_string(Version::MAJOR) + "."s + std::to_string(Version::MINOR);
-            auto &ui = GetUserinterface();
+        return 0;
+    }
 
-            GetConsole().Print(version);
+    void GameLoop::InitMenus()
+    {
+        std::string version = "V"s + std::to_string(Version::MAJOR) + "."s + std::to_string(Version::MINOR);
+        auto &ui = GetUserinterface();
 
-            float w = ui.GetWidth();
-            float h = ui.GetHeight() - 24;
+        GetConsole().Print(version);
 
-            auto font = Loader::Load<Graphics::Font>("fonts/immortal.json", resourcePack);
+        float w = ui.GetWidth();
+        float h = ui.GetHeight() - 24;
 
-            float titleFontSize = 60;
+        auto font = Loader::Load<Graphics::Font>("fonts/immortal.json", resourcePack);
 
-            auto titleMetrics = font->MeasureString(Version::GAME_NAME, titleFontSize);
+        float titleFontSize = 60;
 
-            auto titleLabel = UI::Label::Create(font);
-            titleLabel->SetName("title");
-            titleLabel->SetFontSize(titleFontSize);
-            titleLabel->SetText(std::string(Version::GAME_NAME));
-            titleLabel->SetPosition({(w / 2.0f) - (titleMetrics.width / 2.0f), titleMetrics.height + 10.0f});
+        auto titleMetrics = font->MeasureString(Version::GAME_NAME, titleFontSize);
 
-            auto versionMetrics = font->MeasureString(version, 16);
+        auto titleLabel = UI::Label::Create(font);
+        titleLabel->SetName("title");
+        titleLabel->SetFontSize(titleFontSize);
+        titleLabel->SetText(std::string(Version::GAME_NAME));
+        titleLabel->SetPosition({(w / 2.0f) - (titleMetrics.width / 2.0f), titleMetrics.height + 10.0f});
 
-            auto versionLabel = UI::Label::Create(font);
-            versionLabel->SetName("version");
-            versionLabel->SetFontSize(16);
-            versionLabel->SetTextColor({1, 1, 0, 1});
-            versionLabel->SetPosition({w - versionMetrics.width, h - versionMetrics.height});
-            versionLabel->SetText(version);
+        auto versionMetrics = font->MeasureString(version, 16);
 
-            auto catImage = Loader::Load<Graphics::Texture>("textures/meow.dds", resourcePack);
+        auto versionLabel = UI::Label::Create(font);
+        versionLabel->SetName("version");
+        versionLabel->SetFontSize(16);
+        versionLabel->SetTextColor({1, 1, 0, 1});
+        versionLabel->SetPosition({w - versionMetrics.width, h - versionMetrics.height});
+        versionLabel->SetText(version);
 
-            auto img = UI::Image::Create();
-            img->SetName("img");
-            img->SetPosition({w - 100, 0});
-            img->SetImage(catImage);
+        auto catImage = Loader::Load<Graphics::Texture>("textures/meow.dds", resourcePack);
 
-            auto btn = UI::Button::Create(font);
-            btn->SetName("btn1");
-            btn->SetPosition({10, h - 10});
-            btn->SetSize({74, 24});
-            btn->SetText("Quit");
-            btn->SetFontSize(16);
-            btn->SetCallback([](){ GetWindow().Exit(0); });
+        auto img = UI::Image::Create();
+        img->SetName("img");
+        img->SetPosition({w - 100, 0});
+        img->SetImage(catImage);
 
-            auto btn2 = UI::Button::Create(font);
-            btn2->SetName("btn2");
-            btn2->SetPosition({10, h - 36});
-            btn2->SetSize({74, 24});
-            btn2->SetText("Options");
-            btn2->SetFontSize(16);
-            //btn2->SetCallback([](){});
-            btn2->SetActive(false);
+        auto btn = UI::Button::Create(font);
+        btn->SetName("btn1");
+        btn->SetPosition({10, h - 10});
+        btn->SetSize({74, 24});
+        btn->SetText("Quit");
+        btn->SetFontSize(16);
+        btn->SetCallback([](){ GetWindow().Exit(0); });
 
-            auto textBox = UI::InputBox::Create(font);
-            textBox->SetName("txtbox");
-            textBox->SetPreviewText("Hello World");
-            textBox->SetText("Hah");
-            textBox->SetPosition({100, 100});
-            textBox->SetSize({128, 32});
-            textBox->SetFontSize(16);
+        auto btn2 = UI::Button::Create(font);
+        btn2->SetName("btn2");
+        btn2->SetPosition({10, h - 36});
+        btn2->SetSize({74, 24});
+        btn2->SetText("Options");
+        btn2->SetFontSize(16);
+        //btn2->SetCallback([](){});
+        btn2->SetActive(false);
 
-            auto btn3 = UI::Button::Create(font);
-            btn3->SetName("btn2");
-            btn3->SetPosition({10, h - 36 - 26});
-            btn3->SetSize({74, 24});
-            btn3->SetText("Play");
-            btn3->SetFontSize(16);
-            btn3->SetCallback([textBox](){ GetConsole().Print(textBox->GetText()); });
+        auto textBox = UI::InputBox::Create(font);
+        textBox->SetName("txtbox");
+        textBox->SetPreviewText("Hello World");
+        textBox->SetText("Hah");
+        textBox->SetPosition({100, 100});
+        textBox->SetSize({128, 32});
+        textBox->SetFontSize(16);
 
-            auto panel = UI::Panel::Create();
-            panel->SetName("panel");
-            panel->Add(img);
-            panel->Add(btn);
-            panel->Add(btn2);
-            panel->Add(btn3);
-            panel->Add(titleLabel);
-            panel->Add(versionLabel);
-            panel->Add(textBox);
+        auto btn3 = UI::Button::Create(font);
+        btn3->SetName("btn2");
+        btn3->SetPosition({10, h - 36 - 26});
+        btn3->SetSize({74, 24});
+        btn3->SetText("Play");
+        btn3->SetFontSize(16);
+        btn3->SetCallback([textBox](){ GetConsole().Print(textBox->GetText()); });
 
-            ui.RegisterMenu("mainMenu", panel);
-            ui.SetActiveMenu("mainMenu");
-        }
+        auto panel = UI::Panel::Create();
+        panel->SetName("panel");
+        panel->Add(img);
+        panel->Add(btn);
+        panel->Add(btn2);
+        panel->Add(btn3);
+        panel->Add(titleLabel);
+        panel->Add(versionLabel);
+        panel->Add(textBox);
+
+        ui.RegisterMenu("mainMenu", panel);
+        ui.SetActiveMenu("mainMenu");
     }
 }

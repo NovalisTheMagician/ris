@@ -4,27 +4,24 @@
 
 #include <zip.hpp>
 
-namespace RIS
+namespace RIS::Loader
 {
-    namespace Loader
+    class ZipPack : public Pack
     {
-        class ZipPack : public Pack
-        {
-        public:
-            ZipPack(const std::string &archivePath);
-            virtual ~ZipPack() = default;
+    public:
+        ZipPack(const std::string &archivePath);
+        virtual ~ZipPack() = default;
 
-            ZipPack(const ZipPack &) = delete;
-            ZipPack& operator=(const ZipPack &) = delete;
-            ZipPack(ZipPack &&) = default;
-            ZipPack& operator=(ZipPack &&) = default;
+        ZipPack(const ZipPack &) = delete;
+        ZipPack& operator=(const ZipPack &) = delete;
+        ZipPack(ZipPack &&) = default;
+        ZipPack& operator=(ZipPack &&) = default;
 
-            std::vector<std::byte> Read(const std::string &res) const override;
-            bool Contains(const std::string &res) const override;
+        std::vector<std::byte> Read(const std::string &res) const override;
+        bool Contains(const std::string &res) const override;
 
-        private:
-            libzip::archive archive;
+    private:
+        libzip::archive archive;
 
-        };
-    }
+    };
 }

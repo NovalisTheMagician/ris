@@ -5,20 +5,17 @@
 #include <string>
 #include <map>
 
-namespace RIS
+namespace RIS::Loader
 {
-    namespace Loader
+    class EmbeddedPack : public Pack
     {
-        class EmbeddedPack : public Pack
-        {
-        public:
+    public:
 
-            std::vector<std::byte> Read(const std::string &res) const override;
-            bool Contains(const std::string &res) const override;
+        std::vector<std::byte> Read(const std::string &res) const override;
+        bool Contains(const std::string &res) const override;
 
-        private:
-            static const std::map<std::string, std::string> resources;
+    private:
+        static const std::map<std::string, std::string> resources;
 
-        };
-    }
+    };
 }

@@ -2,18 +2,10 @@
 
 #include <glm/glm.hpp>
 
-namespace RIS
+namespace RIS::Graphics
 {
-    namespace Graphics
+    Camera::Camera()
     {
-        Camera::Camera()
-        {
 
-        }
-
-        Camera::~Camera()
-        {
-            
-        }
     }
 }

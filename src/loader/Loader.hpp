@@ -20,19 +20,16 @@
 #include "loader/LoadFunc.hpp"
 #include "loader/ResourcePack.hpp"
 
-namespace RIS
+namespace RIS::Loader
 {
-    namespace Loader
+    template<typename T>
+    std::shared_ptr<T> Load(const std::string &res, const ResourcePack &resourcePack, std::any param = {})
     {
-        template<typename T>
-        std::shared_ptr<T> Load(const std::string &res, const ResourcePack &resourcePack, std::any param = {})
+        auto bytes = resourcePack.Read(res);
+        if(!bytes.empty())
         {
-            auto bytes = resourcePack.Read(res);
-            if(!bytes.empty())
-            {
-                return Load<T>(bytes, res, param, resourcePack);
-            }
-            return nullptr;
+            return Load<T>(bytes, res, param, resourcePack);
         }
+        return nullptr;
     }
 }

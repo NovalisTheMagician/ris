@@ -69,7 +69,6 @@ int main(int argc, char *argv[])
 #endif
 
     Logger &logger = Logger::Instance();
-    //logger.Info("Starting "s + Version::GAME_NAME + " Version "s + std::to_string(Version::MAJOR) + "."s + std::to_string(Version::MINOR));
     logger.Info(fmt::format("Starting {} Version {}.{}", Version::GAME_NAME, Version::MAJOR, Version::MINOR));
 
     Args args(argc, argv);
@@ -91,9 +90,7 @@ int main(int argc, char *argv[])
         resourcePack.PushFront(Loader::FilesystemPack(assetFolder));
     }
     if(args.IsSet("-base"))
-    {
         baseArchive = args.GetParameter("-base");
-    }
     if(!baseArchive.empty())
         resourcePack.PushBack(Loader::ZipPack(baseArchive));
 

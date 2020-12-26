@@ -2,23 +2,19 @@
 
 #include <glm/glm.hpp>
 
-namespace RIS
+namespace RIS::Graphics
 {
-    namespace Graphics
+    class Camera
     {
-        class Camera
-        {
-        public:
-            Camera();
-            ~Camera();
+    public:
+        Camera();
 
-        private:
-            glm::mat4 projection;
-            glm::mat4 view;
+    private:
+        glm::mat4 projection;
+        glm::mat4 view;
 
-            glm::vec3 position;
-            float yaw, pitch;
+        glm::vec3 position;
+        float yaw, pitch;
 
-        };
-    }
+    };
 }

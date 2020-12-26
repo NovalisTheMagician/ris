@@ -2,36 +2,33 @@
 
 #include <base64.h>
 
-namespace RIS
+namespace RIS::Loader
 {
-    namespace Loader
+    const std::map<std::string, std::string> EmbeddedPack::resources = 
     {
-        const std::map<std::string, std::string> EmbeddedPack::resources = 
-        {
-            {"test", "SGVsbG8gV29ybGQgRW1iZWRkZWQh"}
-        };
+        {"test", "SGVsbG8gV29ybGQgRW1iZWRkZWQh"}
+    };
 
-        std::vector<std::byte> EmbeddedPack::Read(const std::string &res) const
+    std::vector<std::byte> EmbeddedPack::Read(const std::string &res) const
+    {
+        if(Contains(res))
         {
-            if(Contains(res))
+            try
             {
-                try
-                {
-                    std::string resource = base64_decode(resources.at(res));
-                    std::vector<std::byte> bytes(resource.size());
-                    for(std::size_t i = 0; i < resource.size(); ++i)
-                        bytes[i] = static_cast<std::byte>(resource.at(i));
-                    return bytes;
-                }
-                catch(const std::exception& e)
-                {}
+                std::string resource = base64_decode(resources.at(res));
+                std::vector<std::byte> bytes(resource.size());
+                for(std::size_t i = 0; i < resource.size(); ++i)
+                    bytes[i] = static_cast<std::byte>(resource.at(i));
+                return bytes;
             }
-            return {};
+            catch(const std::exception& e)
+            {}
         }
+        return {};
+    }
 
-        bool EmbeddedPack::Contains(const std::string &res) const
-        {
-            return resources.count(res) > 0;
-        }
+    bool EmbeddedPack::Contains(const std::string &res) const
+    {
+        return resources.count(res) > 0;
     }
 }

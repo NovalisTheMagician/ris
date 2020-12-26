@@ -16,55 +16,52 @@
 
 #include "graphics/Image.hpp"
 
-namespace RIS
+namespace RIS::Window
 {
-    namespace Window
+    struct WindowException : public RISException
     {
-        struct WindowException : public RISException
-        {
-            WindowException(const std::string &reason) : RISException(reason) {}
-        };
+        WindowException(const std::string &reason) : RISException(reason) {}
+    };
 
-        class Window
-        {
-        public:
-            Window(const std::string &title);
-            ~Window();
+    class Window
+    {
+    public:
+        Window(const std::string &title);
+        ~Window();
 
-            Window(const Window &) = delete;
-            Window(Window &&) = delete;
-            Window &operator=(const Window &) = delete;
-            Window &operator=(Window &&) = delete;
+        Window(const Window &) = delete;
+        Window(Window &&) = delete;
+        Window &operator=(const Window &) = delete;
+        Window &operator=(Window &&) = delete;
 
-            void PostInit();
+        void PostInit();
 
-            void SetRelativeMouse(bool setRelative);
+        void SetRelativeMouse(bool setRelative);
 
-            void SetWindowIcon(std::shared_ptr<Graphics::Image> icon);
-            void SetCursorIcon(std::shared_ptr<Graphics::Image> cursor, int xHot, int yHot);
+        void SetWindowIcon(std::shared_ptr<Graphics::Image> icon);
+        void SetCursorIcon(std::shared_ptr<Graphics::Image> cursor, int xHot, int yHot);
 
-            std::string GetClipboard() const;
-            void SetClipboard(const std::string &str) const;
+        std::string GetClipboard() const;
+        void SetClipboard(const std::string &str) const;
 
-            void RequestAttention();
+        void RequestAttention();
 
-            void SetVsync(bool vsync);
+        void SetVsync(bool vsync);
 
-            void Exit(int exitCode);
+        void Exit(int exitCode);
 
-            void RegisterScriptFunctions();
+        void RegisterScriptFunctions();
 
-            bool HandleMessages();
-            void Present();
+        bool HandleMessages();
+        void Present();
 
-            GLFWwindow *GetWindowHandle() const;
+        GLFWwindow *GetWindowHandle() const;
 
-        private:
-            static void FramebufferResize(GLFWwindow *window, int width, int height);
+    private:
+        static void FramebufferResize(GLFWwindow *window, int width, int height);
 
-        private:
-            GLFWwindow *window;
+    private:
+        GLFWwindow *window;
 
-        };
-    }
+    };
 }

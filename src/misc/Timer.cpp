@@ -13,11 +13,6 @@ namespace RIS
 		prevTime = curTime = startTime;
 	}
 
-	Timer::~Timer()
-	{
-
-	}
-
 	void Timer::Update()
 	{
 		prevTime = curTime;
@@ -26,13 +21,11 @@ namespace RIS
 
 	float Timer::Delta() const
 	{
-		auto v = duration_cast<microseconds>(curTime - prevTime).count();
-		return static_cast<float>(v / (1000.0f * 1000.0f));
+		return fseconds(curTime - prevTime).count();
 	}
 
 	float Timer::Total() const
 	{
-		auto v = duration_cast<microseconds>(curTime - startTime).count();
-		return static_cast<float>(v / (1000.0f * 1000.0f));
+		return fseconds(curTime - startTime).count();
 	}
 }

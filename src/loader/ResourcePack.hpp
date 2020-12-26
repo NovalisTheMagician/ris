@@ -8,37 +8,34 @@
 #include "loader/FilesystemPack.hpp"
 #include "loader/EmbeddedPack.hpp"
 
-namespace RIS
+namespace RIS::Loader
 {
-    namespace Loader
+    using PackType = std::variant<ZipPack, FilesystemPack, EmbeddedPack>;
+
+    class ResourcePack
     {
-        using PackType = std::variant<ZipPack, FilesystemPack, EmbeddedPack>;
-
-        class ResourcePack
-        {
-        public:
-            template<typename P>
-            void PushFront(P &&pack);
-            template<typename P>
-            void PushBack(P &&pack);
-
-            std::vector<std::byte> Read(const std::string &res) const;
-
-        private:
-            std::vector<PackType> packs;
-
-        };
-
+    public:
         template<typename P>
-        void ResourcePack::PushFront(P &&pack)
-        {
-            packs.insert(packs.begin(), std::forward<P>(pack));
-        }
-
+        void PushFront(P &&pack);
         template<typename P>
-        void ResourcePack::PushBack(P &&pack)
-        {
-            packs.push_back(std::forward<P>(pack));
-        }
+        void PushBack(P &&pack);
+
+        std::vector<std::byte> Read(const std::string &res) const;
+
+    private:
+        std::vector<PackType> packs;
+
+    };
+
+    template<typename P>
+    void ResourcePack::PushFront(P &&pack)
+    {
+        packs.insert(packs.begin(), std::forward<P>(pack));
+    }
+
+    template<typename P>
+    void ResourcePack::PushBack(P &&pack)
+    {
+        packs.push_back(std::forward<P>(pack));
     }
 }

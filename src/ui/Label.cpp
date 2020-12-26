@@ -4,52 +4,49 @@
 
 using std::string;
 
-namespace RIS
+namespace RIS::UI
 {
-    namespace UI
+    Label::Ptr Label::Create(std::shared_ptr<Graphics::Font> defaultFont)
     {
-        Label::Ptr Label::Create(std::shared_ptr<Graphics::Font> defaultFont)
-        {
-            return std::make_shared<Label>(defaultFont);
-        }
+        return std::make_shared<Label>(defaultFont);
+    }
 
-        Label::Label(std::shared_ptr<Graphics::Font> defaultFont)
-            : font(defaultFont)
-        {}
+    Label::Label(std::shared_ptr<Graphics::Font> defaultFont)
+        : font(defaultFont)
+    {}
 
-        void Label::SetFont(std::shared_ptr<Graphics::Font> font)
-        {
-            this->font = font;
-        }
+    void Label::SetFont(std::shared_ptr<Graphics::Font> font)
+    {
+        this->font = font;
+    }
 
-        void Label::SetFontSize(float fontSize)
-        {
-            this->fontSize = fontSize;
-        }
+    void Label::SetFontSize(float fontSize)
+    {
+        this->fontSize = fontSize;
+    }
 
-        void Label::SetTextColor(const glm::vec4 &color)
-        {
-            fontColor = color;
-        }
+    void Label::SetTextColor(const glm::vec4 &color)
+    {
+        fontColor = color;
+    }
 
-        void Label::SetVisible(bool visible)
-        {
-            isVisible = visible;
-        }
+    void Label::SetVisible(bool visible)
+    {
+        isVisible = visible;
+    }
 
-        void Label::SetText(const string &text)
-        {
-            this->text = text;
-        }
+    void Label::SetText(const string &text)
+    {
+        this->text = text;
+    }
 
-        void Label::Update(const Timer &timer)
-        {
+    void Label::Update(const Timer &timer)
+    {
 
-        }
+    }
 
-        void Label::Draw(Graphics::SpriteRenderer &renderer, const glm::vec2 &parentPosition)
-        {
-            renderer.DrawString(text, *font.get(), fontSize, parentPosition + position, fontColor);
-        }
+    void Label::Draw(Graphics::SpriteRenderer &renderer, const glm::vec2 &parentPosition)
+    {
+        renderer.DrawString(text, *font.get(), fontSize, parentPosition + position, fontColor);
     }
 }

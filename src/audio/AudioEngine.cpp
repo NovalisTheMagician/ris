@@ -4,30 +4,27 @@
 
 #include "loader/Loader.hpp"
 
-namespace RIS
+namespace RIS::Audio
 {
-    namespace Audio
+    AudioEngine::AudioEngine()
     {
-        AudioEngine::AudioEngine()
-        {
-            SoLoud::result res = soloud.init();
-            if(res != 0)
-                throw AudioException("Couldn't initialize Soloud");
-        }
+        SoLoud::result res = soloud.init();
+        if(res != 0)
+            throw AudioException("Couldn't initialize Soloud");
+    }
 
-        AudioEngine::~AudioEngine()
-        {
-            soloud.deinit();
-        }
+    AudioEngine::~AudioEngine()
+    {
+        soloud.deinit();
+    }
 
-        void AudioEngine::PostInit()
-        {
+    void AudioEngine::PostInit()
+    {
 
-        }
+    }
 
-        void AudioEngine::PlaySound(const int &soundId)
-        {
+    void AudioEngine::PlaySound(const int &soundId)
+    {
 
-        }
     }
 }

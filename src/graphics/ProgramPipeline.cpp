@@ -2,40 +2,37 @@
 
 #include <glad/glad.h>
 
-namespace RIS
+namespace RIS::Graphics
 {
-    namespace Graphics
+    ProgramPipeline::ProgramPipeline()
+        : GLObject(0)
     {
-        ProgramPipeline::ProgramPipeline()
-            : GLObject(0)
-        {
-            glCreateProgramPipelines(1, &id);
-        }
+        glCreateProgramPipelines(1, &id);
+    }
 
-        ProgramPipeline::~ProgramPipeline()
-        {
-            glDeleteProgramPipelines(1, &id);
-        }
+    ProgramPipeline::~ProgramPipeline()
+    {
+        glDeleteProgramPipelines(1, &id);
+    }
 
-        ProgramPipeline::ProgramPipeline(ProgramPipeline &&other)
-        {
-            std::swap(id, other.id);
-        }
+    ProgramPipeline::ProgramPipeline(ProgramPipeline &&other)
+    {
+        std::swap(id, other.id);
+    }
 
-        ProgramPipeline& ProgramPipeline::operator=(ProgramPipeline &&other)
-        {
-            std::swap(id, other.id);
-            return *this;
-        }
+    ProgramPipeline& ProgramPipeline::operator=(ProgramPipeline &&other)
+    {
+        std::swap(id, other.id);
+        return *this;
+    }
 
-        void ProgramPipeline::SetShader(const Shader &shader)
-        {
-            glUseProgramStages(id, shader.GetType(), shader.GetId());
-        }
+    void ProgramPipeline::SetShader(const Shader &shader)
+    {
+        glUseProgramStages(id, shader.GetType(), shader.GetId());
+    }
 
-        void ProgramPipeline::Use()
-        {
-            glBindProgramPipeline(id);
-        }
+    void ProgramPipeline::Use()
+    {
+        glBindProgramPipeline(id);
     }
 }

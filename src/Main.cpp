@@ -33,8 +33,6 @@
 
 #include "graphics/Image.hpp"
 
-#include "game/GameLoop.hpp"
-
 #include "RIS.hpp"
 
 #include <boxer/boxer.h>

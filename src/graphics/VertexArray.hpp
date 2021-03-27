@@ -33,7 +33,7 @@ namespace RIS::Graphics
         VertexArray(VertexArray &&other);
         VertexArray& operator=(VertexArray &&other);
 
-        template<typename T, std::size_t Stride = sizeof T>
+        template<typename T, std::size_t Stride = sizeof(T)>
         void SetVertexBuffer(const Buffer &buffer, int bindingPoint = 0, std::size_t offset = 0);
         void SetIndexBuffer(const Buffer &buffer);
 

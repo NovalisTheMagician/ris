@@ -7,56 +7,21 @@
             "label": "build client (DEBUG)",
             "type": "shell",
             "command": "scons client debug=1 -j4",
-            "problemMatcher": "$msCompile",
+            "problemMatcher": ["$msCompile", "$gcc"],
             "group": "build"
         },
         {
             "label": "build client (DEBUG) (ST)",
             "type": "shell",
             "command": "scons client debug=1",
-            "problemMatcher": "$msCompile",
+            "problemMatcher": ["$msCompile", "$gcc"],
             "group": "build"
         },
         {
             "label": "build client (RELEASE)",
             "type": "shell",
             "command": "scons client -j4",
-            "problemMatcher": "$msCompile",
-            "group": "build"
-        },
-        {
-            "label": "build server (DEBUG)",
-            "type": "shell",
-            "command": "scons server debug=1 -j4",
-            "problemMatcher": "$msCompile",
-            "group": "build"
-        },
-        {
-            "label": "build server (RELEASE)",
-            "type": "shell",
-            "command": "scons server -j4",
-            "problemMatcher": "$msCompile",
-            "group": "build"
-        },
-        {
-            "label": "build shader (DEBUG)",
-            "type": "shell",
-            "command": "scons shader debug=1 -j4",
-            "problemMatcher": [],
-            "group": "build"
-        },
-        {
-            "label": "build shader (RELEASE)",
-            "type": "shell",
-            "command": "scons shader -j4",
-            "problemMatcher": [],
-            "group": "build"
-        },
-        {
-            "label": "clean shader",
-            "type": "shell",
-            "command": "scons shader -c",
-            "problemMatcher": [],
+            "problemMatcher": ["$msCompile", "$gcc"],
             "group": "build"
         },
         {
@@ -66,12 +31,5 @@
             "problemMatcher": [],
             "group": "build"
         },
-        {
-            "label": "install",
-            "type": "shell",
-            "command": "",
-            "problemMatcher": [],
-            "group": "build"
-        }
     ]
 }

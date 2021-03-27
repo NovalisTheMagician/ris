@@ -65,15 +65,16 @@ namespace RIS::UI
 
     void Userinterface::Invalidate()
     {
-        auto &scriptEngine = GetScriptEngine();
-        scriptEngine.Call<void>("InitUserinterfaces");
+        //auto &scriptEngine = GetScriptEngine();
+        //scriptEngine.Call<void>("InitUserinterfaces");
     }
 
     void Userinterface::RegisterScriptFunctions()
     {
+        /*
         auto &scriptEngine = GetScriptEngine();
 
-        /*
+        
         scriptEngine.Func("print", [this](const std::string &msg){ console.Print(msg); });
         scriptEngine.Namespace("Console")
             .Func("openConsole", [this](){ console.Open(); })

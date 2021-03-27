@@ -53,7 +53,7 @@ namespace RIS::Graphics
                             GLenum severity, 
                             GLsizei length, 
                             const GLchar *message, 
-                            const void *userParam) -> void
+                            const void *userParam)
             {
                 auto const src_str = [source]() {
                     switch (source)

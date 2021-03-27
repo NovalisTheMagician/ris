@@ -85,10 +85,11 @@
         "span": "cpp",
         "clocale": "cpp",
         "compare": "cpp",
-        "charconv": "cpp"
+        "charconv": "cpp",
+        "bit": "cpp",
+        "stop_token": "cpp"
     },
     "python.linting.enabled": false,
-    "python.pythonPath": "D:\\python38\\python.exe",
     "workbench.colorTheme": "Winter is Coming (Dark Black)",
     "cmake.configureOnOpen": false,
 }

@@ -2,10 +2,12 @@
 
 #include <limits>
 
+#include <stdexcept>
+
 namespace RIS::Graphics::Animation
 {
-    template TClip<TransformTrack>;
-    template TClip<FastTransformTrack>;
+    template class TClip<TransformTrack>;
+    template class TClip<FastTransformTrack>;
 
     template<typename TRACK>
     TClip<TRACK>::TClip()
@@ -113,7 +115,7 @@ namespace RIS::Graphics::Animation
                 return track;
         }
 
-        throw std::exception("ERROR"); // do better
+        throw std::runtime_error("ERROR"); // do better
     }
 
     template<typename TRACK>

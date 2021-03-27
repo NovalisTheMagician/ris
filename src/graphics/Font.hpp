@@ -9,8 +9,6 @@
 
 namespace RIS::Graphics
 {
-    class Texture;
-
     struct TextMetrics
     {
         float width;

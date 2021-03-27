@@ -195,6 +195,12 @@ namespace RIS::Graphics
     }
 
     template<>
+    void Uniform::Set<glm::mat3>(const std::vector<glm::mat3> &values, bool transpose)
+    {
+        glProgramUniformMatrix3fv(shader.GetId(), location, values.size(), transpose, glm::value_ptr(values[0]));
+    }
+
+    template<>
     void Uniform::Set<glm::mat4>(const std::vector<glm::mat4> &values, bool transpose)
     {
         glProgramUniformMatrix4fv(shader.GetId(), location, values.size(), transpose, glm::value_ptr(values[0]));

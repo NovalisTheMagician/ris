@@ -9,7 +9,7 @@ namespace RIS
     namespace UI { class Userinterface; class Console; }
     namespace Audio { class AudioEngine; }
     namespace Window { class Window; }
-    namespace Script { class ScriptEngine; }
+    //namespace Script { class ScriptEngine; }
     namespace Input { class Input; }
 
     Graphics::Renderer&     GetRenderer();
@@ -18,7 +18,7 @@ namespace RIS
     Audio::AudioEngine&     GetAudioEngine();
     Window::Window&         GetWindow();
     Input::Input&           GetInput();
-    Script::ScriptEngine&   GetScriptEngine();
+    //Script::ScriptEngine&   GetScriptEngine();
 
     Config& GetConfig();
     const Args& GetArgs();

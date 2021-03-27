@@ -50,7 +50,7 @@ namespace
     static Audio::AudioEngine       *globalAudio;
     static Input::Input             *globalInput;
     static UI::Userinterface        *globalUserinterface;
-    static Script::ScriptEngine     *globalScriptEngine;
+    //static Script::ScriptEngine     *globalScriptEngine;
     
     static Config globalConfig;
     static Args globalArgs;
@@ -95,10 +95,10 @@ int main(int argc, char *argv[])
     if(args.IsSet("-file"))
     {
         const auto &params = args.GetParameters("-file");
-        std::for_each(params.begin(), params.end(), [&](const std::string &archiveFile)
+        for(const std::string &archiveFile : params)
         {
             resourcePack.PushBack(Loader::ZipPack(archiveFile));
-        });
+        }
     }
 
     resourcePack.PushFront(Loader::EmbeddedPack());
@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
 
     std::unique_ptr<Window::Window> window;
     std::unique_ptr<Graphics::Renderer> renderer;
-    std::unique_ptr<Script::ScriptEngine> scriptEngine;
+    //std::unique_ptr<Script::ScriptEngine> scriptEngine;
     std::unique_ptr<Audio::AudioEngine> audio;
     std::unique_ptr<UI::Userinterface> userinterface;
     std::unique_ptr<Input::Input> input;
@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
     {
         window = std::make_unique<Window::Window>(std::string(Version::GAME_NAME));
         renderer = std::make_unique<Graphics::Renderer>();
-        scriptEngine = std::make_unique<Script::ScriptEngine>();
+        //scriptEngine = std::make_unique<Script::ScriptEngine>();
         audio = std::make_unique<Audio::AudioEngine>();
         userinterface = std::make_unique<UI::Userinterface>();
         input = std::make_unique<Input::Input>(*window);
@@ -128,14 +128,14 @@ int main(int argc, char *argv[])
         ::globalRenderer = renderer.get();
         ::globalAudio = audio.get();
         ::globalInput = input.get();
-        ::globalScriptEngine = scriptEngine.get();
+        //::globalScriptEngine = scriptEngine.get();
         ::globalUserinterface = userinterface.get();
 
         window->PostInit();
         renderer->PostInit();
         audio->PostInit();
         userinterface->PostInit(resourcePack);
-        scriptEngine->PostInit();
+        //scriptEngine->PostInit();
     }
     catch(const RISException& e)
     {
@@ -207,11 +207,13 @@ namespace RIS
     {
         return *::globalInput;
     }
-
+    
+    /*
     Script::ScriptEngine& GetScriptEngine()
     {
         return *::globalScriptEngine;
     }
+    */
 
     Config& GetConfig()
     {

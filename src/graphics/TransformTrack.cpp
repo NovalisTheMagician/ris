@@ -2,8 +2,8 @@
 
 namespace RIS::Graphics::Animation
 {
-    template TTransformTrack<VectorTrack, QuaternionTrack>;
-    template TTransformTrack<FastVectorTrack, FastQuaternionTrack>;
+    template class TTransformTrack<VectorTrack, QuaternionTrack>;
+    template class TTransformTrack<FastVectorTrack, FastQuaternionTrack>;
 
     template<typename VTRACK, typename QTRACK>
     TTransformTrack<VTRACK, QTRACK>::TTransformTrack()

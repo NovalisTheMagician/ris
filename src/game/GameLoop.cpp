@@ -32,6 +32,12 @@
 #include "graphics/Model.hpp"
 #include "graphics/Font.hpp"
 
+#include <fmt/format.h>
+
+#include <thread>
+
+#include "window/Paths.hpp"
+
 using namespace std::literals;
 
 namespace RIS::Game
@@ -47,15 +53,18 @@ namespace RIS::Game
         auto &input = GetInput();
         auto &interface = GetUserinterface();
         auto &audio = GetAudioEngine();
+        auto &console = interface.GetConsole();
 
         InitMenus();
 
         bool god = false;
-        interface.GetConsole().BindFunc("god", UI::Helpers::BoolFunc(god, "Godmode ON", "Godmode OFF"));
+        console.BindFunc("god", UI::Helpers::BoolFunc(god, "Godmode ON", "Godmode OFF"));
+
+        console.BindFunc("attention", [&window](std::vector<std::string> params){ window.RequestAttention(); return ""; });
 
         auto test = Loader::Load<std::string>("test", resourcePack);
         if(test)
-            interface.GetConsole().Print(*test);
+            console.Print(*test);
 
         Graphics::Texture::Ptr catTexture = Loader::Load<Graphics::Texture>("textures/meow.dds", resourcePack);
         Graphics::Font::Ptr font = Loader::Load<Graphics::Font>("fonts/immortal.json", resourcePack);
@@ -88,7 +97,7 @@ namespace RIS::Game
         glm::mat4 world = glm::mat4(1.0f);
 
         float dist = 5;
-        interface.GetConsole().BindFunc("dist", [&dist](std::vector<std::string> params)
+        console.BindFunc("dist", [&dist](std::vector<std::string> params)
         {
             if(params.size() > 0)
                 dist = std::stof(params.at(0));
@@ -96,7 +105,7 @@ namespace RIS::Game
         });
 
         float animSpeed = 1.0f;
-        interface.GetConsole().BindFunc("anim_speed", [&animSpeed](std::vector<std::string> params)
+        console.BindFunc("anim_speed", [&animSpeed](std::vector<std::string> params)
         {
             if(params.size() > 0)
                 animSpeed = std::stof(params.at(0));
@@ -104,7 +113,7 @@ namespace RIS::Game
         });
 
         bool debugDraw = false;
-        interface.GetConsole().BindFunc("debug_draw", UI::Helpers::BoolFunc(debugDraw, "Show debug stuff", "Dont show debug stuff"));
+        console.BindFunc("debug_draw", UI::Helpers::BoolFunc(debugDraw, "Show debug stuff", "Dont show debug stuff"));
 
         glm::vec3 camPos(std::cos(0.0f) * dist, 5, std::sin(0.0f) * dist);
         float x = 0;
@@ -121,11 +130,16 @@ namespace RIS::Game
         auto &clip = animation->GetByIndex(0);
         Graphics::Animation::Pose &animPose = skeleton->GetBindPose();
 
-        Graphics::UniformBuffer skeletonBuffer(sizeof glm::mat4 * 120);
+        Graphics::UniformBuffer skeletonBuffer(sizeof(glm::mat4) * 120);
 
         const std::vector<glm::mat4> &invBindPose = skeleton->GetInvBindPose();
 
         clip.SetLooping(true);
+
+        console.Print(Window::GetConfigPath().generic_string());
+        console.Print(Window::GetSavePath().generic_string());
+        console.Print(Window::GetModPath().generic_string());
+        console.Print(Window::GetTempPath().generic_string());
 
 #pragma region DebugSetup
 
@@ -205,7 +219,8 @@ namespace RIS::Game
             //cubeModel->GetTexture()->Bind(0);
             cubeModel->Bind(modelLayout);
             sampler.Bind(0);
-            cubeModel->GetMesh()->Draw();
+            //cubeModel->GetMesh()->Draw();
+            cubeModel->Draw();
 
 #pragma region DebugDraw
 
@@ -260,7 +275,7 @@ namespace RIS::Game
 
     void GameLoop::InitMenus()
     {
-        std::string version = "V"s + std::to_string(Version::MAJOR) + "."s + std::to_string(Version::MINOR);
+        std::string version = fmt::format("V {}.{}", std::to_string(Version::MAJOR), std::to_string(Version::MINOR));
         auto &ui = GetUserinterface();
 
         GetConsole().Print(version);
@@ -295,6 +310,7 @@ namespace RIS::Game
         img->SetName("img");
         img->SetPosition({w - 100, 0});
         img->SetImage(catImage);
+        img->SetSize({100, 100});
 
         auto btn = UI::Button::Create(font);
         btn->SetName("btn1");

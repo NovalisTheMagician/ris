@@ -10,7 +10,7 @@ namespace RIS
 	struct ArgsException : public std::exception
 	{
 		ArgsException(std::string reason) : reason(reason) {}
-		const char * what() const override { return reason.c_str(); }
+		const char * what() const noexcept override { return reason.c_str(); }
 	private:
 		std::string reason;
 	};

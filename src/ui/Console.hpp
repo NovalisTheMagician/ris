@@ -16,7 +16,7 @@
 
 namespace RIS::UI
 {
-    using ConsoleFunc = std::function<std::string(std::vector<std::string>)>;
+    using ConsoleFunc = std::function<std::string(std::vector<std::string>&)>;
 
     namespace Helpers
     {
@@ -73,7 +73,7 @@ namespace RIS::UI
         void OnMouseWheel(float x, float y);
 
     private:
-        std::string SetParam(std::vector<std::string> params);
+        std::string SetParam(std::vector<std::string> &params);
         glm::vec2 GetPosForLine(int lineNr);
 
         void OnKey(Input::InputKey key, bool repeat);

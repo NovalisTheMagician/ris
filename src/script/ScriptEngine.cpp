@@ -33,6 +33,7 @@ using namespace std::literals;
 
 namespace RIS::Script
 {
+#if 0
     ScriptEngine::ScriptEngine()
     {}
 
@@ -86,4 +87,5 @@ namespace RIS::Script
 
         LoadScripts();
     }
+#endif
 }

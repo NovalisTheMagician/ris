@@ -19,6 +19,7 @@
 
 namespace RIS::Script
 {
+#if 0
     struct ScriptException : public RISException
     {
         ScriptException(const std::string &reason) : RISException(reason) {}
@@ -219,4 +220,5 @@ namespace RIS::Script
         sol::state vm;
 
     };
+#endif
 }

@@ -29,8 +29,8 @@ namespace RIS::UI
         maxLineHeight = consoleFont->GetMaxHeight(consoleFontSize);
         maxLines = 512;
 
-        BindFunc("con", [this](std::vector<std::string> params){ return SetParam(params); });
-        BindFunc("clear", [this](std::vector<std::string> params){ Clear(); return ""; });
+        BindFunc("con", [this](std::vector<std::string> &params){ return SetParam(params); });
+        BindFunc("clear", [this](std::vector<std::string> &params){ Clear(); return ""; });
     }
 
     void Console::Open()
@@ -87,7 +87,7 @@ namespace RIS::UI
 
     int roundHalf(float f)
     {
-        return static_cast<int>(std::floorf(f + 0.5f));
+        return static_cast<int>(std::floor(f + 0.5f));
     }
 
     void Console::Update(const Timer &timer)
@@ -251,7 +251,7 @@ namespace RIS::UI
         if(funcVars.count(keyword) > 0)
         {
             auto func = funcVars.at(keyword);
-            auto &msg = func(tokens);
+            auto msg = func(tokens);
             if(!msg.empty())
                 Print(msg);
             return true;
@@ -260,7 +260,7 @@ namespace RIS::UI
         return false;
     }
 
-    std::string Console::SetParam(std::vector<std::string> params)
+    std::string Console::SetParam(std::vector<std::string> &params)
     {
         if(params.size() < 1)
             return "no param specified!";

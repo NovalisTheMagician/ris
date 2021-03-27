@@ -1,10 +1,13 @@
+import sys
+
 Import('env')
 
 files = Glob('*.cpp')
 rc_files = Glob('*.rc')
 
 objs = env.Object(files)
-objs.append(env.RES(rc_files))
+if (sys.platform == 'win32'):
+    objs.append(env.RES(rc_files))
 
 for subdir in ['loader', 'game', 'graphics', 'misc', 'network', 'physics', 'audio', 'window', 'ui', 'script', 'input']:
     objs.append(SConscript('%s/SConscript' % subdir))

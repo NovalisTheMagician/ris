@@ -1,4 +1,4 @@
-#include "Graphics/Animation.hpp"
+#include "graphics/Animation.hpp"
 
 #include "misc/MathHelper.hpp"
 
@@ -54,9 +54,9 @@ namespace RIS::Graphics::Animation
         }
     }
 
-    template Track<float, 1>;
-    template Track<glm::vec3, 3>;
-    template Track<glm::quat, 4>;
+    template class Track<float, 1>;
+    template class Track<glm::vec3, 3>;
+    template class Track<glm::quat, 4>;
 
     template<typename T, unsigned int N>
     Track<T, N>::Track()

@@ -82,7 +82,7 @@ namespace RIS::Input
         MOUSE_EXTRA5,
     };
 
-    constexpr InputKey ToKey(const std::string &keyName)
+    constexpr InputKey ToKey(std::string_view keyName)
     {
         auto key = magic_enum::enum_cast<InputKey>(keyName);
         return key.value_or(InputKey::NONE);

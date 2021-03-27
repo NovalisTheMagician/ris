@@ -1,8 +1,6 @@
 #include "misc/Timer.hpp"
 
-using hsclock = std::chrono::high_resolution_clock;
-using std::chrono::duration_cast;
-using std::chrono::microseconds;
+using hsclock = RIS::Timer::tp::clock;
 
 namespace RIS
 {
@@ -27,5 +25,20 @@ namespace RIS
 	float Timer::Total() const
 	{
 		return fseconds(curTime - startTime).count();
+	}
+
+	Timer::fseconds Timer::DeltaDuration() const
+	{
+		return fseconds(curTime - prevTime);
+	}
+
+	Timer::fseconds Timer::TotalDuration() const
+	{
+		return fseconds(curTime - startTime);
+	}
+
+	Timer::tp Timer::CurrentTime() const
+	{
+		return curTime;
 	}
 }

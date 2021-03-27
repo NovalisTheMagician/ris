@@ -29,9 +29,12 @@ namespace RIS::Graphics
     Sampler::Sampler(MinFilter minFilter, MagFilter magFilter, float maxAniso)
     {
         glGenSamplers(1, &id);
-        glSamplerParameteri(id, GL_TEXTURE_MIN_FILTER, static_cast<GLenum>(minFilter));
-        glSamplerParameteri(id, GL_TEXTURE_MAG_FILTER, static_cast<GLenum>(magFilter));
-        glSamplerParameterfv(id, GL_TEXTURE_MAX_ANISOTROPY, &maxAniso);
+        //glSamplerParameteri(id, GL_TEXTURE_MIN_FILTER, static_cast<GLenum>(minFilter));
+        //glSamplerParameteri(id, GL_TEXTURE_MAG_FILTER, static_cast<GLenum>(magFilter));
+        //glSamplerParameterfv(id, GL_TEXTURE_MAX_ANISOTROPY, &maxAniso);
+        SetMinFilter(minFilter);
+        SetMagFilter(magFilter);
+        SetMaxAnisotropy(maxAniso);
     }
 
     Sampler::~Sampler()

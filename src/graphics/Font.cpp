@@ -18,7 +18,7 @@ namespace RIS::Graphics
         float height = 0;
 
         bool first = true;
-        for(auto &it = str.begin(); it != str.end();)
+        for(auto it = str.begin(); it != str.end();)
         {
             uint32_t c = utf8::next(it, str.end());
             if(c != U' ')

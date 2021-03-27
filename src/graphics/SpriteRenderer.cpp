@@ -20,10 +20,10 @@ namespace RIS::Graphics
         : sampler(MinFilter::LINEAR, MagFilter::LINEAR)
         , pipeline()
         , vertexLayout(VertexType::SpriteVertexFormat)
-        , viewProjectionBuffer(sizeof glm::mat4)
-        , worldBuffer(sizeof WorldBufferData)
-        , vertexSpriteBuffer(6 * sizeof VertexType::SpriteVertex)
-        , vertexTextBuffer(6 * MAX_STRING_LEN * sizeof VertexType::SpriteVertex)
+        , viewProjectionBuffer(sizeof(glm::mat4))
+        , worldBuffer(sizeof(WorldBufferData))
+        , vertexSpriteBuffer(6 * sizeof(VertexType::SpriteVertex))
+        , vertexTextBuffer(6 * MAX_STRING_LEN * sizeof(VertexType::SpriteVertex))
         , white({1, 1, 1, 1})
     {
         vertexShader = Loader::Load<Shader>("shaders/spriteVertex.glsl", resourcePack, ShaderType::VERTEX);
@@ -117,7 +117,7 @@ namespace RIS::Graphics
         vertices.reserve(MAX_STRING_LEN * 6);
 
         bool first = true;
-        for(auto &it = str.begin(); it != str.end();)
+        for(auto it = str.begin(); it != str.end();)
         {
             uint32_t c = utf8::next(it, str.end());
             if(c != U' ')

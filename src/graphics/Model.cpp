@@ -21,4 +21,9 @@ namespace RIS::Graphics
         mesh->Bind(vao);
         texture->Bind(0);
     }
+
+    void Model::Draw() const
+    {
+        mesh->Draw();
+    }
 }

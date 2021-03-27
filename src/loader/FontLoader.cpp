@@ -58,15 +58,18 @@ namespace RIS::Loader
             glyph.s1 = glyphJson["s1"].GetFloat();
             glyph.t1 = glyphJson["t1"].GetFloat();
 
-            auto c = glyphJson["charcode"].GetString();
-            auto cc = std::string(c);
-            glyph.charCode = utf8::next(cc.begin(), cc.end());
+            auto charcode = glyphJson["charcode"].GetString();
+            auto begin = charcode;
+            auto end = charcode + std::strlen(charcode);
+            glyph.charCode = utf8::next(begin, end);
 
             const rapidjson::Value &kerningsJson = glyphJson["kernings"];
             for(auto kItr = kerningsJson.MemberBegin(); kItr != kerningsJson.MemberEnd(); ++kItr)
             {
-                auto cc = std::string(kItr->name.GetString());
-                uint32_t c = utf8::next(cc.begin(), cc.end());
+                auto char2 = kItr->name.GetString();
+                begin = char2;
+                end = char2 + std::strlen(char2);
+                uint32_t c = utf8::next(begin, end);
                 float val = kItr->value.GetFloat();
                 glyph.kernings.insert({ c, val });
             }

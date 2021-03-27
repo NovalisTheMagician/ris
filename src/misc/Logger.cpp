@@ -38,7 +38,11 @@ namespace RIS
 	{
 		time_t time = std::time(nullptr);
 		struct tm timeinfo;
+#ifdef _WIN32
 		localtime_s(&timeinfo, &time);
+#else
+        localtime_r(&time, &timeinfo);
+#endif
 		stream << "[" << std::put_time(&timeinfo, "%d-%m-%Y %H-%M-%S") << "]";
 	}
 }

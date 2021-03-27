@@ -129,6 +129,7 @@ namespace RIS::Window
 
     void Window::RegisterScriptFunctions()
     {
+        /*
         auto &scriptEngine = GetScriptEngine();
 
         scriptEngine.Namespace("Window")
@@ -142,6 +143,7 @@ namespace RIS::Window
             .Func("getGameName", [](){ return Version::GAME_NAME; })
             .Func("getVersionMajor", [](){ return Version::MAJOR; })
             .Func("getVersionMinor", [](){ return Version::MINOR; });
+        */
     }
 
     void Window::SetRelativeMouse(bool setRelative)

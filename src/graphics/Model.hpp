@@ -26,6 +26,7 @@ namespace RIS::Graphics
         std::shared_ptr<Texture> GetTexture();
 
         void Bind(VertexArray &vao) const;
+        void Draw() const;
 
     private:
         std::shared_ptr<Mesh> mesh;

@@ -4,30 +4,30 @@
 
 namespace RIS::Graphics::Animation
 {
-    template FastTrack<float, 1>;
-    template FastTrack<glm::vec3, 3>;
-    template FastTrack<glm::quat, 4>;
+    template class FastTrack<float, 1>;
+    template class FastTrack<glm::vec3, 3>;
+    template class FastTrack<glm::quat, 4>;
 
     template<typename T, unsigned int N>
     void FastTrack<T, N>::UpdateIndexLookupTable()
     {
-        std::size_t numFrames = frames.size();
+        std::size_t numFrames = this->frames.size();
         if(numFrames <= 1)
             return;
 
-        float duration = GetEndTime() - GetStartTime();
+        float duration = this->GetEndTime() - this->GetStartTime();
         std::size_t numSamples = static_cast<std::size_t>(duration * SAMPLES_PER_SECOND);
         sampledFrames.resize(numSamples);
 
         for(std::size_t i = 0; i < numSamples; ++i)
         {
             float t = static_cast<float>(i) / static_cast<float>(numSamples - 1);
-            float time = t * duration + GetStartTime();
+            float time = t * duration + this->GetStartTime();
 
             std::size_t frameIndex = 0;
             for(std::size_t j = numFrames - 1; j >= 0; --j)
             {
-                if(time >= frames.at(j).time)
+                if(time >= this->frames.at(j).time)
                 {
                     frameIndex = j;
                     if(frameIndex >= numFrames - 2)
@@ -42,14 +42,14 @@ namespace RIS::Graphics::Animation
     template<typename T, unsigned int N>
     int FastTrack<T, N>::FrameIndex(float time, bool looping) const
     {
-        std::size_t size = frames.size();
+        std::size_t size = this->frames.size();
         if(size <= 1)
             return -1;
 
         if(looping)
         {
-            float startTime = frames.front().time;
-            float endTime = frames.back().time;
+            float startTime = this->frames.front().time;
+            float endTime = this->frames.back().time;
             float duration = endTime - startTime;
 
             time = std::fmod(time - startTime, duration);
@@ -59,14 +59,14 @@ namespace RIS::Graphics::Animation
         }
         else
         {
-            if(time <= frames.front().time)
+            if(time <= this->frames.front().time)
                 return 0;
-            if(time >= frames.rbegin()[1].time) // second to last element
+            if(time >= this->frames.rbegin()[1].time) // second to last element
                 return static_cast<int>(size) - 2;
         }
         
-        float duration = GetEndTime() - GetStartTime();
-        float t = (time - GetStartTime()) / duration;
+        float duration = this->GetEndTime() - this->GetStartTime();
+        float t = (time - this->GetStartTime()) / duration;
 
         std::size_t numSamples = static_cast<std::size_t>(duration * SAMPLES_PER_SECOND);
         std::size_t index = static_cast<std::size_t>(t * numSamples);

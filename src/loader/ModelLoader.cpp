@@ -33,7 +33,7 @@ namespace RIS::Loader
 {
     namespace GLTFHelper
     {
-        template<typename T, std::size_t Size = sizeof T>
+        template<typename T, std::size_t Size = sizeof(T)>
         static std::vector<T>& VectorReinterpret(const std::vector<unsigned char> &in, std::vector<T> &out)
         {
             if(in.size() % Size != 0) throw std::runtime_error("input size mismatch");
@@ -56,7 +56,7 @@ namespace RIS::Loader
             return out;
         }
 
-        template<typename T, std::size_t Size = sizeof T>
+        template<typename T, std::size_t Size = sizeof(T)>
         static std::vector<T> VectorReinterpret(const std::vector<unsigned char> &in)
         {
             if(in.size() % Size != 0) throw std::runtime_error("input size mismatch");
@@ -79,7 +79,7 @@ namespace RIS::Loader
             return out;
         }
 
-        template<typename InType, typename OutType, std::size_t Size = sizeof InType>
+        template<typename InType, typename OutType, std::size_t Size = sizeof(InType)>
         static std::vector<OutType>& VectorCast(const std::vector<unsigned char> &in, std::vector<OutType> &out)
         {
             if(in.size() % Size != 0) throw std::runtime_error("input size mismatch");
@@ -100,7 +100,7 @@ namespace RIS::Loader
             return out;
         }
 
-        template<typename InType, typename OutType, std::size_t Size = sizeof InType>
+        template<typename InType, typename OutType, std::size_t Size = sizeof(InType)>
         static std::vector<OutType> VectorCast(const std::vector<unsigned char> &in)
         {
             if(in.size() % Size != 0) throw std::runtime_error("input size mismatch");

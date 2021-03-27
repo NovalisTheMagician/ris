@@ -23,10 +23,6 @@
 
 #include <iostream>
 
-#include <squirrel.h>
-#include <sqstdmath.h>
-#include <sqstdstring.h>
-
 using namespace std::literals;
 
 #define RIS_BUF_SIZE 256

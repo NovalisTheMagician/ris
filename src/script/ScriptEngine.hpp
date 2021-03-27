@@ -15,7 +15,7 @@
 #include <utility>
 #include <optional>
 
-#include <sol/sol.hpp>
+//#include <sol/sol.hpp>
 
 namespace RIS::Script
 {

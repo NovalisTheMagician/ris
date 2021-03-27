@@ -10,6 +10,9 @@
 #include <pwd.h>
 #endif 
 
+#include <string>
+#include <string_view>
+
 namespace RIS::Window
 {
     static std::filesystem::path GetHomePath()
@@ -25,7 +28,7 @@ namespace RIS::Window
             homeDir = getpwuid(getuid())->pw_dir;
         }
         std::filesystem::path path(homeDir);
-        return path / ("." + Version::GAME_NAME);
+        return path / ("." + std::string(Version::GAME_NAME));
 #elif __EMSCRIPTEN__
         return "";
 #endif

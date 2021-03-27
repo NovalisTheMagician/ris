@@ -143,7 +143,7 @@ namespace RIS::Loader
             return 0;
         }
 
-        template<typename T, std::size_t Size = sizeof T>
+        template<typename T, std::size_t Size = sizeof(T)>
         static void GetScalarValues(const tinygltf::Model &model, std::vector<T> &out, std::size_t compCount, const tinygltf::Accessor &accessor)
         {
             out.resize(accessor.count * compCount);
@@ -165,7 +165,7 @@ namespace RIS::Loader
             }
         };
 
-        template<typename T, std::size_t Size = sizeof T>
+        template<typename T, std::size_t Size = sizeof(T)>
         static void GetValues(const tinygltf::Model &model, const tinygltf::Accessor &accessor, std::vector<T> &out)
         {
             out.resize(accessor.count);

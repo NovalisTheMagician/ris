@@ -36,7 +36,7 @@ namespace RIS::UI
                         value = std::stoi(params.at(0));
                         return value ? onMsg : offMsg;
                     }
-                    catch(const std::exception& e)
+                    catch(const std::exception&)
                     {
                         return "Invalid Value"s;
                     }

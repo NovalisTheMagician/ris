@@ -180,6 +180,6 @@ namespace RIS::Graphics
 
         vertexTextBuffer.UpdateData(vertices);
         std::size_t numVertices = vertices.size();
-        glDrawArrays(GL_TRIANGLES, 0, numVertices);
+        glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(numVertices));
     }
 }

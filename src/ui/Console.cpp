@@ -213,7 +213,7 @@ namespace RIS::UI
             {
                 viewOffset++;
                 if(viewOffset > static_cast<int>(lines.size() - 1))
-                    viewOffset = lines.size() - 1;
+                    viewOffset = static_cast<int>(lines.size()) - 1;
             }
             else if(key == Input::InputKey::PAGE_DOWN)
             {
@@ -223,7 +223,7 @@ namespace RIS::UI
             }
             else if(key == Input::InputKey::HOME)
             {
-                viewOffset = lines.size() - 1;
+                viewOffset = static_cast<int>(lines.size()) - 1;
             }
             else if(key == Input::InputKey::END)
             {

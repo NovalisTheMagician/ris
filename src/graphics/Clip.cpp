@@ -100,7 +100,7 @@ namespace RIS::Graphics::Animation
         }
 
         tracks.emplace_back();
-        tracks.back().SetId(joint);
+        tracks.back().SetId(static_cast<unsigned int>(joint));
         return tracks.back();
     }
 
@@ -168,7 +168,7 @@ namespace RIS::Graphics::Animation
     template<typename TRACK>
     void TClip<TRACK>::SetIdAtIndex(std::size_t index, std::size_t id)
     {
-        tracks.at(index).SetId(id);
+        tracks.at(index).SetId(static_cast<unsigned int>(id));
     }
 
     template<typename TRACK>

@@ -279,7 +279,7 @@ namespace RIS::Loader
                 pose.SetLocalTransform(boneId, t);
                 int parent = getParent(i);
 
-                int parentBoneId = parent == -1 ? -1 : nodeBoneMap.at(parent);
+                int parentBoneId = parent == -1 ? -1 : static_cast<int>(nodeBoneMap.at(parent));
                 pose.SetParent(boneId, parentBoneId);
                 
                 names[boneId] = node.name;
@@ -341,7 +341,7 @@ namespace RIS::Loader
         tinygltf::Model model;
         std::string err, warn;
 
-        bool result = gltfLoader.LoadBinaryFromMemory(&model, &err, &warn, reinterpret_cast<const unsigned char*>(bytes.data()), bytes.size());
+        bool result = gltfLoader.LoadBinaryFromMemory(&model, &err, &warn, reinterpret_cast<const unsigned char*>(bytes.data()), static_cast<unsigned int>(bytes.size()));
         if(!warn.empty()) logger.Warning(warn);
         if(result)
         {
@@ -472,7 +472,7 @@ namespace RIS::Loader
             Graphics::VertexBuffer weightsBuffer(weights);
             Graphics::IndexBuffer indexBuffer(indices);
             
-            int numIndices = model.accessors.at(primitive.indices).count;
+            int numIndices = static_cast<int>(model.accessors.at(primitive.indices).count);
 
             return std::make_shared<Graphics::Mesh>(std::move(positionBuffer), std::move(normalBuffer), std::move(texCoordBuffer), std::move(jointsBuffer), std::move(weightsBuffer), std::move(indexBuffer), numIndices);
         }
@@ -491,7 +491,7 @@ namespace RIS::Loader
         tinygltf::Model model;
         std::string err, warn;
 
-        bool result = gltfLoader.LoadBinaryFromMemory(&model, &err, &warn, reinterpret_cast<const unsigned char*>(bytes.data()), bytes.size());
+        bool result = gltfLoader.LoadBinaryFromMemory(&model, &err, &warn, reinterpret_cast<const unsigned char*>(bytes.data()), static_cast<unsigned int>(bytes.size()));
         if(!warn.empty()) logger.Warning(warn);
         if(result)
         {
@@ -529,7 +529,7 @@ namespace RIS::Loader
         tinygltf::Model model;
         std::string err, warn;
 
-        bool result = gltfLoader.LoadBinaryFromMemory(&model, &err, &warn, reinterpret_cast<const unsigned char*>(bytes.data()), bytes.size());
+        bool result = gltfLoader.LoadBinaryFromMemory(&model, &err, &warn, reinterpret_cast<const unsigned char*>(bytes.data()), static_cast<unsigned int>(bytes.size()));
         if(!warn.empty()) logger.Warning(warn);
         if(result)
         {
@@ -548,7 +548,7 @@ namespace RIS::Loader
                 for(const auto &channel : animation.channels)
                 {
                     //const tinygltf::Node &targetNode = model.nodes.at(channel.target_node);
-                    int nodeId = nodeBoneMap.at(channel.target_node);
+                    int nodeId = static_cast<int>(nodeBoneMap.at(channel.target_node));
                     if(channel.target_path == "translation")
                     {
                         auto &track = clip[nodeId].GetPositionTrack();

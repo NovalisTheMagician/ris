@@ -33,11 +33,11 @@ namespace RIS::Graphics
     {
         glEnableVertexArrayAttrib(id, attrib);
         if(type == GL_FLOAT)
-            glVertexArrayAttribFormat(id, attrib, numComponents, type, normalized, offset);
+            glVertexArrayAttribFormat(id, attrib, numComponents, type, normalized, static_cast<GLuint>(offset));
         else if(type == GL_DOUBLE)
-            glVertexArrayAttribLFormat(id, attrib, numComponents, type, offset);
+            glVertexArrayAttribLFormat(id, attrib, numComponents, type, static_cast<GLuint>(offset));
         else
-            glVertexArrayAttribIFormat(id, attrib, numComponents, type, offset);
+            glVertexArrayAttribIFormat(id, attrib, numComponents, type, static_cast<GLuint>(offset));
         glVertexArrayAttribBinding(id, attrib, bindingPoint);
     }
 

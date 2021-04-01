@@ -118,7 +118,7 @@ namespace RIS::Window
                     bool value = std::stoi(params.at(0));
                     SetVsync(value);
                 }
-                catch(const std::exception& e)
+                catch(const std::exception&)
                 {
                     return "Invalid Value"s;
                 }

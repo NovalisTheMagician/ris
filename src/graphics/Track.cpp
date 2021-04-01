@@ -167,7 +167,7 @@ namespace RIS::Graphics::Animation
                 return static_cast<int>(size) - 2;
         }
         
-        int index = size - 1;
+        int index = static_cast<int>(size) - 1;
         for(auto it = frames.rbegin(); it != frames.rend(); ++it)
         {
             if(time >= (*it).time)

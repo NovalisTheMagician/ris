@@ -21,7 +21,7 @@ namespace RIS::Loader
                     bytes[i] = static_cast<std::byte>(resource.at(i));
                 return bytes;
             }
-            catch(const std::exception& e)
+            catch(const std::exception&)
             {}
         }
         return {};

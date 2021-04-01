@@ -81,7 +81,7 @@ namespace RIS
 			auto& value = configMap.at(key);
 			try 
 			{
-				return std::get<float>(value);
+				return static_cast<int>(std::get<float>(value));
 			}
 			catch (const std::bad_variant_access&) 
 			{
@@ -98,7 +98,7 @@ namespace RIS
 			auto& value = configMap.at(key);
 			try 
 			{
-				return std::get<float>(value);
+				return static_cast<int>(std::get<float>(value));
 			}
 			catch (const std::bad_variant_access&) 
 			{

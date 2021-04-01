@@ -90,6 +90,5 @@
         "stop_token": "cpp"
     },
     "python.linting.enabled": false,
-    "workbench.colorTheme": "Winter is Coming (Dark Black)",
     "cmake.configureOnOpen": false,
 }

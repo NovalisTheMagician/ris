@@ -161,48 +161,48 @@ namespace RIS::Graphics
     template<>
     void Uniform::Set<float>(const std::vector<float> &values, bool transpose)
     {
-        glProgramUniform1fv(shader.GetId(), location, values.size(), values.data());
+        glProgramUniform1fv(shader.GetId(), location, static_cast<GLsizei>(values.size()), values.data());
     }
 
     template<>
     void Uniform::Set<int>(const std::vector<int> &values, bool transpose)
     {
-        glProgramUniform1iv(shader.GetId(), location, values.size(), values.data());
+        glProgramUniform1iv(shader.GetId(), location, static_cast<GLsizei>(values.size()), values.data());
     }
 
     template<>
     void Uniform::Set<unsigned int>(const std::vector<unsigned int> &values, bool transpose)
     {
-        glProgramUniform1uiv(shader.GetId(), location, values.size(), values.data());
+        glProgramUniform1uiv(shader.GetId(), location, static_cast<GLsizei>(values.size()), values.data());
     }
 
     template<>
     void Uniform::Set<glm::vec2>(const std::vector<glm::vec2> &values, bool transpose)
     {
-        glProgramUniform2fv(shader.GetId(), location, values.size(), glm::value_ptr(values[0]));
+        glProgramUniform2fv(shader.GetId(), location, static_cast<GLsizei>(values.size()), glm::value_ptr(values[0]));
     }
 
     template<>
     void Uniform::Set<glm::vec3>(const std::vector<glm::vec3> &values, bool transpose)
     {
-        glProgramUniform3fv(shader.GetId(), location, values.size(), glm::value_ptr(values[0]));
+        glProgramUniform3fv(shader.GetId(), location, static_cast<GLsizei>(values.size()), glm::value_ptr(values[0]));
     }
 
     template<>
     void Uniform::Set<glm::vec4>(const std::vector<glm::vec4> &values, bool transpose)
     {
-        glProgramUniform4fv(shader.GetId(), location, values.size(), glm::value_ptr(values[0]));
+        glProgramUniform4fv(shader.GetId(), location, static_cast<GLsizei>(values.size()), glm::value_ptr(values[0]));
     }
 
     template<>
     void Uniform::Set<glm::mat3>(const std::vector<glm::mat3> &values, bool transpose)
     {
-        glProgramUniformMatrix3fv(shader.GetId(), location, values.size(), transpose, glm::value_ptr(values[0]));
+        glProgramUniformMatrix3fv(shader.GetId(), location, static_cast<GLsizei>(values.size()), transpose, glm::value_ptr(values[0]));
     }
 
     template<>
     void Uniform::Set<glm::mat4>(const std::vector<glm::mat4> &values, bool transpose)
     {
-        glProgramUniformMatrix4fv(shader.GetId(), location, values.size(), transpose, glm::value_ptr(values[0]));
+        glProgramUniformMatrix4fv(shader.GetId(), location, static_cast<GLsizei>(values.size()), transpose, glm::value_ptr(values[0]));
     }
 }

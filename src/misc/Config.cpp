@@ -46,7 +46,7 @@ namespace RIS
 				configMap[key] = val;
 				continue;
 			}
-			catch(const std::invalid_argument& e)
+			catch(const std::invalid_argument&)
 			{}
 
 			//is it a bool?
@@ -58,7 +58,7 @@ namespace RIS
 				configMap[key] = val;
 				continue;
 			}
-			catch(const std::exception& e)
+			catch(const std::exception&)
 			{}
 			
 			// it's a string!

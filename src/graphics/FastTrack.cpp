@@ -72,7 +72,7 @@ namespace RIS::Graphics::Animation
         std::size_t index = static_cast<std::size_t>(t * numSamples);
         if(index >= sampledFrames.size())
             return -1;
-        return sampledFrames.at(index);
+        return static_cast<int>(sampledFrames.at(index));
     }
 
     template FastTrack<float, 1>        OptimizeTrack(const Track<float, 1> &input);

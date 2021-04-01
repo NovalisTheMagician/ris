@@ -90,14 +90,34 @@ int main(int argc, char *argv[])
     if(args.IsSet("-base"))
         baseArchive = args.GetParameter("-base");
     if(!baseArchive.empty())
-        resourcePack.PushBack(Loader::ZipPack(baseArchive));
+    {
+        try
+        {
+            resourcePack.PushBack(Loader::ZipPack(baseArchive));
+        }
+        catch(const std::runtime_error &e)
+        {
+            logger.Error(fmt::format("Failed to load base archive ({}): {}", baseArchive, e.what()));
+            Logger::Destroy();
+            boxer::show(fmt::format("{}: {}", baseArchive, e.what()).c_str(), "Failed to launch game", boxer::Style::Error);
+            
+            return 1;
+        }
+    }
 
     if(args.IsSet("-file"))
     {
         const auto &params = args.GetParameters("-file");
         for(const std::string &archiveFile : params)
         {
-            resourcePack.PushBack(Loader::ZipPack(archiveFile));
+            try
+            {
+                resourcePack.PushBack(Loader::ZipPack(archiveFile));
+            }
+            catch(const std::runtime_error &e)
+            {
+                logger.Warning(fmt::format("Failed to load archive ({}): {}", archiveFile, e.what()));
+            }
         }
     }
 

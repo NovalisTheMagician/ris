@@ -69,7 +69,7 @@ namespace RIS
 	inline std::vector<std::string> split(const std::string &str, const std::string &delimiter)
 	{
 		std::vector<std::string> tokens;
-		auto start = 0U;
+		auto start = 0ULL;
 		auto end = str.find(delimiter);
 		while (end != std::string::npos)
 		{

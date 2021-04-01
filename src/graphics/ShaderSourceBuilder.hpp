@@ -46,7 +46,7 @@ namespace RIS::Graphics
                     {
                         includeContent = includeCallback(file);
                     }
-                    catch(const std::exception& e)
+                    catch(const std::exception&)
                     {
                         throw ShaderSourceBuilderException("include file " + file + " not found");
                     }

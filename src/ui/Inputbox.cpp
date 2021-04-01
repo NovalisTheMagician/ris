@@ -33,7 +33,7 @@ namespace RIS::UI
         this->text = text;
         RecalcCharWidths();
 
-        caretPosition = utf8::distance(text.begin(), text.end());
+        caretPosition = static_cast<int>(utf8::distance(text.begin(), text.end()));
     }
     
     void InputBox::SetPreviewTextColor(const glm::vec4 &previewColor)
@@ -103,7 +103,7 @@ namespace RIS::UI
         {
             hasFocus = isInBounds;
             if(hasFocus)
-                caretPosition = utf8::distance(text.begin(), text.end());
+                caretPosition = static_cast<int>(utf8::distance(text.begin(), text.end()));
         }
     }
 
@@ -209,7 +209,7 @@ namespace RIS::UI
             
             text.insert(it, clipbrd.begin(), clipbrd.end());
 
-            caretPosition += utf8::distance(clipbrd.begin(), clipbrd.end());
+            caretPosition += static_cast<int>(utf8::distance(clipbrd.begin(), clipbrd.end()));
 
             RecalcCharWidths();
         }

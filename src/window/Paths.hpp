@@ -8,4 +8,5 @@ namespace RIS::Window
     std::filesystem::path GetSavePath();
     std::filesystem::path GetModPath();
     std::filesystem::path GetTempPath();
+    std::filesystem::path GetCachePath();
 }

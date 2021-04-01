@@ -60,7 +60,10 @@ namespace RIS::Game
         bool god = false;
         console.BindFunc("god", UI::Helpers::BoolFunc(god, "Godmode ON", "Godmode OFF"));
 
-        console.BindFunc("attention", [&window](std::vector<std::string> params){ window.RequestAttention(); return ""; });
+        console.BindFunc("attention", [&window](std::vector<std::string> &params){ window.RequestAttention(); return ""; });
+
+        console.Print(fmt::format("Press {} to open and close the console", input.GetKeyName(Input::InputKey::F1)));
+        console.Print(fmt::format("Name of Key ` is {} (translated)", input.GetKeyName(Input::InputKey::GRAVE_ACCENT)));
 
         auto test = Loader::Load<std::string>("test", resourcePack);
         if(test)
@@ -97,7 +100,7 @@ namespace RIS::Game
         glm::mat4 world = glm::mat4(1.0f);
 
         float dist = 5;
-        console.BindFunc("dist", [&dist](std::vector<std::string> params)
+        console.BindFunc("dist", [&dist](std::vector<std::string> &params)
         {
             if(params.size() > 0)
                 dist = std::stof(params.at(0));
@@ -105,7 +108,7 @@ namespace RIS::Game
         });
 
         float animSpeed = 1.0f;
-        console.BindFunc("anim_speed", [&animSpeed](std::vector<std::string> params)
+        console.BindFunc("anim_speed", [&animSpeed](std::vector<std::string> &params)
         {
             if(params.size() > 0)
                 animSpeed = std::stof(params.at(0));
@@ -140,6 +143,7 @@ namespace RIS::Game
         console.Print(Window::GetSavePath().generic_string());
         console.Print(Window::GetModPath().generic_string());
         console.Print(Window::GetTempPath().generic_string());
+        console.Print(Window::GetCachePath().generic_string());
 
 #pragma region DebugSetup
 

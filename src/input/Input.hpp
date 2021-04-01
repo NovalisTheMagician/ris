@@ -3,6 +3,8 @@
 #include "window/Window.hpp"
 
 #include <vector>
+#include <map>
+#include <string_view>
 #include <functional>
 
 #include "input/KeyDefs.hpp"
@@ -34,6 +36,8 @@ namespace RIS::Input
         void RegisterWheel(WheelFunc callback, bool insertLast = false);
         void RegisterChar(CharFunc callback, bool insertLast = false);
         void RegisterKeyRepeat(KeyFunc callback, bool insertLast = false);
+
+        std::string_view GetKeyName(InputKey key) const;
 
         void Update();
 
@@ -72,6 +76,8 @@ namespace RIS::Input
         std::vector<WheelFunc> wheelCallbacks;
 
         std::vector<CharFunc> charCallbacks;
+
+        std::map<InputKey, std::string_view> keyNames;
 
     };
 }

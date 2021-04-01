@@ -17,8 +17,30 @@ namespace RIS::Input
         glfwSetCursorPosCallback(wnd, MousePosCallback);
         glfwSetScrollCallback(wnd, MouseScrollCallback);
         glfwSetMouseButtonCallback(wnd, MouseButtonCallback);
+
+        for(int key = GLFW_KEY_SPACE; key < GLFW_KEY_LAST; ++key)
+        {
+            auto keyName = glfwGetKeyName(key, 0);
+            auto inputKey = TranslateKey(key);
+            if(inputKey != InputKey::NONE)
+            {
+                if(keyName != nullptr)
+                    keyNames.insert({inputKey, keyName});
+                else
+                    keyNames.insert({inputKey, ToString(inputKey)});
+            }
+        }
+
         ready = true;
         instance = this;
+    }
+
+    std::string_view Input::GetKeyName(InputKey key) const
+    {
+        if(keyNames.count(key) > 0)
+            return keyNames.at(key);
+        return "";
+
     }
 
     void Input::KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)

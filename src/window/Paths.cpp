@@ -34,6 +34,18 @@ namespace RIS::Window
 #endif
     }
 
+    static std::filesystem::path GetAppdataPath()
+    {
+#ifdef _WIN32
+        char docPath[MAX_PATH];
+        SHGetSpecialFolderPathA(nullptr, docPath, CSIDL_LOCAL_APPDATA, false);
+        std::filesystem::path path(docPath);
+        return path / Version::GAME_NAME;
+#else 
+        return GetHomePath();
+#endif
+    }
+
     std::filesystem::path GetConfigPath()
     {
         return GetHomePath() / "Config/";
@@ -47,6 +59,11 @@ namespace RIS::Window
     std::filesystem::path GetModPath()
     {
         return GetHomePath() / "Mods/";
+    }
+
+    std::filesystem::path GetCachePath()
+    {
+        return GetAppdataPath() / "Cache/";
     }
 
     std::filesystem::path GetTempPath()

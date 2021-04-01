@@ -19,7 +19,8 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/src/*",
-                "/usr/include/*"
+                "/usr/include/*",
+                "/usr/local/include/*"
             ],
             "defines": [
                 "_DEBUG"

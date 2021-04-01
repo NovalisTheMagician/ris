@@ -162,12 +162,14 @@ namespace RIS::Window
 
     void Window::SetWindowIcon(std::shared_ptr<Graphics::Image> icon)
     {
+#ifndef __linux__ // apparently ubuntu has issues with this
         GLFWimage iconImage = { 0 };
         iconImage.width = icon->GetWidth();
         iconImage.height = icon->GetHeight();
         iconImage.pixels = icon->GetPixels();
 
         glfwSetWindowIcon(window, 1, &iconImage);
+#endif
     }
 
     void Window::SetCursorIcon(std::shared_ptr<Graphics::Image> cursor, int xHot, int yHot)
@@ -204,7 +206,7 @@ namespace RIS::Window
 
     void Window::FramebufferResize(GLFWwindow *window, int width, int height)
     {
-        Window *wnd = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
+        //Window *wnd = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
         auto &renderer = GetRenderer();
         renderer.Resize(width, height);
     }

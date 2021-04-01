@@ -25,7 +25,7 @@ namespace RIS::UI
         maxY = 0;
         currentY = -(viewSize.y * 0.5f);
 
-        consoleFont = Loader::Load<Graphics::Font>("fonts/immortal.json", resourcePack);
+        consoleFont = Loader::Load<Graphics::Font>("fonts/IMMORTAL.json", resourcePack);
         maxLineHeight = consoleFont->GetMaxHeight(consoleFontSize);
         maxLines = 512;
 
@@ -212,7 +212,7 @@ namespace RIS::UI
             else if(key == Input::InputKey::PAGE_UP)
             {
                 viewOffset++;
-                if(viewOffset > lines.size() - 1)
+                if(viewOffset > static_cast<int>(lines.size() - 1))
                     viewOffset = lines.size() - 1;
             }
             else if(key == Input::InputKey::PAGE_DOWN)

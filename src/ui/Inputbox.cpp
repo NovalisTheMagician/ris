@@ -121,7 +121,7 @@ namespace RIS::UI
         if(hasFocus)
         {
             auto it = text.begin();
-            for(std::size_t i = 0; i < caretPosition; ++i)
+            for(int i = 0; i < caretPosition; ++i)
                 utf8::next(it, text.end());
 
             utf8::append(c, std::inserter(text, it));
@@ -155,7 +155,7 @@ namespace RIS::UI
             if(text.size() > 0 && caretPosition > 0)
             {
                 auto it = text.begin();
-                for(std::size_t i = 0; i < caretPosition; ++i)
+                for(int i = 0; i < caretPosition; ++i)
                     utf8::next(it, text.end());
 
                 auto toDelete = it;
@@ -170,11 +170,11 @@ namespace RIS::UI
         }
         else if(keyCode == Input::InputKey::DELETE && hasFocus)
         {
-            std::size_t numChars = utf8::distance(text.begin(), text.end());
+            int numChars = static_cast<int>(utf8::distance(text.begin(), text.end()));
             if(text.size() > 0 && caretPosition < numChars)
             {
                 auto it = text.begin();
-                for(std::size_t i = 0; i < caretPosition + 1; ++i)
+                for(int i = 0; i < caretPosition + 1; ++i)
                     utf8::next(it, text.end());
 
                 auto toDelete = it;
@@ -204,7 +204,7 @@ namespace RIS::UI
             std::string clipbrd = window.GetClipboard();
 
             auto it = text.begin();
-            for(std::size_t i = 0; i < caretPosition; ++i)
+            for(int i = 0; i < caretPosition; ++i)
                 utf8::next(it, text.end());
             
             text.insert(it, clipbrd.begin(), clipbrd.end());

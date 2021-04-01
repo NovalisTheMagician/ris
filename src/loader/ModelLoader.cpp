@@ -163,7 +163,7 @@ namespace RIS::Loader
 
                 it += Size;
             }
-        };
+        }
 
         template<typename T, std::size_t Size = sizeof(T)>
         static void GetValues(const tinygltf::Model &model, const tinygltf::Accessor &accessor, std::vector<T> &out)
@@ -545,10 +545,9 @@ namespace RIS::Loader
                 Graphics::Animation::Clip &clip = clips[i];
                 clip.SetName(animation.name);
 
-                std::size_t numChannels = animation.channels.size();
                 for(const auto &channel : animation.channels)
                 {
-                    const tinygltf::Node &targetNode = model.nodes.at(channel.target_node);
+                    //const tinygltf::Node &targetNode = model.nodes.at(channel.target_node);
                     int nodeId = nodeBoneMap.at(channel.target_node);
                     if(channel.target_path == "translation")
                     {
@@ -609,6 +608,9 @@ namespace RIS::Loader
 
         auto textureId = Load<Graphics::Texture>(resourcePack.Read(textureName), textureName, {}, resourcePack);
         auto meshId = Load<Graphics::Mesh>(resourcePack.Read(meshName), meshName, {}, resourcePack);
+
+        if(!textureId || !meshId)
+            return nullptr;
 
         return std::make_shared<Graphics::Model>(meshId, textureId);
     }

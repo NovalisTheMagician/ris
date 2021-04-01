@@ -81,8 +81,10 @@ namespace RIS
 		return tokens;
 	}
 
+#ifdef _WIN32
 #pragma warning(push)
 #pragma warning(disable:4996)
+#endif
 	inline std::string wstringToString(const std::wstring &str)
 	{
 		return std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(str);
@@ -92,7 +94,9 @@ namespace RIS
 	{
 		return std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(str);
 	}
+#ifdef _WIN32
 #pragma warning(pop)
+#endif
 
 	template<typename T>
 	inline std::string toString(const T& val)

@@ -70,14 +70,13 @@ namespace RIS::Game
             console.Print(*test);
 
         Graphics::Texture::Ptr catTexture = Loader::Load<Graphics::Texture>("textures/meow.dds", resourcePack);
-        Graphics::Font::Ptr font = Loader::Load<Graphics::Font>("fonts/immortal.json", resourcePack);
-        Graphics::Model::Ptr cubeModel = Loader::Load<Graphics::Model>("models/john.json", resourcePack);
+        Graphics::Model::Ptr cubeModel = Loader::Load<Graphics::Model>("models/John.json", resourcePack);
 
         Graphics::Shader::Ptr modelVertexShader = Loader::Load<Graphics::Shader>("shaders/mAnim.glsl", resourcePack, Graphics::ShaderType::VERTEX);
         Graphics::Shader::Ptr modelFragmentShader = Loader::Load<Graphics::Shader>("shaders/mUnlit.glsl", resourcePack, Graphics::ShaderType::FRAGMENT);
 
-        Graphics::Animation::Skeleton::Ptr skeleton = Loader::Load<Graphics::Animation::Skeleton>("meshes/john.glb", resourcePack);
-        Graphics::Animation::Animation::Ptr animation = Loader::Load<Graphics::Animation::Animation>("meshes/john.glb", resourcePack);
+        Graphics::Animation::Skeleton::Ptr skeleton = Loader::Load<Graphics::Animation::Skeleton>("meshes/John.glb", resourcePack);
+        Graphics::Animation::Animation::Ptr animation = Loader::Load<Graphics::Animation::Animation>("meshes/John.glb", resourcePack);
 
         Graphics::VertexArray modelLayout(VertexType::ModelVertexFormat);
 
@@ -287,7 +286,7 @@ namespace RIS::Game
         float w = ui.GetWidth();
         float h = ui.GetHeight() - 24;
 
-        auto font = Loader::Load<Graphics::Font>("fonts/immortal.json", resourcePack);
+        auto font = Loader::Load<Graphics::Font>("fonts/IMMORTAL.json", resourcePack);
 
         float titleFontSize = 60;
 

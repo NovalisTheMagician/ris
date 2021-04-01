@@ -11,7 +11,6 @@ namespace RIS::Graphics
     TextMetrics Font::MeasureString(const std::string_view str, float fontSize) const
     {
         float penX = 0.0f;
-        float penY = 0.0f;
         if(fontSize == -1)
             fontSize = size;
         

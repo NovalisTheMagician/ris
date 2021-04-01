@@ -17,9 +17,10 @@ debug = ARGUMENTS.get('debug', 0)
 verbose = ARGUMENTS.get('verbose', 0)
 
 if(sys.platform == 'linux'):
-    cl_flags = ['-std=c++17']
+    cl_flags = ['-std=c++17', '-pthread']
+    lk_flags = ['-pthread']
     inc_path = ['#src']
-    libs = ['glfw', 'libz', 'libzip', 'fmt', 'glad', 'base64', 'boxer', 'dl', 'gtk-3', 'gobject-2.0', 'glib-2.0'] 
+    libs = ['glfw', 'libz', 'libzip', 'fmt', 'glad', 'base64', 'boxer', 'soloud', 'dl', 'gtk-3', 'gobject-2.0', 'glib-2.0', 'asound'] 
 
     if int(debug):
         cl_flags.append(['-g', '-Wall', '-pedantic'])

@@ -12,7 +12,7 @@ namespace RIS::UI
     }
 
     Button::Button(std::shared_ptr<Graphics::Font> defaultFont)
-        : callback([](){}), font(defaultFont)
+        : font(defaultFont), callback([](){})
     {
     }
 

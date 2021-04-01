@@ -26,6 +26,6 @@ namespace RIS::UI
     {
         glm::vec2 pos = parentPosition + position;
         if(image)
-            renderer.DrawTexture(*image, position, size, {1, 1, 1, 1});
+            renderer.DrawTexture(*image, pos, size, {1, 1, 1, 1});
     }
 }

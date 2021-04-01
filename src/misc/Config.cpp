@@ -18,7 +18,7 @@ namespace RIS
 		std::ifstream inputStream(configPath);
 		if (!inputStream)
 		{
-			std::ofstream(configPath);
+			std::ofstream _(configPath);
 			return;
 		}
 

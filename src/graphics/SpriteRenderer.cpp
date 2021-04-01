@@ -17,13 +17,13 @@
 namespace RIS::Graphics
 {
     SpriteRenderer::SpriteRenderer(const Loader::ResourcePack &resourcePack)
-        : sampler(MinFilter::LINEAR, MagFilter::LINEAR)
+        : vertexSpriteBuffer(6 * sizeof(VertexType::SpriteVertex))
+        , vertexTextBuffer(6 * MAX_STRING_LEN * sizeof(VertexType::SpriteVertex))
+        , sampler(MinFilter::LINEAR, MagFilter::LINEAR)
         , pipeline()
         , vertexLayout(VertexType::SpriteVertexFormat)
         , viewProjectionBuffer(sizeof(glm::mat4))
         , worldBuffer(sizeof(WorldBufferData))
-        , vertexSpriteBuffer(6 * sizeof(VertexType::SpriteVertex))
-        , vertexTextBuffer(6 * MAX_STRING_LEN * sizeof(VertexType::SpriteVertex))
         , white({1, 1, 1, 1})
     {
         vertexShader = Loader::Load<Shader>("shaders/spriteVertex.glsl", resourcePack, ShaderType::VERTEX);
@@ -141,7 +141,7 @@ namespace RIS::Graphics
                 float glyphWidth = glyph.bboxWidth * fontSize;
                 float glyphHeight = glyph.bboxHeight * fontSize;
                 float glyphBearingX = glyph.bearingX * fontSize;
-                float glyphBearingY = glyph.bearingY * fontSize;
+                //float glyphBearingY = glyph.bearingY * fontSize;
                 float glyphAdvanceX = glyph.advanceX * fontSize;
 
                 float x = std::round(penX + glyphBearingX);

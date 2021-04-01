@@ -65,7 +65,7 @@ namespace RIS::Graphics
 
     void Sampler::SetMaxAnisotropy(float maxAniso)
     {
-        glSamplerParameterfv(id, GL_TEXTURE_MAX_ANISOTROPY, &maxAniso);
+        glSamplerParameterfv(id, GL_TEXTURE_MAX_ANISOTROPY_EXT, &maxAniso);
     }
 
     void Sampler::Bind(int textureUnit) const

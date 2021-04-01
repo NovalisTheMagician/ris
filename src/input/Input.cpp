@@ -1,5 +1,3 @@
-#pragma once
-
 #include "input/Input.hpp"
 
 using std::string;

@@ -29,8 +29,8 @@ namespace RIS::Loader
         }
 
         float ascender = fontJson["ascender"].GetFloat();
-        float bitmapWidth = fontJson["bitmap_width"].GetInt();
-        float bitmapHeight = fontJson["bitmap_height"].GetInt();
+        //float bitmapWidth = fontJson["bitmap_width"].GetInt();
+        //float bitmapHeight = fontJson["bitmap_height"].GetInt();
         float descender = fontJson["descender"].GetFloat();
         float height = fontJson["height"].GetFloat();
         float maxAdvance = fontJson["max_advance"].GetFloat();

@@ -22,7 +22,6 @@ namespace RIS::Graphics::Animation
 
         time = AdjustTimeToFitRange(time);
 
-        std::size_t size = tracks.size();
         for(auto it = tracks.begin(); it != tracks.end(); ++it)
         {
             std::size_t id = (*it).GetId();

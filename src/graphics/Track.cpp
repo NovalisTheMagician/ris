@@ -228,7 +228,7 @@ namespace RIS::Graphics::Animation
     T Track<T, N>::SampleConstant(float time, bool looping) const
     {
         int frame = FrameIndex(time, looping);
-        if(frame < 0 || frame >= frames.size())
+        if(frame < 0 || frame >= static_cast<int>(frames.size()))
             return T();
         return Cast(frames.at(frame).value.data());
     }
@@ -237,7 +237,7 @@ namespace RIS::Graphics::Animation
     T Track<T, N>::SampleLinear(float time, bool looping) const
     {
         int thisFrame = FrameIndex(time, looping);
-        if(thisFrame < 0 || thisFrame >= frames.size() - 1)
+        if(thisFrame < 0 || thisFrame >= static_cast<int>(frames.size() - 1))
             return T();
 
         int nextFrame = thisFrame + 1;
@@ -261,7 +261,7 @@ namespace RIS::Graphics::Animation
     T Track<T, N>::SampleCubic(float time, bool looping) const
     {
         int thisFrame = FrameIndex(time, looping);
-        if(thisFrame < 0 || thisFrame >= frames.size() - 1)
+        if(thisFrame < 0 || thisFrame >= static_cast<int>(frames.size() - 1))
             return T();
 
         int nextFrame = thisFrame + 1;

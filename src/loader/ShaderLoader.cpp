@@ -10,6 +10,9 @@ namespace RIS::Loader
     template<>
     std::shared_ptr<Graphics::Shader> Load<Graphics::Shader>(const std::vector<std::byte> &bytes, const std::string &name, std::any param, const ResourcePack &resourcePack)
     {
+        if(bytes.size() == 0)
+            return nullptr;
+
         GLenum shaderType;
         auto shaderParam = std::any_cast<Graphics::ShaderType>(param);
         if(shaderParam == Graphics::ShaderType::VERTEX)

@@ -217,6 +217,7 @@ namespace RIS::Game
 
             interface.Update(timer);
 
+            glViewport(0, 0, width, height);
             defaultFramebuffer.Clear(clearColor, 1.0f);
 
             pipeline.Use();
@@ -285,7 +286,7 @@ namespace RIS::Game
 
     void GameLoop::InitMenus()
     {
-#if 1
+#if 0
         std::string version = fmt::format("V {}.{}", std::to_string(Version::MAJOR), std::to_string(Version::MINOR));
         auto &ui = GetUserinterface();
 
@@ -368,6 +369,18 @@ namespace RIS::Game
 
         ui.RegisterMenu("mainMenu", panel);
         ui.SetActiveMenu("mainMenu");
+#else
+        std::string version = fmt::format("V {}.{}", std::to_string(Version::MAJOR), std::to_string(Version::MINOR));
+        auto &ui = GetUserinterface();
+
+        GetConsole().Print(version);
+
+        auto &rootPanel = ui.CreateMenu("mainMenu").SetSize({90, 300}).SetPosition({24, 24});
+        auto &btn1 = rootPanel.CreateButton().SetCallback([](){ GetConsole().Print("test"); }).SetText("Play").SetSize({74, 24}).SetPosition({0, 0});
+        auto &btn2 = rootPanel.CreateButton().SetText("Options").SetActive(false).SetSize({74, 24}).SetPosition({0, 36});
+        auto &btn3 = rootPanel.CreateButton().SetCallback([](){ GetWindow().Exit(0); }).SetText("Quit").SetSize({74, 24}).SetPosition({0, 82});
+
+        ui.PushMenu("mainMenu");
 #endif
     }
 }

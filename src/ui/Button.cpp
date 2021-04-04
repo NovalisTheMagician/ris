@@ -6,88 +6,77 @@
 
 namespace RIS::UI
 {
-    Button::Ptr Button::Create(std::shared_ptr<Graphics::Font> defaultFont)
-    {
-        return std::make_shared<Button>(defaultFont);
+    Button::Button(Graphics::Framebuffer &parentFramebuffer, std::shared_ptr<Graphics::Font> defaultFont)
+        : parentFramebuffer(parentFramebuffer), font(defaultFont), callback([](){})
+    {}
+
+    Button& Button::SetName(const std::string &name) 
+    { 
+        this->name = name; return *this; 
     }
 
-    Button::Button(std::shared_ptr<Graphics::Font> defaultFont)
-        : font(defaultFont), callback([](){})
-    {
+    std::string Button::GetName() const 
+    { 
+        return name; 
     }
 
-    void Button::SetText(const std::string &text)
+    Button& Button::SetAnchor(Anchor anchor) 
+    { 
+        this->anchor = anchor; 
+        return *this; 
+    }
+
+    Anchor Button::GetAnchor() const 
+    { 
+        return anchor; 
+    }
+
+    Button& Button::SetPosition(const glm::vec2 &position) 
+    { 
+        this->position = position; 
+        return *this; 
+    }
+
+    Button& Button::SetSize(const glm::vec2 &size) 
+    { 
+        this->size = size; 
+        return *this; 
+    }
+
+    Button& Button::SetText(const std::string &text)
     {
         this->text = text;
+        return *this;
     }
 
-    void Button::SetFont(std::shared_ptr<Graphics::Font> font)
+    Button& Button::SetFont(std::shared_ptr<Graphics::Font> font)
     {
         this->font = font;
+        return *this;
     }
 
-    void Button::SetFontSize(float size)
+    Button& Button::SetFontSize(float size)
     {
         this->fontSize = size;
+        return *this;
     }
 
-    void Button::SetTextColor(const glm::vec4 &color)
+    Button& Button::SetTextColor(const glm::vec4 &color)
     {
         this->textColor = color;
+        return *this;
     }
 
-    void Button::SetColors(const glm::vec4 &normal, const glm::vec4 &hover, const glm::vec4 &down)
-    {
-        normalColor = normal;
-        hoverColor = hover;
-        downColor = down;
-    }
-
-    void Button::SetImages(std::shared_ptr<Graphics::Texture> normal, std::shared_ptr<Graphics::Texture> hover, std::shared_ptr<Graphics::Texture> down)
-    {
-        normalImage = normal;
-        hoverImage = hover;
-        downImage = down;
-    }
-
-    void Button::SetNormalColor(const glm::vec4 &color)
-    {
-        normalColor = color;
-    }
-
-    void Button::SetNormalImage(std::shared_ptr<Graphics::Texture> image)
-    {
-        normalImage = image;
-    }
-
-    void Button::SetHoverColor(const glm::vec4 &color)
-    {
-        hoverColor = color;
-    }
-
-    void Button::SetHoverImage(std::shared_ptr<Graphics::Texture> image)
-    {
-        hoverImage = image;
-    }
-
-    void Button::SetDownColor(const glm::vec4 &color)
-    {
-        downColor = color;
-    }
-
-    void Button::SetDownImage(std::shared_ptr<Graphics::Texture> image)
-    {
-        downImage = image;
-    }
-
-    void Button::SetCallback(ButtonFunc func)
+    Button& Button::SetCallback(ButtonFunc func)
     {
         callback = func;
+        return *this;
     }
 
-    void Button::SetActive(bool isActive)
+    Button& Button::SetActive(bool isActive)
     {
         active = isActive;
+        return *this;
     }
 
     void Button::Update(const Timer &timer)
@@ -95,11 +84,10 @@ namespace RIS::UI
         
     }
 
-    void Button::Draw(Graphics::SpriteRenderer &renderer, const glm::vec2 &parentPosition)
+    void Button::Draw(Graphics::SpriteRenderer &renderer)
     {
-        glm::vec2 pos = parentPosition + position;
         Graphics::TextMetrics metrics = font->MeasureString(text, fontSize);
-        glm::vec2 textPos = pos + ((size / glm::vec2(2)) - (glm::vec2(metrics.width, metrics.height) / glm::vec2(2)));
+        glm::vec2 textPos = position + ((size / glm::vec2(2)) - (glm::vec2(metrics.width, metrics.height) / glm::vec2(2)));
 
         glm::vec4 color = normalColor;
         std::shared_ptr<Graphics::Texture> image = normalImage;
@@ -108,9 +96,9 @@ namespace RIS::UI
         {
             glm::vec4 inactiveColor(0.7f);
             if(image)
-                renderer.DrawTexture(*image, pos, size, inactiveColor);
+                renderer.DrawTexture(*image, position, size, inactiveColor);
             else
-                renderer.DrawRect(pos, size, inactiveColor);
+                renderer.DrawRect(position, size, inactiveColor);
             renderer.DrawString(text, *font.get(), fontSize, textPos, textColor);
             return;
         }
@@ -127,9 +115,9 @@ namespace RIS::UI
         }
 
         if(image)
-            renderer.DrawTexture(*image, pos, size, color);
+            renderer.DrawTexture(*image, position, size, color);
         else
-            renderer.DrawRect(pos, size, color);
+            renderer.DrawRect(position, size, color);
         renderer.DrawString(text, *font.get(), fontSize, textPos, textColor);
     }
 

@@ -1,7 +1,6 @@
 #include "RIS.hpp"
 #include "loader/Loader.hpp"
 #include "input/Input.hpp"
-#include "script/ScriptEngine.hpp"
 
 #include "ui/Userinterface.hpp"
 
@@ -20,8 +19,9 @@ using namespace std::literals;
 namespace RIS::UI
 {
     Userinterface::Userinterface()
+        : fb(200, 200)
     {
-        rootContainer = Panel::Create();
+        
     }
 
     void Userinterface::PostInit(Loader::ResourcePack &resourcePack)
@@ -36,15 +36,17 @@ namespace RIS::UI
 
         console.InitLimits(glm::vec2(uiWidth, uiHeight), resourcePack);
 
+        /*
         fpsLabel = Label::Create(defaultFont);
         fpsLabel->SetPosition({0, 0});
         fpsLabel->SetText("0");
         fpsLabel->SetTextColor({1, 1, 1, 1});
         fpsLabel->SetFont(defaultFont);
         fpsLabel->SetFontSize(16);
+        */
 
-        console.BindFunc("fps", Helpers::BoolFunc(showFps, "Show FPS", "Hide FPS"));
-        console.BindFunc("frametime", Helpers::BoolFunc(showFrametime, "Show Frametime", "Hide Frametime"));
+        //console.BindFunc("fps", Helpers::BoolFunc(showFps, "Show FPS", "Hide FPS"));
+        //console.BindFunc("frametime", Helpers::BoolFunc(showFrametime, "Show Frametime", "Hide Frametime"));
 
         auto &input = GetInput();
         input.RegisterChar([this](uint32_t ch){ return OnChar(ch); });
@@ -58,207 +60,17 @@ namespace RIS::UI
 
     void Userinterface::ReleaseScriptReferences()
     {
-        components.clear();
         menus.clear();
-        activeMenu = nullptr;
     }
 
     void Userinterface::Invalidate()
     {
-        //auto &scriptEngine = GetScriptEngine();
-        //scriptEngine.Call<void>("InitUserinterfaces");
+        
     }
 
     void Userinterface::RegisterScriptFunctions()
     {
-        /*
-        auto &scriptEngine = GetScriptEngine();
-
         
-        scriptEngine.Func("print", [this](const std::string &msg){ console.Print(msg); });
-        scriptEngine.Namespace("Console")
-            .Func("openConsole", [this](){ console.Open(); })
-            .Func("closeConsole", [this](){ console.Close(); })
-            .Func("toggleConsole", [this](){ console.Toggle(); });
-
-        scriptEngine.Namespace("UI")
-            .Func("getUIWidth", [this](){ return static_cast<float>(uiWidth); })
-            .Func("getUIHeight", [this](){ return static_cast<float>(uiHeight); });
-
-        scriptEngine.Class<Component>("Component")
-            .Func("setPosition", [](Component *self, float x, float y){ self->SetPosition({x, y}); })
-            .Func("setSize", [](Component *self, float w, float h){ self->SetSize({w, h}); });
-
-        scriptEngine.Class<Image, Component>("Image")
-            .Func("setImage", [&loader](Image *self, const std::string &image)
-            { 
-                auto texture = loader.Load<Graphics::Texture>(image);
-                self->SetImage(texture);
-            });
-
-        scriptEngine.Namespace("UI")
-            .Func("Image", [this](const std::string &name)
-            {
-                Image::Ptr image = Image::Create();
-                image->SetName(name);
-                components.push_back(image);
-                return image.get();
-            });
-
-        scriptEngine.Class<Button, Component>("Button")
-            .Func("setText", &Button::SetText)
-            .Func("setFont", [&loader](Button *self, const std::string &fontName)
-            {
-                auto font = loader.Load<Graphics::Font, false>(fontName);
-                if(font)
-                    self->SetFont(font);
-            })
-            .Func("setFontSize", &Button::SetFontSize)
-            .Func("setCallback", &Button::SetCallback)
-            .Func("setActive", &Button::SetActive);
-
-        scriptEngine.Namespace("UI")
-            .Func("Button", [this](const std::string &name)
-            {
-                Button::Ptr button = Button::Create(defaultFont);
-                button->SetName(name);
-                components.push_back(button);
-                return button.get();
-            });
-
-        auto panelAdd = [this](Panel *self, Component *component)
-        {
-            auto comp = std::find_if(std::begin(components), std::end(components), 
-            [&component](const Component::Ptr &elem) { return component == elem.get(); });
-            if(comp != std::end(components))
-                self->Add(*comp);
-        };
-
-        auto panelRemove = [this](Panel *self, Component *component)
-        {
-            auto comp = std::find_if(std::begin(components), std::end(components), 
-            [&component](const Component::Ptr &elem) { return component == elem.get(); });
-            if(comp != std::end(components))
-                self->Remove(*comp);
-        };
-
-        auto panelAddButton = [panelAdd](Panel *self, Button *component){ panelAdd(self, component); };
-        auto panelAddLabel = [panelAdd](Panel *self, Label *component){ panelAdd(self, component); };
-        auto panelAddImage = [panelAdd](Panel *self, Image *component){ panelAdd(self, component); };
-        auto panelAddTextBox = [panelAdd](Panel *self, InputBox *component){ panelAdd(self, component); };
-
-        auto panelRemoveButton = [panelRemove](Panel *self, Button *component){ panelRemove(self, component); };
-        auto panelRemoveLabel = [panelRemove](Panel *self, Label *component){ panelRemove(self, component); };
-        auto panelRemoveImage = [panelRemove](Panel *self, Image *component){ panelRemove(self, component); };
-        auto panelRemoveTextBox = [panelRemove](Panel *self, InputBox *component){ panelRemove(self, component); };
-
-        scriptEngine.Class<Panel, Component>("Panel")
-            .FuncOverload("add", panelAddButton, panelAddLabel, panelAddImage, panelAddTextBox)
-            .FuncOverload("remove", panelRemoveButton, panelRemoveLabel, panelRemoveImage, panelRemoveTextBox)
-            .Func("removeAll", &Panel::RemoveAll);
-
-        scriptEngine.Namespace("UI")
-            .Func("Panel", [this](const std::string &name)
-            {
-                Panel::Ptr panel = Panel::Create();
-                panel->SetName(name);
-                panel->SetPosition({0, 0});
-                panel->SetSize({static_cast<float>(uiWidth), static_cast<float>(uiHeight)});
-                components.push_back(panel);
-                return panel.get();
-            });
-
-        scriptEngine.Class<Label, Component>("Label")
-            .Func("setFont", [&loader](Label *self, const std::string &fontName)
-            {
-                auto font = loader.Load<Graphics::Font, false>(fontName);
-                if(font)
-                    self->SetFont(font);
-            })
-            .Func("setFontSize", &Label::SetFontSize)
-            .Func("setText", &Label::SetText)
-            .Func("setTextColor", [](Label *self, float r, float g, float b, float a)
-            {
-                self->SetTextColor({ r, g, b, a });
-            });
-
-        scriptEngine.Namespace("UI")
-            .Func("Label", [this](const std::string &name)
-            {
-                Label::Ptr label = Label::Create(defaultFont);
-                label->SetName(name);
-                components.push_back(label);
-                return label.get();
-            });
-
-        scriptEngine.Class<InputBox, Component>("Textbox")
-            .Func("setFont", [&loader](InputBox *self, const std::string &fontName)
-            {
-                auto font = loader.Load<Graphics::Font, false>(fontName);
-                if(font)
-                    self->SetFont(font);
-            })
-            .Func("setFontSize", &InputBox::SetFontSize)
-            .Func("setPreviewText", &InputBox::SetPreviewText)
-            .Func("setText", &InputBox::SetText)
-            .Func("getText", &InputBox::GetText);
-
-        scriptEngine.Namespace("UI")
-            .Func("Textbox", [this](const std::string &name)
-            {
-                InputBox::Ptr textbox = InputBox::Create(defaultFont);
-                textbox->SetName(name);
-                components.push_back(textbox);
-                return textbox.get();
-            });
-
-        scriptEngine.Class<Graphics::TextMetrics>("TextMetrics")
-            .Var("width", &Graphics::TextMetrics::width)
-            .Var("height", &Graphics::TextMetrics::height);
-
-        scriptEngine.Namespace("UI")
-            .Func("measureText", [&loader](const std::string &fontName, const std::string &text, float fontSize) -> Graphics::TextMetrics
-            {
-                auto font = loader.Load<Graphics::Font>(fontName);
-                if(font)
-                    return font->MeasureString(text, fontSize);
-                return { 0, 0 };
-            })
-            .Func("registerMenu", [this](const std::string &menuName, Component *component)
-            {
-                auto comp = std::find_if(std::begin(components), std::end(components), 
-                    [&component](const Component::Ptr &elem) { return component == elem.get(); });
-                if(comp != std::end(components))
-                    menus.insert_or_assign(menuName, *comp);
-            })
-            .Func("menuExists", [this](const std::string &menuName)
-            {
-                return menus.count(menuName) > 0;
-            })
-            .Func("getMenu", [this](const std::string &menuName) -> Component*
-            {
-                if(menus.count(menuName) > 0)
-                    return menus.at(menuName).get();
-                return nullptr;
-            })
-            .Func("getActiveMenu", [this]()
-            {
-                return activeMenu.get();
-            })
-            .Func("setActiveMenu", [this](const std::string &menuName)
-            {
-                if(menus.count(menuName) > 0)
-                {
-                    auto& comp = menus.at(menuName);
-                    activeMenu = comp;
-                }
-                else
-                {
-                    activeMenu = nullptr;
-                }
-            });
-
-        */
     }
 
     Console &Userinterface::GetConsole()
@@ -268,12 +80,21 @@ namespace RIS::UI
 
     void Userinterface::Draw()
     {
+        fb.Bind();
+        fb.Clear({0.35f, 0.75f, 0, 1.0f}, 1.0f);
+        defaultFramebuffer.Bind();
+
         renderer->Begin(static_cast<float>(uiWidth), static_cast<float>(uiHeight));
+        /*
         if(showFps)
             fpsLabel->Draw(*renderer, glm::vec2());
-        if(activeMenu)
-            activeMenu->Draw(*renderer, glm::vec2());
+        */
+        if(!activeMenus.empty())
+            activeMenus.top().get().Draw(*renderer);
         console.Draw(*renderer);
+
+        renderer->DrawTexture(fb.ColorTexture());
+
         renderer->End();
     }
 
@@ -282,6 +103,7 @@ namespace RIS::UI
 
     void Userinterface::Update(const Timer &timer)
     {
+        /*
         frameTime = timer.Delta();
 
         nFrames++;
@@ -297,9 +119,10 @@ namespace RIS::UI
             else
                 fpsLabel->SetText(std::to_string(1 / fps));
         }
+        */
         
-        if(activeMenu)
-            activeMenu->Update(timer);
+        if(!activeMenus.empty())
+            activeMenus.top().get().Update(timer);
         console.Update(timer);
     }
 
@@ -313,21 +136,27 @@ namespace RIS::UI
         return uiHeight;
     }
 
-    void Userinterface::RegisterMenu(std::string name, Component::Ptr component)
+    Panel& Userinterface::CreateMenu(const std::string &menuName)
     {
-        menus.insert_or_assign(name, component);
+        Panel p(defaultFramebuffer, defaultFont);
+        menus.emplace(menuName, std::move(p));
+        return menus.at(menuName);
     }
 
-    void Userinterface::SetActiveMenu(std::string name)
+    void Userinterface::PushMenu(const std::string &menuName)
     {
-        if(menus.count(name) > 0)
+        if(menus.count(menuName) > 0)
         {
-            auto& comp = menus.at(name);
-            activeMenu = comp;
+            auto &menu = menus.at(menuName);
+            activeMenus.push(std::ref(menu));
         }
-        else
+    }
+
+    void Userinterface::PopMenu()
+    {
+        if(!activeMenus.empty())
         {
-            activeMenu = nullptr;
+            activeMenus.pop();
         }
     }
 
@@ -343,9 +172,9 @@ namespace RIS::UI
             console.OnChar(character);
             return true;
         }
-        if(activeMenu)
+        if(!activeMenus.empty())
         {
-            activeMenu->OnChar(character);
+            activeMenus.top().get().OnChar(character);
             return true;
         }
         return false;
@@ -353,9 +182,9 @@ namespace RIS::UI
 
     bool Userinterface::OnMouseMove(float x, float y)
     {
-        if(activeMenu)
+        if(!activeMenus.empty())
         {
-            activeMenu->OnMouseMove(x, y);
+            activeMenus.top().get().OnMouseMove(x, y);
             return true;
         }
         return false;
@@ -363,9 +192,9 @@ namespace RIS::UI
 
     bool Userinterface::OnMouseDown(Input::InputKey button)
     {
-        if(activeMenu)
+        if(!activeMenus.empty())
         {
-            activeMenu->OnMouseDown(button);
+            activeMenus.top().get().OnMouseDown(button);
             return true;
         }
         return false;
@@ -373,9 +202,9 @@ namespace RIS::UI
 
     bool Userinterface::OnMouseUp(Input::InputKey button)
     {
-        if(activeMenu)
+        if(!activeMenus.empty())
         {
-            activeMenu->OnMouseUp(button);
+            activeMenus.top().get().OnMouseUp(button);
             return true;
         }
         return false;
@@ -388,9 +217,9 @@ namespace RIS::UI
             console.OnMouseWheel(x, y);
             return true;
         }
-        if(activeMenu)
+        if(!activeMenus.empty())
         {
-            activeMenu->OnMouseWheel(x, y);
+            activeMenus.top().get().OnMouseWheel(x, y);
             return true;
         }
         return false;
@@ -408,9 +237,9 @@ namespace RIS::UI
             console.OnKeyDown(key);
             return true;
         }
-        if(activeMenu)
+        if(!activeMenus.empty())
         {
-            activeMenu->OnKeyDown(key);
+            activeMenus.top().get().OnKeyDown(key);
             return true;
         }
         return false;
@@ -418,9 +247,9 @@ namespace RIS::UI
 
     bool Userinterface::OnKeyUp(Input::InputKey key)
     {
-        if(activeMenu)
+        if(!activeMenus.empty())
         {
-            activeMenu->OnKeyUp(key);
+            activeMenus.top().get().OnKeyUp(key);
             return true;
         }
         return false;
@@ -433,9 +262,9 @@ namespace RIS::UI
             console.OnKeyRepeat(key);
             return true;
         }
-        if(activeMenu)
+        if(!activeMenus.empty())
         {
-            activeMenu->OnKeyRepeat(key);
+            activeMenus.top().get().OnKeyRepeat(key);
             return true;
         }
         return false;

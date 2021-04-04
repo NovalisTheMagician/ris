@@ -12,70 +12,103 @@
 
 namespace RIS::UI
 {
-    InputBox::Ptr InputBox::Create(std::shared_ptr<Graphics::Font> defaultFont)
-    {
-        return std::make_shared<InputBox>(defaultFont);
-    }
-
-    InputBox::InputBox(std::shared_ptr<Graphics::Font> defaultFont)
-        : font(defaultFont)
+    Inputbox::Inputbox(Graphics::Framebuffer &parentFramebuffer, Graphics::Font::Ptr defaultFont)
+        : parentFramebuffer(parentFramebuffer), font(defaultFont)
     {
         fontHeight = font->GetMaxHeight(fontSize);
     }
 
-    void InputBox::SetPreviewText(const std::string &previewText)
-    {
-        this->previewText = previewText;
+    Inputbox& Inputbox::SetName(const std::string &name)
+    { 
+        this->name = name; return *this; 
     }
 
-    void InputBox::SetText(const std::string &text)
+    std::string Inputbox::GetName() const 
+    { 
+        return name; 
+    }
+
+    Inputbox& Inputbox::SetAnchor(Anchor anchor) 
+    { 
+        this->anchor = anchor; 
+        return *this; 
+    }
+
+    Anchor Inputbox::GetAnchor() const 
+    { 
+        return anchor; 
+    }
+
+    Inputbox& Inputbox::SetPosition(const glm::vec2 &position) 
+    { 
+        this->position = position; 
+        return *this; 
+    }
+
+    Inputbox& Inputbox::SetSize(const glm::vec2 &size) 
+    { 
+        this->size = size; 
+        return *this; 
+    }
+
+    Inputbox& Inputbox::SetPreviewText(const std::string &previewText)
+    {
+        this->previewText = previewText;
+        return *this;
+    }
+
+    Inputbox& Inputbox::SetText(const std::string &text)
     {
         this->text = text;
         RecalcCharWidths();
 
         caretPosition = static_cast<int>(utf8::distance(text.begin(), text.end()));
+        return *this;
     }
     
-    void InputBox::SetPreviewTextColor(const glm::vec4 &previewColor)
+    Inputbox& Inputbox::SetPreviewTextColor(const glm::vec4 &previewColor)
     {
         this->previewTextColor = previewColor;
+        return *this;
     }
     
-    void InputBox::SetTextColor(const glm::vec4 &textColor)
+    Inputbox& Inputbox::SetTextColor(const glm::vec4 &textColor)
     {
         this->textColor = textColor;
+        return *this;
     }
     
-    void InputBox::SetFont(std::shared_ptr<Graphics::Font> font)
+    Inputbox& Inputbox::SetFont(std::shared_ptr<Graphics::Font> font)
     {
         this->font = font;
         fontHeight = this->font->GetMaxHeight(fontSize);
         RecalcCharWidths();
+        return *this;
     }
     
-    void InputBox::SetFontSize(float fontSize)
+    Inputbox& Inputbox::SetFontSize(float fontSize)
     {
         this->fontSize = fontSize;
         fontHeight = font->GetMaxHeight(this->fontSize);
         RecalcCharWidths();
+        return *this;
     }
     
-    const std::string& InputBox::GetText() const
+    const std::string& Inputbox::GetText() const
     {
         return text;
     }
 
-    void InputBox::Update(const Timer &timer)
+    void Inputbox::Update(const Timer &timer)
     {
 
     }
 
-    void InputBox::Draw(Graphics::SpriteRenderer &renderer, const glm::vec2 &parentPosition)
+    void Inputbox::Draw(Graphics::SpriteRenderer &renderer)
     {
-        glm::vec2 pos = position + parentPosition;
-        glm::vec2 textPos = pos + glm::vec2(2, size.y / 4);
+        glm::vec2 textPos = position + glm::vec2(2, size.y / 4);
 
-        renderer.DrawRect(pos, size, backColor);
+        renderer.DrawRect(position, size, backColor);
         if(text.empty() && !hasFocus)
             renderer.DrawString(previewText, *font, fontSize, textPos, previewTextColor);
         else
@@ -92,12 +125,12 @@ namespace RIS::UI
         }
     }
 
-    void InputBox::OnMouseDown(Input::InputKey mouseCode)
+    void Inputbox::OnMouseDown(Input::InputKey mouseCode)
     {
 
     }
 
-    void InputBox::OnMouseUp(Input::InputKey mouseCode)
+    void Inputbox::OnMouseUp(Input::InputKey mouseCode)
     {
         if(mouseCode == Input::InputKey::MOUSE_LEFT)
         {
@@ -107,7 +140,7 @@ namespace RIS::UI
         }
     }
 
-    void InputBox::OnMouseMove(float x, float y)
+    void Inputbox::OnMouseMove(float x, float y)
     {
         if( x > position.x && x < position.x + size.x &&
             y > position.y && y < position.y + size.y)
@@ -116,7 +149,7 @@ namespace RIS::UI
             isInBounds = false;
     }
 
-    void InputBox::OnChar(uint32_t c)
+    void Inputbox::OnChar(uint32_t c)
     {
         if(hasFocus)
         {
@@ -132,23 +165,23 @@ namespace RIS::UI
         }
     }
 
-    void InputBox::OnKeyRepeat(Input::InputKey keyCode)
+    void Inputbox::OnKeyRepeat(Input::InputKey keyCode)
     {
         OnKey(keyCode, true);
     }
 
-    void InputBox::OnKeyDown(Input::InputKey keyCode)
+    void Inputbox::OnKeyDown(Input::InputKey keyCode)
     {
         OnKey(keyCode, false);
     }
 
-    void InputBox::OnKeyUp(Input::InputKey keyCode)
+    void Inputbox::OnKeyUp(Input::InputKey keyCode)
     {
         if(keyCode == Input::InputKey::LEFT_CONTROL)
             ctrlDown = false;
     }
 
-    void InputBox::OnKey(Input::InputKey keyCode, bool repeat)
+    void Inputbox::OnKey(Input::InputKey keyCode, bool repeat)
     {
         if(keyCode == Input::InputKey::BACKSPACE && hasFocus)
         {
@@ -220,7 +253,7 @@ namespace RIS::UI
         }
     }
 
-    void InputBox::RecalcCharWidths()
+    void Inputbox::RecalcCharWidths()
     {
         charWidths.clear();
 

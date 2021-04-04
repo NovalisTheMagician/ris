@@ -6,38 +6,71 @@ using std::string;
 
 namespace RIS::UI
 {
-    Label::Ptr Label::Create(std::shared_ptr<Graphics::Font> defaultFont)
-    {
-        return std::make_shared<Label>(defaultFont);
-    }
-
-    Label::Label(std::shared_ptr<Graphics::Font> defaultFont)
-        : font(defaultFont)
+    Label::Label(Graphics::Framebuffer &parentFramebuffer, Graphics::Font::Ptr defaultFont)
+        : parentFramebuffer(parentFramebuffer), font(defaultFont)
     {}
 
-    void Label::SetFont(std::shared_ptr<Graphics::Font> font)
+    Label& Label::SetName(const std::string &name)
+    { 
+        this->name = name; return *this; 
+    }
+
+    std::string Label::GetName() const 
+    { 
+        return name; 
+    }
+
+    Label& Label::SetAnchor(Anchor anchor) 
+    { 
+        this->anchor = anchor; 
+        return *this; 
+    }
+
+    Anchor Label::GetAnchor() const 
+    { 
+        return anchor; 
+    }
+
+    Label& Label::SetPosition(const glm::vec2 &position) 
+    { 
+        this->position = position; 
+        return *this; 
+    }
+
+    Label& Label::SetSize(const glm::vec2 &size) 
+    { 
+        this->size = size; 
+        return *this; 
+    }
+
+    Label& Label::SetFont(std::shared_ptr<Graphics::Font> font)
     {
         this->font = font;
+        return *this;
     }
 
-    void Label::SetFontSize(float fontSize)
+    Label& Label::SetFontSize(float fontSize)
     {
         this->fontSize = fontSize;
+        return *this;
     }
 
-    void Label::SetTextColor(const glm::vec4 &color)
+    Label& Label::SetTextColor(const glm::vec4 &color)
     {
         fontColor = color;
+        return *this;
     }
 
-    void Label::SetVisible(bool visible)
+    Label& Label::SetVisible(bool visible)
     {
         isVisible = visible;
+        return *this;
     }
 
-    void Label::SetText(const string &text)
+    Label& Label::SetText(const string &text)
     {
         this->text = text;
+        return *this;
     }
 
     void Label::Update(const Timer &timer)
@@ -45,8 +78,8 @@ namespace RIS::UI
 
     }
 
-    void Label::Draw(Graphics::SpriteRenderer &renderer, const glm::vec2 &parentPosition)
+    void Label::Draw(Graphics::SpriteRenderer &renderer)
     {
-        renderer.DrawString(text, *font.get(), fontSize, parentPosition + position, fontColor);
+        renderer.DrawString(text, *font.get(), fontSize, position, fontColor);
     }
 }

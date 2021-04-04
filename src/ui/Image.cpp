@@ -2,19 +2,53 @@
 
 namespace RIS::UI
 {
-    Image::Ptr Image::Create()
-    {
-        return std::make_shared<Image>();
+    Image::Image(Graphics::Framebuffer &parentFramebuffer, Graphics::Font::Ptr defaultFont)
+        :parentFramebuffer(parentFramebuffer), font(defaultFont)
+    {}
+
+    Image& Image::SetName(const std::string &name)
+    { 
+        this->name = name; return *this; 
     }
 
-    void Image::SetImage(std::shared_ptr<Graphics::Texture> image)
+    std::string Image::GetName() const 
+    { 
+        return name; 
+    }
+
+    Image& Image::SetAnchor(Anchor anchor) 
+    { 
+        this->anchor = anchor; 
+        return *this; 
+    }
+
+    Anchor Image::GetAnchor() const 
+    { 
+        return anchor; 
+    }
+
+    Image& Image::SetPosition(const glm::vec2 &position) 
+    { 
+        this->position = position; 
+        return *this; 
+    }
+
+    Image& Image::SetSize(const glm::vec2 &size) 
+    { 
+        this->size = size; 
+        return *this; 
+    }
+
+    Image& Image::SetImage(std::shared_ptr<Graphics::Texture> image)
     {
         this->image = image;
+        return *this;
     }
 
-    void Image::SetColor(const glm::vec4 &color)
+    Image& Image::SetColor(const glm::vec4 &color)
     {
         this->color = color;
+        return *this;
     }
 
     void Image::Update(const Timer &timer)
@@ -22,10 +56,9 @@ namespace RIS::UI
 
     }
 
-    void Image::Draw(Graphics::SpriteRenderer &renderer, const glm::vec2 &parentPosition)
+    void Image::Draw(Graphics::SpriteRenderer &renderer)
     {
-        glm::vec2 pos = parentPosition + position;
         if(image)
-            renderer.DrawTexture(*image, pos, size, {1, 1, 1, 1});
+            renderer.DrawTexture(*image, position, size, {1, 1, 1, 1});
     }
 }

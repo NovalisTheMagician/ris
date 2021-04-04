@@ -16,49 +16,53 @@ namespace RIS::UI
 {
     using ButtonFunc = std::function<void()>;
 
-    class Button : public Component
+    class Button
     {
     public:
-        using Ptr = std::shared_ptr<Button>;
-        static Ptr Create(std::shared_ptr<Graphics::Font> defaultFont);
-
-        Button(std::shared_ptr<Graphics::Font> defaultFont);
-        virtual ~Button() = default;
-        Button(const Button&) = default;
-        Button& operator=(const Button&) = default;
+        Button(Graphics::Framebuffer &parentFramebuffer, Graphics::Font::Ptr defaultFont);
+        Button(const Button&) = delete;
+        Button& operator=(const Button&) = delete;
         Button(Button&&) = default;
         Button& operator=(Button&&) = default;
 
-        void SetText(const std::string &text);
-        void SetFont(std::shared_ptr<Graphics::Font> font);
-        void SetFontSize(float size);
-        void SetTextColor(const glm::vec4 &color);
+        Button& SetName(const std::string &name);
+        std::string GetName() const;
+        Button& SetAnchor(Anchor anchor);
+        Anchor GetAnchor() const;
+        Button& SetPosition(const glm::vec2 &position);
+        Button& SetSize(const glm::vec2 &size);
+        Button& SetText(const std::string &text);
+        Button& SetFont(std::shared_ptr<Graphics::Font> font);
+        Button& SetFontSize(float size);
+        Button& SetTextColor(const glm::vec4 &color);
+        Button& SetCallback(ButtonFunc func);
+        Button& SetActive(bool isActive);
 
-        void SetColors(const glm::vec4 &normal, const glm::vec4 &hover, const glm::vec4 &down);
-        void SetImages(std::shared_ptr<Graphics::Texture> normal, std::shared_ptr<Graphics::Texture> hover, std::shared_ptr<Graphics::Texture> down);
+        void Update(const Timer &timer);
+        void Draw(Graphics::SpriteRenderer &renderer);
 
-        void SetNormalColor(const glm::vec4 &color);
-        void SetNormalImage(std::shared_ptr<Graphics::Texture> image);
-        void SetHoverColor(const glm::vec4 &color);
-        void SetHoverImage(std::shared_ptr<Graphics::Texture> image);
-        void SetDownColor(const glm::vec4 &color);
-        void SetDownImage(std::shared_ptr<Graphics::Texture> image);
+        void OnMouseMove(float x, float y);
+        void OnMouseDown(Input::InputKey button);
+        void OnMouseUp(Input::InputKey button);
 
-        void SetCallback(ButtonFunc func);
+        void OnMouseWheel(float x, float y) {};
 
-        void SetActive(bool isActive);
+        void OnKeyDown(Input::InputKey keyCode) {};
+        void OnKeyUp(Input::InputKey keyCode) {};
+        void OnKeyRepeat(Input::InputKey keyCode) {};
 
-        void Update(const Timer &timer) override;
-        void Draw(Graphics::SpriteRenderer &renderer, const glm::vec2 &parentPosition) override;
-
-        void OnMouseMove(float x, float y) override;
-        void OnMouseDown(Input::InputKey button) override;
-        void OnMouseUp(Input::InputKey button) override;
+        void OnChar(uint32_t c) {};
 
     private:
+        std::string name;
+        glm::vec2 position;
+        glm::vec2 size = glm::vec2(64, 32);
+        Anchor anchor = Anchor::TopLeft;
+        Graphics::Framebuffer &parentFramebuffer;
+        Graphics::Font::Ptr font;
+
         std::string text = "";
 
-        std::shared_ptr<Graphics::Font> font;
         float fontSize = -1;
         glm::vec4 textColor = glm::vec4(0, 0, 0, 1);
 

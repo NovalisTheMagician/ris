@@ -2,6 +2,7 @@
 
 #include "graphics/SpriteRenderer.hpp"
 #include "graphics/Font.hpp"
+#include "graphics/Framebuffer.hpp"
 
 #include "ui/Console.hpp"
 
@@ -9,17 +10,13 @@
 
 #include <glm/glm.hpp>
 
-#include <rapidjson/rapidjson.h>
-#include <rapidjson/document.h>
-
 #include <vector>
 #include <unordered_map>
 #include <string>
-#include <variant>
 #include <memory>
+#include <stack>
 
 #include "ui/Component.hpp"
-#include "ui/Container.hpp"
 #include "ui/Panel.hpp"
 #include "ui/Label.hpp"
 #include "ui/Image.hpp"
@@ -50,8 +47,10 @@ namespace RIS::UI
         int GetWidth() const;
         int GetHeight() const;
 
-        void RegisterMenu(std::string name, Component::Ptr component);
-        void SetActiveMenu(std::string name);
+        Panel& CreateMenu(const std::string &menuName);
+
+        void PushMenu(const std::string &menuName);
+        void PopMenu();
 
         Graphics::Font::Ptr GetDefaultFont() const;
 
@@ -69,19 +68,19 @@ namespace RIS::UI
         Console console;
         std::unique_ptr<Graphics::SpriteRenderer> renderer;
 
-        std::shared_ptr<Graphics::Font> defaultFont;
+        Graphics::Framebuffer fb;
+
+        Graphics::Font::Ptr defaultFont;
+        Graphics::Framebuffer defaultFramebuffer;
 
         int uiWidth, uiHeight;
-        Container::Ptr rootContainer;
 
-        Label::Ptr fpsLabel;
-        bool showFps = false;
-        bool showFrametime = false;
-        float frameTime;
+        //Label fpsLabel;
+        //bool showFps = false;
+        //bool showFrametime = false;
+        //float frameTime;
 
-        Component::Ptr activeMenu;
-
-        std::unordered_map<std::string, Component::Ptr> menus;
-        std::vector<Component::Ptr> components;
+        std::stack<std::reference_wrapper<Panel>> activeMenus;
+        std::unordered_map<std::string, Panel> menus;
     };
 }

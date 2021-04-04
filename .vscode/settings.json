@@ -87,7 +87,8 @@
         "compare": "cpp",
         "charconv": "cpp",
         "bit": "cpp",
-        "stop_token": "cpp"
+        "stop_token": "cpp",
+        "stack": "cpp"
     },
     "python.linting.enabled": false,
     "cmake.configureOnOpen": false,

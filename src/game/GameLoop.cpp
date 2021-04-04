@@ -62,6 +62,13 @@ namespace RIS::Game
 
         console.BindFunc("attention", [&window](const std::vector<std::string> &params){ window.RequestAttention(); return ""; });
 
+        console.BindFunc("clear_cache", [](const auto&)
+        {
+            auto &cache = Loader::GetCache();
+            cache.Cleanup();
+            return "";
+        });
+
         console.Print(fmt::format("Press {} to open and close the console", input.GetKeyName(Input::InputKey::F1)));
         console.Print(fmt::format("Name of Key ` is {} (translated)", input.GetKeyName(Input::InputKey::GRAVE_ACCENT)));
 
@@ -278,7 +285,7 @@ namespace RIS::Game
 
     void GameLoop::InitMenus()
     {
-#if 0
+#if 1
         std::string version = fmt::format("V {}.{}", std::to_string(Version::MAJOR), std::to_string(Version::MINOR));
         auto &ui = GetUserinterface();
 

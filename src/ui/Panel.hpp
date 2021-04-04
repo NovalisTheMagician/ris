@@ -25,7 +25,7 @@ namespace RIS::UI
         using UITypes = std::variant<Button, Image, Inputbox, Label, Panel>;
 
     public:
-        Panel(Graphics::Framebuffer &parentFramebuffer, Graphics::Font::Ptr defaultFont);
+        Panel(Graphics::Framebuffer &parentFramebuffer, Graphics::Font::Ptr defaultFont, glm::vec2 parentSize);
         virtual ~Panel() = default;
         Panel(const Panel&) = delete;
         Panel& operator=(const Panel&) = delete;
@@ -65,6 +65,7 @@ namespace RIS::UI
         Anchor anchor = Anchor::TopLeft;
         Graphics::Framebuffer &parentFramebuffer;
         Graphics::Font::Ptr font;
+        glm::vec2 parentSize;
 
         std::vector<UITypes> components;
 

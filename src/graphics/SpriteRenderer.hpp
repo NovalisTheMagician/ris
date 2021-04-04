@@ -28,8 +28,9 @@ namespace RIS::Graphics
         SpriteRenderer(SpriteRenderer&&) = default;
         SpriteRenderer& operator=(SpriteRenderer&&) = default;
 
-        void Begin(float viewWidth, float viewHeight);
+        void Begin();
         void End();
+        void SetViewport(float width, float height, bool flip = false);
 
         void DrawTexture(const Texture &texture, const glm::vec2 &position = {}, const glm::vec2 &size = {1, 1}, const glm::vec4 &tint = {1, 1, 1, 1});
         void DrawRect(const glm::vec2 &position = {}, const glm::vec2 &size = {1, 1}, const glm::vec4 &tint = {1, 1, 1, 1});

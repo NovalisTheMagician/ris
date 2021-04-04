@@ -18,12 +18,6 @@ using namespace std::literals;
 
 namespace RIS::UI
 {
-    Userinterface::Userinterface()
-        : fb(200, 200)
-    {
-        
-    }
-
     void Userinterface::PostInit(Loader::ResourcePack &resourcePack)
     {
         renderer = std::make_unique<Graphics::SpriteRenderer>(resourcePack);
@@ -80,20 +74,18 @@ namespace RIS::UI
 
     void Userinterface::Draw()
     {
-        fb.Bind();
-        fb.Clear({0.35f, 0.75f, 0, 1.0f}, 1.0f);
-        defaultFramebuffer.Bind();
-
-        renderer->Begin(static_cast<float>(uiWidth), static_cast<float>(uiHeight));
+        renderer->Begin();
         /*
         if(showFps)
             fpsLabel->Draw(*renderer, glm::vec2());
         */
         if(!activeMenus.empty())
             activeMenus.top().get().Draw(*renderer);
-        console.Draw(*renderer);
 
-        renderer->DrawTexture(fb.ColorTexture());
+        //renderer->SetViewport(static_cast<float>(uiWidth), static_cast<float>(uiHeight));
+        defaultFramebuffer.Bind();
+
+        console.Draw(*renderer);
 
         renderer->End();
     }
@@ -138,7 +130,7 @@ namespace RIS::UI
 
     Panel& Userinterface::CreateMenu(const std::string &menuName)
     {
-        Panel p(defaultFramebuffer, defaultFont);
+        Panel p(defaultFramebuffer, defaultFont, glm::vec2(uiWidth, uiHeight));
         menus.emplace(menuName, std::move(p));
         return menus.at(menuName);
     }

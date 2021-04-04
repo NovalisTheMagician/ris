@@ -217,7 +217,7 @@ namespace RIS::Game
 
             interface.Update(timer);
 
-            glViewport(0, 0, width, height);
+            //glViewport(0, 0, width, height);
             defaultFramebuffer.Clear(clearColor, 1.0f);
 
             pipeline.Use();
@@ -375,10 +375,12 @@ namespace RIS::Game
 
         GetConsole().Print(version);
 
+        auto font = Loader::Load<Graphics::Font>("fonts/IMMORTAL.json", resourcePack);
+
         auto &rootPanel = ui.CreateMenu("mainMenu").SetSize({90, 300}).SetPosition({24, 24});
-        auto &btn1 = rootPanel.CreateButton().SetCallback([](){ GetConsole().Print("test"); }).SetText("Play").SetSize({74, 24}).SetPosition({0, 0});
-        auto &btn2 = rootPanel.CreateButton().SetText("Options").SetActive(false).SetSize({74, 24}).SetPosition({0, 36});
-        auto &btn3 = rootPanel.CreateButton().SetCallback([](){ GetWindow().Exit(0); }).SetText("Quit").SetSize({74, 24}).SetPosition({0, 82});
+        auto &btn1 = rootPanel.CreateButton().SetCallback([](){ GetConsole().Print("test"); }).SetText("Play").SetSize({74, 24}).SetPosition({0, 0}).SetFontSize(16).SetFont(font);
+        auto &btn2 = rootPanel.CreateButton().SetText("Options").SetActive(false).SetSize({74, 24}).SetPosition({0, 36}).SetFontSize(16).SetFont(font);
+        auto &btn3 = rootPanel.CreateButton().SetCallback([](){ GetWindow().Exit(0); }).SetText("Quit").SetSize({74, 24}).SetPosition({0, 36 * 2}).SetFontSize(16).SetFont(font);
 
         ui.PushMenu("mainMenu");
 #endif

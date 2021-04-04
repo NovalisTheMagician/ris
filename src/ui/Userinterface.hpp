@@ -30,9 +30,6 @@ namespace RIS::UI
     class Userinterface
     {
     public:
-        Userinterface();
-        ~Userinterface() = default;
-
         void PostInit(Loader::ResourcePack &resourcePack);
         void RegisterScriptFunctions();
 
@@ -67,8 +64,6 @@ namespace RIS::UI
     private:
         Console console;
         std::unique_ptr<Graphics::SpriteRenderer> renderer;
-
-        Graphics::Framebuffer fb;
 
         Graphics::Font::Ptr defaultFont;
         Graphics::Framebuffer defaultFramebuffer;

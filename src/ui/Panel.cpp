@@ -9,8 +9,8 @@
 
 namespace RIS::UI
 {
-    Panel::Panel(Graphics::Framebuffer &parentFramebuffer, Graphics::Font::Ptr defaultFont)
-        : parentFramebuffer(parentFramebuffer), font(defaultFont), panelFramebuffer(static_cast<int>(size.x), static_cast<int>(size.y))
+    Panel::Panel(Graphics::Framebuffer &parentFramebuffer, Graphics::Font::Ptr defaultFont, glm::vec2 parentSize)
+        : parentFramebuffer(parentFramebuffer), font(defaultFont), panelFramebuffer(static_cast<int>(size.x), static_cast<int>(size.y)), parentSize(parentSize)
     {}
 
     Panel& Panel::SetName(const std::string &name)
@@ -108,11 +108,12 @@ namespace RIS::UI
         else
             renderer.DrawRect(position, size, color);
         */
-        //glViewport(position.x, position.y, size.x, size.y);
         panelFramebuffer.Bind();
-        panelFramebuffer.Clear({0, 0, 0, 0}, 1.0f);
+        panelFramebuffer.Clear({0, 1.0f, 0, 1.0f}, 1.0f);
+        renderer.SetViewport(size.x, size.y, true);
         std::for_each(components.begin(), components.end(), [&renderer](auto &component){ std::visit([&renderer](auto &&comp){ comp.Draw(renderer); }, component); });
         parentFramebuffer.Bind();
+        renderer.SetViewport(parentSize.x, parentSize.y);
         renderer.DrawTexture(panelFramebuffer.ColorTexture(), position, size);
     }
 

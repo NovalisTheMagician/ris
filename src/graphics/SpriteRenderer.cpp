@@ -44,7 +44,7 @@ namespace RIS::Graphics
         vertexSpriteBuffer.UpdateData(vertices);
     }
 
-    void SpriteRenderer::Begin(float viewWidth, float viewHeight)
+    void SpriteRenderer::Begin()
     {
         glDisable(GL_CULL_FACE);
         glDisable(GL_DEPTH_TEST);
@@ -55,7 +55,6 @@ namespace RIS::Graphics
 
         vertexLayout.Bind();
 
-        viewProjectionBuffer.UpdateData(glm::ortho(0.0f, viewWidth, viewHeight, 0.0f, -1.0f, 1.0f));
         viewProjectionBuffer.Bind(0);
 
         pipeline.Use();
@@ -66,6 +65,15 @@ namespace RIS::Graphics
         glDisable(GL_BLEND);
         glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
+    }
+
+    void SpriteRenderer::SetViewport(float width, float height, bool flip)
+    {
+        glViewport(0, 0, static_cast<GLsizei>(width), static_cast<GLsizei>(height));
+        if(flip)
+            viewProjectionBuffer.UpdateData(glm::ortho(0.0f, width, 0.0f, height, -1.0f, 1.0f));
+        else
+            viewProjectionBuffer.UpdateData(glm::ortho(0.0f, width, height, 0.0f, -1.0f, 1.0f));
     }
 
     void SpriteRenderer::DrawTexture(const Texture &texture, const glm::vec2 &position, const glm::vec2 &size, const glm::vec4 &tint)

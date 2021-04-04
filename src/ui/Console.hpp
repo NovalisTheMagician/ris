@@ -16,13 +16,13 @@
 
 namespace RIS::UI
 {
-    using ConsoleFunc = std::function<std::string(std::vector<std::string>&)>;
+    using ConsoleFunc = std::function<std::string(const std::vector<std::string>&)>;
 
     namespace Helpers
     {
         inline ConsoleFunc BoolFunc(bool &value, const std::string &onMsg, const std::string &offMsg)
         {
-            return [&, onMsg, offMsg](auto& params)
+            return [&, onMsg, offMsg](const auto& params)
             {
                 using namespace std::literals;
                 if(params.size() == 0)
@@ -73,7 +73,7 @@ namespace RIS::UI
         void OnMouseWheel(float x, float y);
 
     private:
-        std::string SetParam(std::vector<std::string> &params);
+        std::string SetParam(const std::vector<std::string> &params);
         glm::vec2 GetPosForLine(int lineNr);
 
         void OnKey(Input::InputKey key, bool repeat);

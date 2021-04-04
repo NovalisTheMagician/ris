@@ -45,7 +45,7 @@ elif(sys.platform == 'win32'):
     libs = ['user32', 'kernel32', 'gdi32', 'shell32', 'opengl32', 'ws2_32', 'advapi32']
 
     if int(debug):
-        cl_flags.append(['/Zi', '/MTd', '/W3', '/external:anglebrackets', '/external:W0', '/experimental:external', '/FC'])
+        cl_flags.append(['/Zi', '/MTd', '/experimental:external', '/external:anglebrackets', '/external:W0', '/external:templates-', '/W3', '/FC'])
         lk_flags.append(['/DEBUG'])
         defines.append(['_DEBUG'])
         libs.append(libs_deb)

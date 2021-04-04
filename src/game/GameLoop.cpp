@@ -60,7 +60,7 @@ namespace RIS::Game
         bool god = false;
         console.BindFunc("god", UI::Helpers::BoolFunc(god, "Godmode ON", "Godmode OFF"));
 
-        console.BindFunc("attention", [&window](std::vector<std::string> &params){ window.RequestAttention(); return ""; });
+        console.BindFunc("attention", [&window](const std::vector<std::string> &params){ window.RequestAttention(); return ""; });
 
         console.Print(fmt::format("Press {} to open and close the console", input.GetKeyName(Input::InputKey::F1)));
         console.Print(fmt::format("Name of Key ` is {} (translated)", input.GetKeyName(Input::InputKey::GRAVE_ACCENT)));
@@ -99,7 +99,7 @@ namespace RIS::Game
         glm::mat4 world = glm::mat4(1.0f);
 
         float dist = 5;
-        console.BindFunc("dist", [&dist](std::vector<std::string> &params)
+        console.BindFunc("dist", [&dist](const std::vector<std::string> &params)
         {
             if(params.size() > 0)
                 dist = std::stof(params.at(0));
@@ -107,7 +107,7 @@ namespace RIS::Game
         });
 
         float animSpeed = 1.0f;
-        console.BindFunc("anim_speed", [&animSpeed](std::vector<std::string> &params)
+        console.BindFunc("anim_speed", [&animSpeed](const std::vector<std::string> &params)
         {
             if(params.size() > 0)
                 animSpeed = std::stof(params.at(0));
@@ -278,6 +278,7 @@ namespace RIS::Game
 
     void GameLoop::InitMenus()
     {
+#if 0
         std::string version = fmt::format("V {}.{}", std::to_string(Version::MAJOR), std::to_string(Version::MINOR));
         auto &ui = GetUserinterface();
 
@@ -360,5 +361,6 @@ namespace RIS::Game
 
         ui.RegisterMenu("mainMenu", panel);
         ui.SetActiveMenu("mainMenu");
+#endif
     }
 }

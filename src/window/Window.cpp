@@ -103,8 +103,8 @@ namespace RIS::Window
     void Window::PostInit()
     {
         auto &console = GetUserinterface().GetConsole();
-        console.BindFunc("exit", [this](std::vector<std::string> params){ Exit(0); return ""; });
-        console.BindFunc("vsync", [this](std::vector<std::string> params)
+        console.BindFunc("exit", [this](const std::vector<std::string> &params){ Exit(0); return ""; });
+        console.BindFunc("vsync", [this](const std::vector<std::string> &params)
         { 
             if(params.size() == 0)
             {
@@ -162,14 +162,18 @@ namespace RIS::Window
 
     void Window::SetWindowIcon(std::shared_ptr<Graphics::Image> icon)
     {
-#ifndef __linux__ // apparently ubuntu has issues with this
         GLFWimage iconImage = { 0 };
         iconImage.width = icon->GetWidth();
         iconImage.height = icon->GetHeight();
         iconImage.pixels = icon->GetPixels();
 
+        if(iconImage.width > 256 || iconImage.height > 256)
+        {
+            Logger::Instance().Warning("window icon exceeds limits of 256x256");
+            return;
+        }
+
         glfwSetWindowIcon(window, 1, &iconImage);
-#endif
     }
 
     void Window::SetCursorIcon(std::shared_ptr<Graphics::Image> cursor, int xHot, int yHot)
@@ -178,6 +182,12 @@ namespace RIS::Window
         cursorImage.width = cursor->GetWidth();
         cursorImage.height = cursor->GetHeight();
         cursorImage.pixels = cursor->GetPixels();
+
+        if(cursorImage.width > 256 || cursorImage.height > 256)
+        {
+            Logger::Instance().Warning("window cursor exceeds limits of 256x256");
+            return;
+        }
 
         // maybe cache the cursor object to manually destroy it later
         // but it is not needed because glfw will destroy any 
@@ -231,7 +241,8 @@ namespace RIS::Window
 
     void Window::RequestAttention()
     {
-        glfwRequestWindowAttention(window);
+        if(!glfwGetWindowAttrib(window, GLFW_FOCUSED))
+            glfwRequestWindowAttention(window);
     }
 
     void Window::SetVsync(bool vsync)

@@ -29,8 +29,8 @@ namespace RIS::UI
         maxLineHeight = consoleFont->GetMaxHeight(consoleFontSize);
         maxLines = 512;
 
-        BindFunc("con", [this](std::vector<std::string> &params){ return SetParam(params); });
-        BindFunc("clear", [this](std::vector<std::string> &params){ Clear(); return ""; });
+        BindFunc("con", [this](const std::vector<std::string> &params){ return SetParam(params); });
+        BindFunc("clear", [this](const std::vector<std::string> &params){ Clear(); return ""; });
     }
 
     void Console::Open()
@@ -93,13 +93,12 @@ namespace RIS::UI
     void Console::Update(const Timer &timer)
     {
         // cursor blink
-        if(roundHalf(timer.Total()) % 2)
+        static float timePassed = 0;
+        timePassed += timer.Delta();
+        if(timePassed >= 0.5f)
         {
-            cursor = "_";
-        }
-        else
-        {
-            cursor = "";
+            timePassed -= 0.5f;
+            cursor = cursor.size() > 0 ? "" : "_";
         }
 
         if(isMoving)
@@ -260,7 +259,7 @@ namespace RIS::UI
         return false;
     }
 
-    std::string Console::SetParam(std::vector<std::string> &params)
+    std::string Console::SetParam(const std::vector<std::string> &params)
     {
         if(params.size() < 1)
             return "no param specified!";

@@ -1,6 +1,10 @@
 #pragma once
 
 #include "ui/Component.hpp"
+#include "ui/Button.hpp"
+#include "ui/Image.hpp"
+#include "ui/Label.hpp"
+#include "ui/Inputbox.hpp"
 
 #include "graphics/Texture.hpp"
 #include "graphics/Framebuffer.hpp"
@@ -15,11 +19,6 @@
 
 namespace RIS::UI
 {
-    class Button;
-    class Image;
-    class Inputbox;
-    class Label;
-
     class Panel : public Component<Panel>
     {
     private:

@@ -3,11 +3,6 @@
 #include <algorithm>
 #include <numeric>
 
-#include "ui/Button.hpp"
-#include "ui/Image.hpp"
-#include "ui/Inputbox.hpp"
-#include "ui/Label.hpp"
-
 namespace RIS::UI
 {
     Panel::Panel(Graphics::Framebuffer &parentFramebuffer, Graphics::Font::Ptr defaultFont, glm::vec2 parentSize)

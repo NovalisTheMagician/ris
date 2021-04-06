@@ -66,7 +66,7 @@ namespace RIS::UI
         std::unique_ptr<Graphics::SpriteRenderer> renderer;
 
         Graphics::Font::Ptr defaultFont;
-        Graphics::Framebuffer defaultFramebuffer;
+        Graphics::Framebuffer defaultFramebuffer, uiFramebuffer;
 
         int uiWidth, uiHeight;
 

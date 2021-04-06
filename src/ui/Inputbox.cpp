@@ -12,43 +12,10 @@
 
 namespace RIS::UI
 {
-    Inputbox::Inputbox(Graphics::Framebuffer &parentFramebuffer, Graphics::Font::Ptr defaultFont)
-        : parentFramebuffer(parentFramebuffer), font(defaultFont)
+    Inputbox::Inputbox(Graphics::Framebuffer &parentFramebuffer, Graphics::Font::Ptr defaultFont, const glm::vec2 &parentSize)
+        : Component(parentFramebuffer, defaultFont, parentSize)
     {
         fontHeight = font->GetMaxHeight(fontSize);
-    }
-
-    Inputbox& Inputbox::SetName(const std::string &name)
-    { 
-        this->name = name; return *this; 
-    }
-
-    std::string Inputbox::GetName() const 
-    { 
-        return name; 
-    }
-
-    Inputbox& Inputbox::SetAnchor(Anchor anchor) 
-    { 
-        this->anchor = anchor; 
-        return *this; 
-    }
-
-    Anchor Inputbox::GetAnchor() const 
-    { 
-        return anchor; 
-    }
-
-    Inputbox& Inputbox::SetPosition(const glm::vec2 &position) 
-    { 
-        this->position = position; 
-        return *this; 
-    }
-
-    Inputbox& Inputbox::SetSize(const glm::vec2 &size) 
-    { 
-        this->size = size; 
-        return *this; 
     }
 
     Inputbox& Inputbox::SetPreviewText(const std::string &previewText)

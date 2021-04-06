@@ -6,42 +6,9 @@
 
 namespace RIS::UI
 {
-    Button::Button(Graphics::Framebuffer &parentFramebuffer, std::shared_ptr<Graphics::Font> defaultFont)
-        : parentFramebuffer(parentFramebuffer), font(defaultFont), callback([](){})
+    Button::Button(Graphics::Framebuffer &parentFramebuffer, std::shared_ptr<Graphics::Font> defaultFont, const glm::vec2 &parentSize)
+        : Component(parentFramebuffer, defaultFont, parentSize), callback([](){})
     {}
-
-    Button& Button::SetName(const std::string &name) 
-    { 
-        this->name = name; return *this; 
-    }
-
-    std::string Button::GetName() const 
-    { 
-        return name; 
-    }
-
-    Button& Button::SetAnchor(Anchor anchor) 
-    { 
-        this->anchor = anchor; 
-        return *this; 
-    }
-
-    Anchor Button::GetAnchor() const 
-    { 
-        return anchor; 
-    }
-
-    Button& Button::SetPosition(const glm::vec2 &position) 
-    { 
-        this->position = position; 
-        return *this; 
-    }
-
-    Button& Button::SetSize(const glm::vec2 &size) 
-    { 
-        this->size = size; 
-        return *this; 
-    }
 
     Button& Button::SetText(const std::string &text)
     {
@@ -49,16 +16,9 @@ namespace RIS::UI
         return *this;
     }
 
-    Button& Button::SetFont(std::shared_ptr<Graphics::Font> font)
+    std::string Button::GetText() const
     {
-        this->font = font;
-        return *this;
-    }
-
-    Button& Button::SetFontSize(float size)
-    {
-        this->fontSize = size;
-        return *this;
+        return text;
     }
 
     Button& Button::SetTextColor(const glm::vec4 &color)
@@ -77,11 +37,6 @@ namespace RIS::UI
     {
         active = isActive;
         return *this;
-    }
-
-    void Button::Update(const Timer &timer)
-    {
-        
     }
 
     void Button::Draw(Graphics::SpriteRenderer &renderer)

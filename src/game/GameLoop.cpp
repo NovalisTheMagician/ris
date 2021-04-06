@@ -377,10 +377,38 @@ namespace RIS::Game
 
         auto font = Loader::Load<Graphics::Font>("fonts/IMMORTAL.json", resourcePack);
 
-        auto &rootPanel = ui.CreateMenu("mainMenu").SetSize({90, 300}).SetPosition({24, 24});
-        auto &btn1 = rootPanel.CreateButton().SetCallback([](){ GetConsole().Print("test"); }).SetText("Play").SetSize({74, 24}).SetPosition({0, 0}).SetFontSize(16).SetFont(font);
-        auto &btn2 = rootPanel.CreateButton().SetText("Options").SetActive(false).SetSize({74, 24}).SetPosition({0, 36}).SetFontSize(16).SetFont(font);
-        auto &btn3 = rootPanel.CreateButton().SetCallback([](){ GetWindow().Exit(0); }).SetText("Quit").SetSize({74, 24}).SetPosition({0, 36 * 2}).SetFontSize(16).SetFont(font);
+        auto &rootPanel = ui.CreateMenu("mainMenu").SetSize({90, 300}).SetPosition({24, 24}).SetColor(Graphics::Colors::Cyan);
+        auto &btn1 = rootPanel.CreateButton()
+                                .SetCallback([](){ GetConsole().Print("test"); })
+                                .SetText("Play")
+                                .SetSize({74, 24})
+                                .SetPosition({30, 0})
+                                .SetFontSize(16)
+                                .SetFont(font)
+                                .SetName("btn_play");
+        
+        auto &btn2 = rootPanel.CreateButton()
+                                .SetText("Options")
+                                .SetActive(false)
+                                .SetSize({74, 24})
+                                .SetPosition({0, 36})
+                                .SetFontSize(16)
+                                .SetFont(font);
+        
+        auto &btn3 = rootPanel.CreateButton()
+                                .SetCallback([](){ GetWindow().Exit(0); })
+                                .SetText("Quit")
+                                .SetSize({74, 24})
+                                .SetPosition({0, 36 * 2})
+                                .SetFontSize(16)
+                                .SetFont(font);
+
+        auto b = rootPanel.GetComponent<UI::Button>("btn_play");
+        if(b)
+        {
+            UI::Button &button = *b;
+            GetConsole().Print(button.GetText());
+        }
 
         ui.PushMenu("mainMenu");
 #endif

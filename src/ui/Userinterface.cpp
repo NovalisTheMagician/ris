@@ -28,6 +28,8 @@ namespace RIS::UI
         uiWidth = config.GetValue("r_width", 800);
         uiHeight = config.GetValue("r_height", 600);
 
+        uiFramebuffer = Graphics::Framebuffer(1920, 1080);
+
         console.InitLimits(glm::vec2(uiWidth, uiHeight), resourcePack);
 
         /*

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <memory>
 #include <string>
 
 #include <glm/glm.hpp>
@@ -12,6 +11,8 @@
 #include "graphics/SpriteRenderer.hpp"
 #include "graphics/Framebuffer.hpp"
 #include "graphics/Font.hpp"
+
+#include <algorithm>
 
 namespace RIS::UI
 {
@@ -27,34 +28,39 @@ namespace RIS::UI
         BottomRight
     };
 
-    class Component
+    template<typename Collection, typename Func>
+    void ForeachDispatch(Collection &c, Func func)
     {
-    public:
-        Component(Graphics::Framebuffer &parentFramebuffer, Graphics::Font::Ptr defaultFont) : parentFramebuffer(parentFramebuffer), font(defaultFont) {};
-        virtual ~Component() = default;
+        std::for_each(std::begin(c), std::end(c), [func](auto &v){ std::visit(func, v); });
+    }
 
-        virtual void OnMouseMove(float x, float y) {};
-        virtual void OnMouseDown(Input::InputKey mouseCode) {};
-        virtual void OnMouseUp(Input::InputKey mouseCode) {};
-        virtual void OnMouseWheel(float x, float y) {};
+    template<typename T>
+    struct Component
+    {
+        Component(Graphics::Framebuffer &parentFramebuffer, Graphics::Font::Ptr defaultFont, glm::vec2 parentSize) : parentFramebuffer(parentFramebuffer), font(defaultFont), parentSize(parentSize) {}
+        T& SetName(const std::string &name) { this->name = name; return *static_cast<T*>(this); }
+        std::string GetName() const { return name; }
+        T& SetAnchor(Anchor anchor) { this->anchor = anchor; return *static_cast<T*>(this); }
+        Anchor GetAnchor() const { return anchor; }
+        T& SetPosition(const glm::vec2 &position) { this->position = position; return *static_cast<T*>(this); }
+        glm::vec2 GetPosition() const { return position; }
+        T& SetSize(const glm::vec2 &size) { this->size = size; return *static_cast<T*>(this); }
+        glm::vec2 GetSize() const { return size; }
+        T& SetFont(Graphics::Font::Ptr font) { this->font = font; return *static_cast<T*>(this); }
+        Graphics::Font::Ptr GetFont() const { return font; }
+        T& SetFontSize(float fontSize) { this->fontSize = fontSize; return *static_cast<T*>(this); }
+        float GetFontSize() const { return fontSize; }
 
-        virtual void OnKeyDown(Input::InputKey keyCode) {};
-        virtual void OnKeyUp(Input::InputKey keyCode) {};
-        virtual void OnKeyRepeat(Input::InputKey keyCode) {};
+        void Update(const Timer &timer) {}
 
-        virtual void OnChar(uint32_t c) {};
-
-        virtual Component& SetName(const std::string &name) { this->name = name; return *this; };
-        virtual std::string GetName() const { return name; };
-
-        virtual Component& SetAnchor(Anchor anchor) { this->anchor = anchor; return *this; };
-        virtual Anchor GetAnchor() const { return anchor; };
-
-        virtual Component& SetPosition(const glm::vec2 &position) { this->position = position; return *this; };
-        virtual Component& SetSize(const glm::vec2 &size) { this->size = size; return *this; };
-
-        virtual void Update(const Timer &timer) = 0;
-        virtual void Draw(Graphics::SpriteRenderer &renderer) = 0;
+        void OnMouseMove(float x, float y) {}
+        void OnMouseDown(Input::InputKey button) {}
+        void OnMouseUp(Input::InputKey button) {}
+        void OnMouseWheel(float x, float y) {}
+        void OnKeyDown(Input::InputKey keyCode) {}
+        void OnKeyUp(Input::InputKey keyCode) {}
+        void OnKeyRepeat(Input::InputKey keyCode) {}
+        void OnChar(uint32_t c) {}
 
     protected:
         std::string name;
@@ -63,6 +69,8 @@ namespace RIS::UI
         Anchor anchor = Anchor::TopLeft;
         Graphics::Framebuffer &parentFramebuffer;
         Graphics::Font::Ptr font;
+        float fontSize = 16.0f;
+        glm::vec2 parentSize;
 
     };
 }

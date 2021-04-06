@@ -5,30 +5,23 @@
 #include <glm/glm.hpp>
 
 #include <string>
-#include <memory>
 
 namespace RIS::UI
 {
-    class Inputbox
+    class Inputbox : public Component<Inputbox>
     {
     public:
-        Inputbox(Graphics::Framebuffer &parentFramebuffer, Graphics::Font::Ptr defaultFont);
+        Inputbox(Graphics::Framebuffer &parentFramebuffer, Graphics::Font::Ptr defaultFont, const glm::vec2 &parentSize);
         Inputbox(const Inputbox&) = delete;
         Inputbox& operator=(const Inputbox&) = delete;
         Inputbox(Inputbox&&) = default;
         Inputbox& operator=(Inputbox&&) = default;
 
-        Inputbox& SetName(const std::string &name);
-        std::string GetName() const;
-        Inputbox& SetAnchor(Anchor anchor);
-        Anchor GetAnchor() const;
-        Inputbox& SetPosition(const glm::vec2 &position);
-        Inputbox& SetSize(const glm::vec2 &size);
         Inputbox& SetPreviewText(const std::string &previewText);
         Inputbox& SetText(const std::string &text);
         Inputbox& SetPreviewTextColor(const glm::vec4 &previewColor);
         Inputbox& SetTextColor(const glm::vec4 &textColor);
-        Inputbox& SetFont(std::shared_ptr<Graphics::Font> font);
+        Inputbox& SetFont(Graphics::Font::Ptr font);
         Inputbox& SetFontSize(float fontSize);
 
         const std::string& GetText() const;
@@ -44,26 +37,16 @@ namespace RIS::UI
         void OnKeyUp(Input::InputKey keyCode);
         void OnKeyDown(Input::InputKey keyCode);
 
-        void OnMouseWheel(float x, float y) {};
-
     private:
         void OnKey(Input::InputKey key, bool repeat);
 
         void RecalcCharWidths();
 
     private:
-        std::string name;
-        glm::vec2 position;
-        glm::vec2 size = glm::vec2(64, 32);
-        Anchor anchor = Anchor::TopLeft;
-        Graphics::Framebuffer &parentFramebuffer;
-        Graphics::Font::Ptr font;
-
         std::string previewText, text;
 
         glm::vec4 previewTextColor = glm::vec4(0.6f, 0.6f, 0.6f, 1.0f), textColor = glm::vec4(0, 0, 0, 1);
         glm::vec4 backColor = glm::vec4(1, 1, 1, 1);
-        float fontSize = 16;
 
         float fontHeight;
         std::vector<float> charWidths;

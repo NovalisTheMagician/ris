@@ -2,42 +2,9 @@
 
 namespace RIS::UI
 {
-    Image::Image(Graphics::Framebuffer &parentFramebuffer, Graphics::Font::Ptr defaultFont)
-        :parentFramebuffer(parentFramebuffer), font(defaultFont)
+    Image::Image(Graphics::Framebuffer &parentFramebuffer, Graphics::Font::Ptr defaultFont, const glm::vec2 &parentSize)
+        : Component(parentFramebuffer, defaultFont, parentSize)
     {}
-
-    Image& Image::SetName(const std::string &name)
-    { 
-        this->name = name; return *this; 
-    }
-
-    std::string Image::GetName() const 
-    { 
-        return name; 
-    }
-
-    Image& Image::SetAnchor(Anchor anchor) 
-    { 
-        this->anchor = anchor; 
-        return *this; 
-    }
-
-    Anchor Image::GetAnchor() const 
-    { 
-        return anchor; 
-    }
-
-    Image& Image::SetPosition(const glm::vec2 &position) 
-    { 
-        this->position = position; 
-        return *this; 
-    }
-
-    Image& Image::SetSize(const glm::vec2 &size) 
-    { 
-        this->size = size; 
-        return *this; 
-    }
 
     Image& Image::SetImage(std::shared_ptr<Graphics::Texture> image)
     {
@@ -49,11 +16,6 @@ namespace RIS::UI
     {
         this->color = color;
         return *this;
-    }
-
-    void Image::Update(const Timer &timer)
-    {
-
     }
 
     void Image::Draw(Graphics::SpriteRenderer &renderer)

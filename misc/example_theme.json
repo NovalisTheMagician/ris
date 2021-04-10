@@ -1,0 +1,60 @@
+{
+    "version": 1,
+    "name": "example",
+    "texture": "example.dds",
+    "font": "example.json",
+    "components": {
+        "button": {
+            "font": "example.json",
+            "states": {
+                "normal": {
+                    "topleft": [0.0, 0.0],
+                    "botright": [0.1, 0.1]
+                },
+                "hover": {
+                    "topleft": [0.0, 0.0],
+                    "botright": [0.1, 0.1]
+                },
+                "click": {
+                    "topleft": [0.0, 0.0],
+                    "botright": [0.1, 0.1]
+                },
+                "disabled": {
+                    "topleft": [0.0, 0.0],
+                    "botright": [0.1, 0.1]
+                }
+            }
+        },
+        "panel": {
+            "background": {
+                "color": [0.0, 0.0, 0.0, 0.0],
+                "texture": "background_example.dds",
+                "region": {
+                    "topleft": [0.0, 0.0],
+                    "botright": [0.1, 0.1]
+                }
+            },
+            "border": {
+                "topleft": [0.0, 0.0],
+                "botright": [0.1, 0.1]
+            }
+        },
+        "input": {
+            "font": "example.json",
+            "topleft": [0.0, 0.0],
+            "botright": [0.1, 0.1]
+        },
+        "checkbox": {
+            "states": {
+                "checked": {
+                    "topleft": [0.0, 0.0],
+                    "botright": [0.1, 0.1]
+                },
+                "unchecked": {
+                    "topleft": [0.0, 0.0],
+                    "botright": [0.1, 0.1]
+                }
+            }
+        }
+    }
+}

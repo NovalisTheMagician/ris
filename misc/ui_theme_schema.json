@@ -1,0 +1,27 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://aldrheim.com/ui_theme_schema.json",
+    "title": "UI Theme",
+    "description": "A theme description for ui elements",
+    "type": "object",
+    "properties": {
+        "version": {
+            "description": "The version this theme was written against",
+            "type": "integer",
+            "minimum": 1
+        },
+        "name": {
+            "description": "The name of the theme",
+            "type": "string"
+        },
+        "font": {
+            "description": "The name of the font this theme uses",
+            "type": "string"
+        },
+        "texture": {
+            "description": "The name of the texture this theme uses",
+            "type": "string"
+        }
+    },
+    "required": ["version", "name", "texture", "components"]
+}

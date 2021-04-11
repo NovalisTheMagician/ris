@@ -30,8 +30,8 @@ namespace RIS::UI
 
     void Panel::OnMouseMove(float x, float y)
     {
-        float relX = x - position.x;
-        float relY = y - position.y;
+        float relX = x - position.x - offset.x;
+        float relY = y - position.y - offset.y;
 
         glm::vec2 topLeft = position;
         glm::vec2 botRight = position + size;
@@ -56,6 +56,7 @@ namespace RIS::UI
 
     void Panel::OnMouseWheel(float x, float y)
     {
+        Component::OnMouseWheel(x, y);
         ForeachDispatch(components, [x, y](auto &&comp){ comp.OnMouseWheel(x, y); });
     }
 
@@ -74,13 +75,20 @@ namespace RIS::UI
         ForeachDispatch(components, [keyCode](auto &&comp){ comp.OnKeyRepeat(keyCode); });
     }
 
+    void Panel::Reset()
+    {
+        Component::Reset();
+        ForeachDispatch(components, [](auto &&comp){ comp.Reset(); });
+    }
+
     void Panel::Update(const Timer &timer)
     {
         ForeachDispatch(components, [&timer](auto &&comp){ comp.Update(timer); });
     }
 
-    void Panel::Draw(Graphics::SpriteRenderer &renderer)
+    void Panel::Draw(Graphics::SpriteRenderer &renderer, glm::vec2 offset)
     {
+        glm::vec2 pos = GetAnchoredPosition() + offset;
         /*
         if(backgroundImage)
             renderer.DrawTexture(*backgroundImage, position, size, color);
@@ -90,16 +98,16 @@ namespace RIS::UI
         panelFramebuffer.Bind();
         panelFramebuffer.Clear(color, 1.0f);
         renderer.SetViewport(size.x, size.y, true);
-        ForeachDispatch(components, [&renderer](auto &&comp){ comp.Draw(renderer); });
+        ForeachDispatch(components, [&renderer, this](auto &&comp){ comp.Draw(renderer, this->offset); });
         parentFramebuffer.Bind();
-        renderer.SetViewport(parentSize.x, parentSize.y);
-        renderer.DrawTexture(panelFramebuffer.ColorTexture(), position, size);
+        renderer.SetViewport(parentSize.x, parentSize.y, true);
+        renderer.DrawTexture(panelFramebuffer.ColorTexture(), pos, size);
     }
 
     Button& Panel::CreateButton()
     {
         Button b(panelFramebuffer, font, size);
-        components.push_back(std::move(b));
+        components.emplace_back(std::move(b));
         return std::get<Button>(components.back());
     }
 
@@ -122,5 +130,12 @@ namespace RIS::UI
         Inputbox ib(panelFramebuffer, font, size);
         components.push_back(std::move(ib));
         return std::get<Inputbox>(components.back());
+    }
+
+    Panel& Panel::CreatePanel()
+    {
+        Panel p(panelFramebuffer, font, size);
+        components.push_back(std::move(p));
+        return std::get<Panel>(components.back());
     }
 }

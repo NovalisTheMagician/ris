@@ -68,7 +68,9 @@ namespace RIS::UI
         Graphics::Font::Ptr defaultFont;
         Graphics::Framebuffer defaultFramebuffer, uiFramebuffer;
 
+        int screenWidth, screenHeight;
         int uiWidth, uiHeight;
+        float uiScale = 1.0f;
 
         //Label fpsLabel;
         //bool showFps = false;

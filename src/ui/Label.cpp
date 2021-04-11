@@ -28,8 +28,9 @@ namespace RIS::UI
         return *this;
     }
 
-    void Label::Draw(Graphics::SpriteRenderer &renderer)
+    void Label::Draw(Graphics::SpriteRenderer &renderer, glm::vec2 offset)
     {
-        renderer.DrawString(text, *font.get(), fontSize, position, fontColor);
+        glm::vec2 pos = GetAnchoredPosition() + offset;
+        renderer.DrawString(text, *font.get(), fontSize, pos, fontColor);
     }
 }

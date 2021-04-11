@@ -22,7 +22,7 @@ namespace RIS::UI
         Image& SetImage(Graphics::Texture::Ptr image);
         Image& SetColor(const glm::vec4 &color);
 
-        void Draw(Graphics::SpriteRenderer &renderer);
+        void Draw(Graphics::SpriteRenderer &renderer, glm::vec2 offset);
 
     private:
         Graphics::Texture::Ptr image;

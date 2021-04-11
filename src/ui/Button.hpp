@@ -31,7 +31,7 @@ namespace RIS::UI
         Button& SetCallback(ButtonFunc func);
         Button& SetActive(bool isActive);
 
-        void Draw(Graphics::SpriteRenderer &renderer);
+        void Draw(Graphics::SpriteRenderer &renderer, glm::vec2 offset);
 
         void OnMouseMove(float x, float y);
         void OnMouseDown(Input::InputKey button);

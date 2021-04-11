@@ -23,7 +23,7 @@ namespace RIS::UI
         Label& SetVisible(bool visible);
         Label& SetText(const std::string &text);
 
-        void Draw(Graphics::SpriteRenderer &renderer);
+        void Draw(Graphics::SpriteRenderer &renderer, glm::vec2 offset);
 
     private:
         std::string text = "";

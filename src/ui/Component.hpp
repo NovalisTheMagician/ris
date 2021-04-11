@@ -50,22 +50,73 @@ namespace RIS::UI
         Graphics::Font::Ptr GetFont() const { return font; }
         T& SetFontSize(float fontSize) { this->fontSize = fontSize; return *static_cast<T*>(this); }
         float GetFontSize() const { return fontSize; }
+        T& SetScale(float scale) { this->scale = scale; return *static_cast<T*>(this); }
+        float GetScale() const { return scale; }
+        T& SetOffset(const glm::vec2 offset) { this->offset = offset; this->offset = glm::clamp(this->offset, -maxOffset, {0.0f, 0.0f}); return *static_cast<T*>(this); }
+        glm::vec2 GetOffset() const { return offset; }
+        T& SetMaxOffset(const glm::vec2 maxOffset) { this->maxOffset = maxOffset; return *static_cast<T*>(this); }
+        glm::vec2 GetMaxOffset() const { return maxOffset; }
+        T& SetOffsetStep(const glm::vec2 offsetStep) { this->offsetStep = offsetStep; return *static_cast<T*>(this); }
+        glm::vec2 GetOffsetStep() const { return offsetStep; }
+        T& UseMouseScrolling(bool useMousewheel) { this->useMousewheelForScrolling = useMousewheel; return *static_cast<T*>(this); }
+        bool IsUsingMouseScrolling() const { return useMousewheelForScrolling; }
+
+        void Reset() { SetOffset({0, 0}); };
 
         void Update(const Timer &timer) {}
 
         void OnMouseMove(float x, float y) {}
         void OnMouseDown(Input::InputKey button) {}
         void OnMouseUp(Input::InputKey button) {}
-        void OnMouseWheel(float x, float y) {}
+        void OnMouseWheel(float x, float y) 
+        { 
+            if(useMousewheelForScrolling) 
+            {
+                offset += offsetStep * glm::vec2(x, y);
+                offset = glm::clamp(offset, -maxOffset, {0.0f, 0.0f});
+            }
+        }
         void OnKeyDown(Input::InputKey keyCode) {}
         void OnKeyUp(Input::InputKey keyCode) {}
         void OnKeyRepeat(Input::InputKey keyCode) {}
         void OnChar(uint32_t c) {}
 
     protected:
+        glm::vec2 GetAnchoredPosition() const
+        {
+            glm::vec2 pos;
+            glm::vec2 ps = parentSize;
+            glm::vec2 s = size;
+            switch(anchor)
+            {
+            case Anchor::Right:
+            case Anchor::TopRight:
+                pos.x = ps.x - position.x - s.x;
+                break;
+            case Anchor::Bottom:
+            case Anchor::BottomLeft:
+                pos.y = ps.y - position.y - s.y;
+                break;
+            case Anchor::BottomRight:
+                pos = ps - position - s;
+                break;
+            case Anchor::Top:
+            case Anchor::TopLeft:
+            default:
+                pos = position;
+            }
+            return pos;
+        }
+
+    protected:
         std::string name;
         glm::vec2 position;
         glm::vec2 size = glm::vec2(64, 32);
+        float scale = 1.0f;
+        glm::vec2 offset = glm::vec2(0, 0);
+        glm::vec2 maxOffset = glm::vec2(0, 0);
+        glm::vec2 offsetStep = glm::vec2(0, 0);
+        bool useMousewheelForScrolling = false;
         Anchor anchor = Anchor::TopLeft;
         Graphics::Framebuffer &parentFramebuffer;
         Graphics::Font::Ptr font;

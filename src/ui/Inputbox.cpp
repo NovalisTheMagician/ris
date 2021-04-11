@@ -71,11 +71,12 @@ namespace RIS::UI
 
     }
 
-    void Inputbox::Draw(Graphics::SpriteRenderer &renderer)
+    void Inputbox::Draw(Graphics::SpriteRenderer &renderer, glm::vec2 offset)
     {
-        glm::vec2 textPos = position + glm::vec2(2, size.y / 4);
+        glm::vec2 pos = GetAnchoredPosition() + offset;
+        glm::vec2 textPos = pos + glm::vec2(2, size.y / 4);
 
-        renderer.DrawRect(position, size, backColor);
+        renderer.DrawRect(pos, size, backColor);
         if(text.empty() && !hasFocus)
             renderer.DrawString(previewText, *font, fontSize, textPos, previewTextColor);
         else
@@ -109,8 +110,9 @@ namespace RIS::UI
 
     void Inputbox::OnMouseMove(float x, float y)
     {
-        if( x > position.x && x < position.x + size.x &&
-            y > position.y && y < position.y + size.y)
+        glm::vec2 pos = GetAnchoredPosition();
+        if( x > pos.x && x < pos.x + size.x &&
+            y > pos.y && y < pos.y + size.y)
             isInBounds = true;
         else 
             isInBounds = false;

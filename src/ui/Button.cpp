@@ -39,10 +39,12 @@ namespace RIS::UI
         return *this;
     }
 
-    void Button::Draw(Graphics::SpriteRenderer &renderer)
+    void Button::Draw(Graphics::SpriteRenderer &renderer, glm::vec2 offset)
     {
+        glm::vec2 pos = GetAnchoredPosition() + offset;
+
         Graphics::TextMetrics metrics = font->MeasureString(text, fontSize);
-        glm::vec2 textPos = position + ((size / glm::vec2(2)) - (glm::vec2(metrics.width, metrics.height) / glm::vec2(2)));
+        glm::vec2 textPos = pos + ((size / glm::vec2(2)) - (glm::vec2(metrics.width, metrics.height) / glm::vec2(2)));
 
         glm::vec4 color = normalColor;
         std::shared_ptr<Graphics::Texture> image = normalImage;
@@ -51,9 +53,9 @@ namespace RIS::UI
         {
             glm::vec4 inactiveColor(0.7f);
             if(image)
-                renderer.DrawTexture(*image, position, size, inactiveColor);
+                renderer.DrawTexture(*image, pos, size, inactiveColor);
             else
-                renderer.DrawRect(position, size, inactiveColor);
+                renderer.DrawRect(pos, size, inactiveColor);
             renderer.DrawString(text, *font.get(), fontSize, textPos, textColor);
             return;
         }
@@ -70,16 +72,18 @@ namespace RIS::UI
         }
 
         if(image)
-            renderer.DrawTexture(*image, position, size, color);
+            renderer.DrawTexture(*image, pos, size, color);
         else
-            renderer.DrawRect(position, size, color);
+            renderer.DrawRect(pos, size, color);
         renderer.DrawString(text, *font.get(), fontSize, textPos, textColor);
     }
 
     void Button::OnMouseMove(float x, float y)
     {
-        if( x > position.x && x < position.x + size.x &&
-            y > position.y && y < position.y + size.y)
+        glm::vec2 pos = GetAnchoredPosition();
+
+        if( x > pos.x && x < pos.x + size.x &&
+            y > pos.y && y < pos.y + size.y)
             isInBounds = true;
         else 
             isInBounds = false;

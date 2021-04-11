@@ -32,6 +32,8 @@
 #include "graphics/Model.hpp"
 #include "graphics/Font.hpp"
 
+#include "ui/Scrollpanel.hpp"
+
 #include <fmt/format.h>
 
 #include <thread>
@@ -382,14 +384,14 @@ namespace RIS::Game
                                 .SetCallback([](){ GetConsole().Print("test"); })
                                 .SetText("Play")
                                 .SetSize({74, 24})
-                                .SetPosition({30, 0})
+                                .SetPosition({0, 0})
                                 .SetFontSize(16)
                                 .SetFont(font)
                                 .SetName("btn_play");
         
         auto &btn2 = rootPanel.CreateButton()
+                                .SetCallback([&ui](){ ui.PushMenu("optionsMenu"); })
                                 .SetText("Options")
-                                .SetActive(false)
                                 .SetSize({74, 24})
                                 .SetPosition({0, 36})
                                 .SetFontSize(16)
@@ -403,13 +405,35 @@ namespace RIS::Game
                                 .SetFontSize(16)
                                 .SetFont(font);
 
-        auto b = rootPanel.GetComponent<UI::Button>("btn_play");
-        if(b)
+        if(auto b = rootPanel.GetComponent<UI::Button>("btn_play"))
         {
             UI::Button &button = *b;
             GetConsole().Print(button.GetText());
         }
 
+        auto &optionsPanel = ui.CreateMenu("optionsMenu").SetSize({300, 300}).SetPosition({24, 24}).SetColor(Graphics::Colors::Red);
+        auto &scrollPanel = UI::MakeScrollable(optionsPanel, {0, 60});
+        auto &testbtn = scrollPanel.CreateButton()
+                                .SetCallback([](){ GetConsole().Print("options test"); })
+                                .SetText("Test")
+                                .SetSize({74, 24})
+                                .SetPosition({0, 0})
+                                .SetFontSize(16)
+                                .SetFont(font);
+        
+        auto &backbtn = scrollPanel.CreateButton()
+                                .SetCallback([&ui](){ ui.PopMenu(); })
+                                .SetText("Back")
+                                .SetSize({74, 24})
+                                .SetPosition({0, 36})
+                                .SetFontSize(16)
+                                .SetFont(font);
+
+        for(int i = 0; i < 10; ++i)
+        {
+            scrollPanel.CreateButton().SetText(fmt::format("Test {}", i)).SetSize({74, 24}).SetPosition({0, (i+2) * 36}).SetFontSize(16).SetFont(font);
+        }
+        
         ui.PushMenu("mainMenu");
 #endif
     }

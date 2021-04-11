@@ -27,7 +27,7 @@ namespace RIS::UI
         const std::string& GetText() const;
 
         void Update(const Timer &timer);
-        void Draw(Graphics::SpriteRenderer &renderer);
+        void Draw(Graphics::SpriteRenderer &renderer, glm::vec2 offset);
 
         void OnMouseDown(Input::InputKey mouseCode);
         void OnMouseUp(Input::InputKey mouseCode);

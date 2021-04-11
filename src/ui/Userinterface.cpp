@@ -25,12 +25,15 @@ namespace RIS::UI
         defaultFont = Loader::Load<Graphics::Font>("fonts/unispace.json", resourcePack);
 
         Config &config = GetConfig();
-        uiWidth = config.GetValue("r_width", 800);
-        uiHeight = config.GetValue("r_height", 600);
+        screenWidth = config.GetValue("r_width", 800);
+        screenHeight = config.GetValue("r_height", 600);
+
+        uiWidth = config.GetValue("ui_width", 1920);
+        uiHeight = config.GetValue("ui_height", 1080);
 
         uiFramebuffer = Graphics::Framebuffer(1920, 1080);
 
-        console.InitLimits(glm::vec2(uiWidth, uiHeight), resourcePack);
+        console.InitLimits(glm::vec2(screenWidth, screenHeight), resourcePack);
 
         /*
         fpsLabel = Label::Create(defaultFont);
@@ -81,11 +84,16 @@ namespace RIS::UI
         if(showFps)
             fpsLabel->Draw(*renderer, glm::vec2());
         */
-        if(!activeMenus.empty())
-            activeMenus.top().get().Draw(*renderer);
+        uiFramebuffer.Bind();
+        uiFramebuffer.Clear(Graphics::Colors::Transparent, 1.0f);
 
-        //renderer->SetViewport(static_cast<float>(uiWidth), static_cast<float>(uiHeight));
+        if(!activeMenus.empty())
+            activeMenus.top().get().Draw(*renderer, {0, 0});
+
+        renderer->SetViewport(static_cast<float>(screenWidth), static_cast<float>(screenHeight));
         defaultFramebuffer.Bind();
+
+        renderer->DrawTexture(uiFramebuffer.ColorTexture(), {0, 0}, {screenWidth, screenHeight});
 
         console.Draw(*renderer);
 
@@ -132,7 +140,7 @@ namespace RIS::UI
 
     Panel& Userinterface::CreateMenu(const std::string &menuName)
     {
-        Panel p(defaultFramebuffer, defaultFont, glm::vec2(uiWidth, uiHeight));
+        Panel p(uiFramebuffer, defaultFont, glm::vec2(uiWidth, uiHeight));
         menus.emplace(menuName, std::move(p));
         return menus.at(menuName);
     }
@@ -142,6 +150,7 @@ namespace RIS::UI
         if(menus.count(menuName) > 0)
         {
             auto &menu = menus.at(menuName);
+            menu.Reset();
             activeMenus.push(std::ref(menu));
         }
     }
@@ -178,7 +187,10 @@ namespace RIS::UI
     {
         if(!activeMenus.empty())
         {
-            activeMenus.top().get().OnMouseMove(x, y);
+            float mx = uiWidth * (x / screenWidth);
+            float my = uiHeight * (y / screenHeight);
+
+            activeMenus.top().get().OnMouseMove(mx, my);
             return true;
         }
         return false;

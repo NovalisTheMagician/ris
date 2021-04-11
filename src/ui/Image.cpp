@@ -18,9 +18,11 @@ namespace RIS::UI
         return *this;
     }
 
-    void Image::Draw(Graphics::SpriteRenderer &renderer)
+    void Image::Draw(Graphics::SpriteRenderer &renderer, glm::vec2 offset)
     {
+        glm::vec2 pos = GetAnchoredPosition() + offset;
+
         if(image)
-            renderer.DrawTexture(*image, position, size, {1, 1, 1, 1});
+            renderer.DrawTexture(*image, pos, size, {1, 1, 1, 1});
     }
 }

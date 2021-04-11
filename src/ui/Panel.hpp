@@ -15,6 +15,7 @@
 #include <string>
 #include <variant>
 #include <vector>
+#include <list>
 #include <optional>
 
 namespace RIS::UI
@@ -44,8 +45,10 @@ namespace RIS::UI
         void OnKeyUp(Input::InputKey keyCode);
         void OnKeyRepeat(Input::InputKey keyCode);
 
+        void Reset();
+
         void Update(const Timer &timer);
-        void Draw(Graphics::SpriteRenderer &renderer);
+        void Draw(Graphics::SpriteRenderer &renderer, glm::vec2 offset);
 
         template<typename Comp>
         std::optional<std::reference_wrapper<Comp>> GetComponent(const std::string &name)
@@ -66,9 +69,10 @@ namespace RIS::UI
         Label& CreateLabel();
         Image& CreateImage();
         Inputbox& CreateInputbox();
+        Panel& CreatePanel();
 
     private:
-        std::vector<UITypes> components;
+        std::list<UITypes> components;
 
         glm::vec4 color = Graphics::Colors::Transparent;
 

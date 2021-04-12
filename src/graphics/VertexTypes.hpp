@@ -22,11 +22,11 @@ namespace RIS::VertexType
         glm::i16vec4 joints;
         glm::vec4 weights;
     };
-    constexpr Graphics::AttribFormat ModelVertexFormat[] = {{0, 3, GL_FLOAT, 0, false, 0},
-                                                            {1, 3, GL_FLOAT, 0, false, 1},
-                                                            {2, 2, GL_FLOAT, 0, false, 2},
-                                                            {3, 4, GL_UNSIGNED_SHORT, 0, false, 3},
-                                                            {4, 4, GL_FLOAT, 0, false, 4}};
+    constexpr Graphics::AttribFormat ModelVertexFormat[] = {{0, 3, GL_FLOAT, offsetof(ModelVertex, position), false, 0},
+                                                            {1, 3, GL_FLOAT, offsetof(ModelVertex, normal), false, 0},
+                                                            {2, 2, GL_FLOAT, offsetof(ModelVertex, texCoords), false, 0},
+                                                            {3, 4, GL_UNSIGNED_SHORT, offsetof(ModelVertex, joints), false, 0},
+                                                            {4, 4, GL_FLOAT, offsetof(ModelVertex, weights), false, 0}};
 
     struct MapVertex
     {

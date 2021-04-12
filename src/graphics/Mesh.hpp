@@ -9,7 +9,7 @@ namespace RIS::Graphics
     class Mesh
     {
     public:
-        Mesh(Buffer &&positionBuffer, Buffer &&normalBuffer, Buffer &&texCoordBuffer, Buffer &&jointsBuffer, Buffer &&weightsBuffer, Buffer &&indexBuffer, int numIndices);
+        Mesh(Buffer &&vertexBuffer, Buffer &&indexBuffer, int numIndices);
 
         Mesh() = default;
         Mesh(const Mesh &) = delete;
@@ -25,11 +25,7 @@ namespace RIS::Graphics
         int NumIndices() const;
 
     private:
-        Buffer positionBuffer;
-        Buffer normalBuffer;
-        Buffer texCoordBuffer;
-        Buffer jointsBuffer;
-        Buffer weightsBuffer;
+        Buffer vertexBuffer;
         Buffer indexBuffer;
         const int numIndices;
     };

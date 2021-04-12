@@ -28,97 +28,41 @@
 #include <rapidjson/document.h>
 
 #include <map>
+#include <vector>
+#include <array>
+
+#include <fmt/format.h>
 
 namespace RIS::Loader
 {
     namespace GLTFHelper
     {
-        template<typename T, std::size_t Size = sizeof(T)>
-        static std::vector<T>& VectorReinterpret(const std::vector<unsigned char> &in, std::vector<T> &out)
+        template<typename T, size_t S = sizeof(T)>
+        static std::array<unsigned char, S> GetComponents(const T &comp)
         {
-            if(in.size() % Size != 0) throw std::runtime_error("input size mismatch");
-            out.resize(in.size() / Size);
-            auto beg = in.cbegin();
-            auto end = in.cend();
-
-            std::size_t i = 0;
-            for(auto it = beg; it != end;)
-            {
-                std::vector<unsigned char> bytes(it, it + Size);
-                T val;
-                std::memcpy(&val, bytes.data(), Size);
-
-                out[i++] = val;
-
-                it += Size;
-            }
-
-            return out;
+            std::array<unsigned char, S> d;
+            std::memcpy(d.data(), &comp, S);
+            return d;
         }
 
-        template<typename T, std::size_t Size = sizeof(T)>
-        static std::vector<T> VectorReinterpret(const std::vector<unsigned char> &in)
+        static std::vector<unsigned char> Interleave(const std::vector<glm::vec3> &positions, const std::vector<glm::vec3> &normals, const std::vector<glm::vec2> &texCoords, const std::vector<glm::i16vec4> &joints, const std::vector<glm::vec4> &weights)
         {
-            if(in.size() % Size != 0) throw std::runtime_error("input size mismatch");
-            std::vector<T> out(in.size() / Size);
-            auto beg = in.cbegin();
-            auto end = in.cend();
-
-            std::size_t i = 0;
-            for(auto it = beg; it != end;)
+            std::vector<unsigned char> data;
+            size_t size = positions.size();
+            for(size_t i = 0; i < size; ++i)
             {
-                std::vector<unsigned char> bytes(it, it + Size);
-                T val;
-                std::memcpy(&val, bytes.data(), Size);
-
-                out[i++] = val;
-
-                it += Size;
+                auto p = GetComponents(positions.at(i));
+                data.insert(data.end(), p.cbegin(), p.cend());
+                auto n = GetComponents(normals.at(i));
+                data.insert(data.end(), n.cbegin(), n.cend());
+                auto t = GetComponents(texCoords.at(i));
+                data.insert(data.end(), t.cbegin(), t.cend());
+                auto j = GetComponents(joints.at(i));
+                data.insert(data.end(), j.cbegin(), j.cend());
+                auto w = GetComponents(weights.at(i));
+                data.insert(data.end(), w.cbegin(), w.cend());
             }
-
-            return out;
-        }
-
-        template<typename InType, typename OutType, std::size_t Size = sizeof(InType)>
-        static std::vector<OutType>& VectorCast(const std::vector<unsigned char> &in, std::vector<OutType> &out)
-        {
-            if(in.size() % Size != 0) throw std::runtime_error("input size mismatch");
-            out.clear();
-            auto beg = in.cbegin();
-            auto end = in.cend();
-
-            for(auto it = beg; it != end;)
-            {
-                std::vector<unsigned char> bytes(beg, end);
-                InType val;
-                std::memcpy(&val, bytes.data(), Size);
-
-                out.push_back(static_cast<OutType>(val));
-                it += Size;
-            }
-
-            return out;
-        }
-
-        template<typename InType, typename OutType, std::size_t Size = sizeof(InType)>
-        static std::vector<OutType> VectorCast(const std::vector<unsigned char> &in)
-        {
-            if(in.size() % Size != 0) throw std::runtime_error("input size mismatch");
-            std::vector<OutType> out;
-            auto beg = in.cbegin();
-            auto end = in.cend();
-
-            for(auto it = beg; it != end;)
-            {
-                std::vector<unsigned char> bytes(beg, end);
-                InType val;
-                std::memcpy(&val, bytes.data(), Size);
-
-                out.push_back(static_cast<OutType>(val));
-                it += Size;
-            }
-
-            return out;
+            return data;
         }
 
         static std::unordered_map<std::size_t, std::size_t> CreateNodeBoneMap(const tinygltf::Model &model, const tinygltf::Skin &skin)
@@ -359,73 +303,13 @@ namespace RIS::Loader
                 return hasAll == 3;
             };
 
-            auto interleave = [](const std::vector<std::pair<std::size_t, std::vector<unsigned char>>> &buffers, std::size_t numElements)
-            {
-                std::vector<unsigned char> buffer;
-
-                for(std::size_t i = 0; i < numElements; ++i)
-                {
-                    for(const auto &buf : buffers)
-                    {
-                        std::size_t stride = buf.first;
-                        std::size_t offset = stride * i;
-                        const auto &b = buf.second;
-                        buffer.insert(buffer.end(), b.cbegin() + offset, b.cbegin() + offset + stride);
-                    }
-                }
-
-                return buffer;
-            };
-
             const tinygltf::Mesh &mesh = model.meshes.at(0);
             const tinygltf::Primitive &primitive = mesh.primitives.at(0);
 
             if(!checkAttribs(primitive.attributes))
                 return nullptr;
 
-            auto fillBuffer = [&model, &primitive](std::vector<unsigned char> &buf, int attribIndex)
-            {
-                const auto &accessor = model.accessors.at(attribIndex);
-                const auto &bufferView = model.bufferViews.at(accessor.bufferView);
-                const auto &buffer = model.buffers.at(bufferView.buffer);
-
-                auto beg = buffer.data.cbegin() + accessor.byteOffset + bufferView.byteOffset;
-                auto end = buffer.data.cbegin() + accessor.byteOffset + bufferView.byteOffset + bufferView.byteLength;
-
-                buf.clear();
-                buf.insert(buf.begin(), beg, end);
-            };
-
             std::size_t numElements = model.accessors.at(primitive.attributes.at("POSITION")).count;
-
-            /*
-            std::vector<std::vector<unsigned char>> buffers(6);
-            fillBuffer(buffers[0], primitive.attributes.at("POSITION"));
-            fillBuffer(buffers[1], primitive.attributes.at("NORMAL"));
-            fillBuffer(buffers[2], primitive.attributes.at("TEXCOORD_0"));
-            fillBuffer(buffers[3], primitive.indices);
-            if(primitive.attributes.count("JOINTS_0"))
-            {
-                fillBuffer(buffers[4], primitive.attributes.at("JOINTS_0"));
-                fillBuffer(buffers[5], primitive.attributes.at("WEIGHTS_0"));
-            }
-            else
-            {
-                buffers[4] = std::vector<unsigned char>(numElements * sizeof glm::i16vec4, 0);
-                buffers[5] = std::vector<unsigned char>(numElements * sizeof glm::vec4, 0);
-            }
-
-            auto buf = interleave({{sizeof glm::vec3, buffers.at(0)}, 
-                                    {sizeof glm::vec3, buffers.at(1)},
-                                    {sizeof glm::vec2, buffers.at(2)},
-                                    {sizeof glm::i16vec4, buffers.at(4)},
-                                    {sizeof glm::vec4, buffers.at(5)}},
-                                    numElements);
-
-            auto j = GLTFHelper::VectorReinterpret<glm::i16vec4>(buffers.at(4));
-
-            auto bufCast = GLTFHelper::VectorReinterpret<VertexType::ModelVertex>(buf);
-            */
 
             std::vector<glm::vec3> positions;
             const auto &posAccessor = model.accessors.at(primitive.attributes.at("POSITION"));
@@ -461,20 +345,18 @@ namespace RIS::Loader
                 weights.resize(numElements);
             }
 
+            std::vector<unsigned char> vertices = GLTFHelper::Interleave(positions, normals, texCoords, joints, weights);
+
             std::vector<unsigned short> indices;
             const tinygltf::Accessor &indexAccessor = model.accessors.at(primitive.indices);
             GLTFHelper::GetValues(model, indexAccessor, indices);
 
-            Graphics::VertexBuffer positionBuffer(positions);
-            Graphics::VertexBuffer normalBuffer(normals);
-            Graphics::VertexBuffer texCoordBuffer(texCoords);
-            Graphics::VertexBuffer jointsBuffer(joints);
-            Graphics::VertexBuffer weightsBuffer(weights);
+            Graphics::VertexBuffer vertexBuffer(vertices);
             Graphics::IndexBuffer indexBuffer(indices);
             
             int numIndices = static_cast<int>(model.accessors.at(primitive.indices).count);
 
-            return std::make_shared<Graphics::Mesh>(std::move(positionBuffer), std::move(normalBuffer), std::move(texCoordBuffer), std::move(jointsBuffer), std::move(weightsBuffer), std::move(indexBuffer), numIndices);
+            return std::make_shared<Graphics::Mesh>(std::move(vertexBuffer), std::move(indexBuffer), numIndices);
         }
         else
         {
@@ -497,13 +379,13 @@ namespace RIS::Loader
         {
             if(model.skins.size() == 0)
             {
-                logger.Warning("no skin found");
+                logger.Warning(fmt::format("({}): no skin found", name));
                 return nullptr;
             }
 
             if(model.skins.size() > 1)
             {
-                logger.Warning("more than 1 skin found. using the first one");
+                logger.Warning(fmt::format("({}): more than 1 skin found. using the first one", name));
             }
 
             const auto &skin = model.skins.at(0);
@@ -599,7 +481,7 @@ namespace RIS::Loader
         if(res.IsError())
         {
             std::string errorMsg = rapidjson::GetParseError_En(res.Code());
-            Logger::Instance().Error("Failed to parse model (" + name + "): " + errorMsg + "(" + std::to_string(res.Offset()) + ")");
+            Logger::Instance().Error(fmt::format("Failed to parse model ({}): {}({})", name, errorMsg, std::to_string(res.Offset())));
             return nullptr;
         }
 

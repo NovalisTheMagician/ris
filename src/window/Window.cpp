@@ -44,12 +44,14 @@ namespace RIS::Window
         int fullscreen = config.GetValue("r_fullscreen", 0);
         bool vsync = config.GetValue("r_vsync", false);
         int msaa = config.GetValue("r_msaa", 0);
+        bool autoIconify = config.GetValue("r_autoiconify", true);
 
         glfwWindowHint(GLFW_RED_BITS, 8);
         glfwWindowHint(GLFW_GREEN_BITS, 8);
         glfwWindowHint(GLFW_BLUE_BITS, 8);
         glfwWindowHint(GLFW_ALPHA_BITS, 8);
         glfwWindowHint(GLFW_SAMPLES, msaa);
+        glfwWindowHint(GLFW_AUTO_ICONIFY, autoIconify);
 
         if(fullscreen == 0) // windowed mode
         {

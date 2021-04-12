@@ -20,7 +20,6 @@ namespace RIS::UI
         Label& operator=(Label&&) = default;
 
         Label& SetTextColor(const glm::vec4 &color);
-        Label& SetVisible(bool visible);
         Label& SetText(const std::string &text);
 
         void Draw(Graphics::SpriteRenderer &renderer, glm::vec2 offset);
@@ -29,7 +28,6 @@ namespace RIS::UI
         std::string text = "";
 
         glm::vec4 fontColor = glm::vec4(1, 1, 1, 1);
-        bool isVisible = true;
 
     };
 }

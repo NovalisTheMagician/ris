@@ -2,7 +2,7 @@
 
 namespace RIS::UI
 {
-    Panel& MakeScrollable(Panel& parentPanel, glm::vec2 scrollSize, glm::vec2 scrollStep, float scrollAreaWidth)
+    Panel& MakeScrollable(Panel& parentPanel, glm::vec2 scrollSize, const ScrollButtons &buttonTextures, glm::vec2 scrollStep, float scrollAreaWidth)
     {
         glm::vec2 parentSize = parentPanel.GetSize();
         Panel& contentPanel = parentPanel.CreatePanel()
@@ -21,7 +21,10 @@ namespace RIS::UI
                     .SetText("/\\")
                     .SetFontSize(10.0f)
                     .SetAnchor(Anchor::TopRight)
-                    .SetCallback([&contentPanel]()
+                    .SetNormalTexture(buttonTextures.upNormal)
+                    .SetHoverTexture(buttonTextures.upHover)
+                    .SetDownTexture(buttonTextures.upClick)
+                    .SetCallback([&contentPanel](Button&)
                     {
                         glm::vec2 offset = contentPanel.GetOffset();
                         offset.y += contentPanel.GetOffsetStep().y;
@@ -35,7 +38,10 @@ namespace RIS::UI
                     .SetText("\\/")
                     .SetFontSize(10.0f)
                     .SetAnchor(Anchor::BottomRight)
-                    .SetCallback([&contentPanel]()
+                    .SetNormalTexture(buttonTextures.downNormal)
+                    .SetHoverTexture(buttonTextures.downHover)
+                    .SetDownTexture(buttonTextures.downClick)
+                    .SetCallback([&contentPanel](Button&)
                     {
                         glm::vec2 offset = contentPanel.GetOffset();
                         offset.y -= contentPanel.GetOffsetStep().y;

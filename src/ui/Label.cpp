@@ -16,12 +16,6 @@ namespace RIS::UI
         return *this;
     }
 
-    Label& Label::SetVisible(bool visible)
-    {
-        isVisible = visible;
-        return *this;
-    }
-
     Label& Label::SetText(const string &text)
     {
         this->text = text;
@@ -30,6 +24,8 @@ namespace RIS::UI
 
     void Label::Draw(Graphics::SpriteRenderer &renderer, glm::vec2 offset)
     {
+        if(!visible) return;
+
         glm::vec2 pos = GetAnchoredPosition() + offset;
         renderer.DrawString(text, *font.get(), fontSize, pos, fontColor);
     }

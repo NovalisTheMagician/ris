@@ -25,16 +25,21 @@ namespace RIS::UI
 
     void Panel::OnChar(uint32_t c)
     {
+        if(!visible) return;
         ForeachDispatch(components, [c](auto &comp){ comp.OnChar(c); });
     }
 
     void Panel::OnMouseMove(float x, float y)
     {
-        float relX = x - position.x - offset.x;
-        float relY = y - position.y - offset.y;
+        if(!visible) return;
 
-        glm::vec2 topLeft = position;
-        glm::vec2 botRight = position + size;
+        glm::vec2 pos = GetAnchoredPosition();
+
+        float relX = x - pos.x - offset.x;
+        float relY = y - pos.y - offset.y;
+
+        glm::vec2 topLeft = pos;
+        glm::vec2 botRight = pos + size;
         if(x < topLeft.x || x > botRight.x || y < topLeft.y || y > botRight.y)
         {
             relX = std::numeric_limits<float>::infinity();
@@ -46,32 +51,38 @@ namespace RIS::UI
 
     void Panel::OnMouseDown(Input::InputKey mouseCode)
     {
+        if(!visible) return;
         ForeachDispatch(components, [mouseCode](auto &&comp){ comp.OnMouseDown(mouseCode); });
     }
 
     void Panel::OnMouseUp(Input::InputKey mouseCode)
     {
+        if(!visible) return;
         ForeachDispatch(components, [mouseCode](auto &&comp){ comp.OnMouseUp(mouseCode); });
     }
 
     void Panel::OnMouseWheel(float x, float y)
     {
+        if(!visible) return;
         Component::OnMouseWheel(x, y);
         ForeachDispatch(components, [x, y](auto &&comp){ comp.OnMouseWheel(x, y); });
     }
 
     void Panel::OnKeyDown(Input::InputKey keyCode)
     {
+        if(!visible) return;
         ForeachDispatch(components, [keyCode](auto &&comp){ comp.OnKeyDown(keyCode); });
     }
 
     void Panel::OnKeyUp(Input::InputKey keyCode)
     {
+        if(!visible) return;
         ForeachDispatch(components, [keyCode](auto &&comp){ comp.OnKeyUp(keyCode); });
     }
 
     void Panel::OnKeyRepeat(Input::InputKey keyCode)
     {
+        if(!visible) return;
         ForeachDispatch(components, [keyCode](auto &&comp){ comp.OnKeyRepeat(keyCode); });
     }
 
@@ -83,11 +94,14 @@ namespace RIS::UI
 
     void Panel::Update(const Timer &timer)
     {
+        if(!visible) return;
         ForeachDispatch(components, [&timer](auto &&comp){ comp.Update(timer); });
     }
 
     void Panel::Draw(Graphics::SpriteRenderer &renderer, glm::vec2 offset)
     {
+        if(!visible) return;
+
         glm::vec2 pos = GetAnchoredPosition() + offset;
         /*
         if(backgroundImage)

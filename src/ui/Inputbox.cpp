@@ -73,6 +73,8 @@ namespace RIS::UI
 
     void Inputbox::Draw(Graphics::SpriteRenderer &renderer, glm::vec2 offset)
     {
+        if(!visible) return;
+
         glm::vec2 pos = GetAnchoredPosition() + offset;
         glm::vec2 textPos = pos + glm::vec2(2, size.y / 4);
 
@@ -95,11 +97,12 @@ namespace RIS::UI
 
     void Inputbox::OnMouseDown(Input::InputKey mouseCode)
     {
-
+        if(!visible) return;
     }
 
     void Inputbox::OnMouseUp(Input::InputKey mouseCode)
     {
+        if(!visible) return;
         if(mouseCode == Input::InputKey::MOUSE_LEFT)
         {
             hasFocus = isInBounds;
@@ -110,6 +113,7 @@ namespace RIS::UI
 
     void Inputbox::OnMouseMove(float x, float y)
     {
+        if(!visible) return;
         glm::vec2 pos = GetAnchoredPosition();
         if( x > pos.x && x < pos.x + size.x &&
             y > pos.y && y < pos.y + size.y)
@@ -120,6 +124,7 @@ namespace RIS::UI
 
     void Inputbox::OnChar(uint32_t c)
     {
+        if(!visible) return;
         if(hasFocus)
         {
             auto it = text.begin();
@@ -146,12 +151,14 @@ namespace RIS::UI
 
     void Inputbox::OnKeyUp(Input::InputKey keyCode)
     {
+        if(!visible) return;
         if(keyCode == Input::InputKey::LEFT_CONTROL)
             ctrlDown = false;
     }
 
     void Inputbox::OnKey(Input::InputKey keyCode, bool repeat)
     {
+        if(!visible) return;
         if(keyCode == Input::InputKey::BACKSPACE && hasFocus)
         {
             if(text.size() > 0 && caretPosition > 0)

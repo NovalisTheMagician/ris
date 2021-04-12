@@ -20,6 +20,8 @@ namespace RIS::UI
 
     void Image::Draw(Graphics::SpriteRenderer &renderer, glm::vec2 offset)
     {
+        if(!visible) return;
+
         glm::vec2 pos = GetAnchoredPosition() + offset;
 
         if(image)

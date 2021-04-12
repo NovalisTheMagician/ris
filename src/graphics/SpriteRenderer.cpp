@@ -5,6 +5,7 @@
 #include "loader/Loader.hpp"
 
 #include "graphics/VertexTypes.hpp"
+#include "graphics/Colors.hpp"
 
 #include <vector>
 
@@ -19,12 +20,12 @@ namespace RIS::Graphics
     SpriteRenderer::SpriteRenderer(const Loader::ResourcePack &resourcePack)
         : vertexSpriteBuffer(6 * sizeof(VertexType::SpriteVertex))
         , vertexTextBuffer(6 * MAX_STRING_LEN * sizeof(VertexType::SpriteVertex))
-        , sampler(MinFilter::LINEAR, MagFilter::LINEAR)
+        , sampler(Sampler::Bilinear())
         , pipeline()
         , vertexLayout(VertexType::SpriteVertexFormat)
         , viewProjectionBuffer(sizeof(glm::mat4))
         , worldBuffer(sizeof(WorldBufferData))
-        , white({1, 1, 1, 1})
+        , white(Colors::White)
     {
         vertexShader = Loader::Load<Shader>("shaders/spriteVertex.glsl", resourcePack, ShaderType::VERTEX);
         fragmentSpriteShader = Loader::Load<Shader>("shaders/spriteFragment.glsl", resourcePack, ShaderType::FRAGMENT);

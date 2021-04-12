@@ -14,7 +14,9 @@
 
 namespace RIS::UI
 {
-    using ButtonFunc = std::function<void()>;
+    class Button;
+
+    using ButtonFunc = std::function<void(Button&)>;
 
     class Button : public Component<Button>
     {
@@ -30,6 +32,12 @@ namespace RIS::UI
         Button& SetTextColor(const glm::vec4 &color);
         Button& SetCallback(ButtonFunc func);
         Button& SetActive(bool isActive);
+        Button& SetToggleMode(bool isToggle);
+        Button& SetToggle(bool toggleOn);
+        bool IsToggle() const;
+        Button& SetNormalTexture(Graphics::Texture::Ptr normalTexture);
+        Button& SetHoverTexture(Graphics::Texture::Ptr hoverTexture);
+        Button& SetDownTexture(Graphics::Texture::Ptr downTexture);
 
         void Draw(Graphics::SpriteRenderer &renderer, glm::vec2 offset);
 
@@ -40,12 +48,15 @@ namespace RIS::UI
     private:
         std::string text = "";
 
+        bool isToggle = false;
+        bool toggleOn = false;
+
         glm::vec4 textColor = glm::vec4(0, 0, 0, 1);
 
         glm::vec4 normalColor = glm::vec4(1, 1, 1, 1);
         glm::vec4 hoverColor = glm::vec4(0.7f, 0.7f, 0.7f, 1);
         glm::vec4 downColor = glm::vec4(0.5f, 0.5f, 0.5f, 1);
-        Graphics::Texture::Ptr normalImage, hoverImage, downImage;
+        Graphics::Texture::Ptr normalImage, hoverImage, downImage, inactiveImage;
 
         bool isInBounds = false;
         bool isClickedDown = false;

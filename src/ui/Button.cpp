@@ -7,7 +7,7 @@
 namespace RIS::UI
 {
     Button::Button(Graphics::Framebuffer &parentFramebuffer, std::shared_ptr<Graphics::Font> defaultFont, const glm::vec2 &parentSize)
-        : Component(parentFramebuffer, defaultFont, parentSize), callback([](){})
+        : Component(parentFramebuffer, defaultFont, parentSize), callback([](Button&){})
     {}
 
     Button& Button::SetText(const std::string &text)
@@ -39,28 +39,65 @@ namespace RIS::UI
         return *this;
     }
 
+    Button& Button::SetToggleMode(bool isToggle)
+    {
+        this->isToggle = isToggle;
+        return *this;
+    }
+
+    Button& Button::SetToggle(bool isToggle)
+    {
+        this->toggleOn = isToggle;
+        return *this;
+    }
+
+    bool Button::IsToggle() const
+    {
+        return toggleOn;
+    }
+
+    Button& Button::SetNormalTexture(Graphics::Texture::Ptr normalTexture)
+    {
+        this->normalImage = normalTexture;
+        return *this;
+    }
+
+    Button& Button::SetHoverTexture(Graphics::Texture::Ptr hoverTexture)
+    {
+        this->hoverImage = hoverTexture;
+        return *this;
+    }
+
+    Button& Button::SetDownTexture(Graphics::Texture::Ptr downTexture)
+    {
+        this->downImage = downTexture;
+        return *this;
+    }
+
     void Button::Draw(Graphics::SpriteRenderer &renderer, glm::vec2 offset)
     {
+        if(!visible) return;
+
         glm::vec2 pos = GetAnchoredPosition() + offset;
 
         Graphics::TextMetrics metrics = font->MeasureString(text, fontSize);
         glm::vec2 textPos = pos + ((size / glm::vec2(2)) - (glm::vec2(metrics.width, metrics.height) / glm::vec2(2)));
 
         glm::vec4 color = normalColor;
-        std::shared_ptr<Graphics::Texture> image = normalImage;
+        Graphics::Texture::Ptr image = normalImage;
 
         if(!active)
         {
-            glm::vec4 inactiveColor(0.7f);
-            if(image)
-                renderer.DrawTexture(*image, pos, size, inactiveColor);
+            glm::vec4 inactiveColor(glm::vec3(0.7f), 1.0f);
+            if(inactiveImage)
+                renderer.DrawTexture(*inactiveImage, pos, size);
             else
                 renderer.DrawRect(pos, size, inactiveColor);
             renderer.DrawString(text, *font.get(), fontSize, textPos, textColor);
             return;
         }
 
-        if(isClickedDown)
+        if(isClickedDown || (isToggle && toggleOn))
         {
             color = downColor;
             image = downImage;
@@ -72,7 +109,7 @@ namespace RIS::UI
         }
 
         if(image)
-            renderer.DrawTexture(*image, pos, size, color);
+            renderer.DrawTexture(*image, pos, size);
         else
             renderer.DrawRect(pos, size, color);
         renderer.DrawString(text, *font.get(), fontSize, textPos, textColor);
@@ -80,6 +117,7 @@ namespace RIS::UI
 
     void Button::OnMouseMove(float x, float y)
     {
+        if(!visible) return;
         glm::vec2 pos = GetAnchoredPosition();
 
         if( x > pos.x && x < pos.x + size.x &&
@@ -91,6 +129,7 @@ namespace RIS::UI
 
     void Button::OnMouseDown(Input::InputKey button)
     {
+        if(!visible) return;
         if(button == Input::InputKey::MOUSE_LEFT && isInBounds)
         {
             isClickedDown = true;
@@ -99,11 +138,13 @@ namespace RIS::UI
 
     void Button::OnMouseUp(Input::InputKey button)
     {
+        if(!visible) return;
         if(button == Input::InputKey::MOUSE_LEFT && isClickedDown)
         {
             if(active && isInBounds)
             {
-                callback();
+                toggleOn = !toggleOn;
+                callback(*this);
             }
             isClickedDown = false;
         }

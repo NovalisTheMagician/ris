@@ -31,7 +31,7 @@ namespace RIS::UI
         uiWidth = config.GetValue("ui_width", 1920);
         uiHeight = config.GetValue("ui_height", 1080);
 
-        uiFramebuffer = Graphics::Framebuffer(1920, 1080);
+        uiFramebuffer = Graphics::Framebuffer(uiWidth, uiHeight);
 
         console.InitLimits(glm::vec2(screenWidth, screenHeight), resourcePack);
 
@@ -54,6 +54,7 @@ namespace RIS::UI
         input.RegisterButtonDown([this](Input::InputKey button){ return OnMouseDown(button); });
         input.RegisterButtonUp([this](Input::InputKey button){ return OnMouseUp(button); });
         input.RegisterKeyDown([this](Input::InputKey key){ return OnKeyDown(key); });
+        input.RegisterKeyUp([this](Input::InputKey key){ return OnKeyUp(key); });
         input.RegisterKeyRepeat([this](Input::InputKey key){ return OnKeyRepeat(key); });
     }
 

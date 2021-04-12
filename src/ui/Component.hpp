@@ -14,6 +14,8 @@
 
 #include <algorithm>
 
+#include <any>
+
 namespace RIS::UI
 {
     enum class Anchor
@@ -25,7 +27,10 @@ namespace RIS::UI
         TopLeft,
         TopRight,
         BottomLeft,
-        BottomRight
+        BottomRight,
+        Center,
+        CenterX,
+        CenterY
     };
 
     template<typename Collection, typename Func>
@@ -60,6 +65,10 @@ namespace RIS::UI
         glm::vec2 GetOffsetStep() const { return offsetStep; }
         T& UseMouseScrolling(bool useMousewheel) { this->useMousewheelForScrolling = useMousewheel; return *static_cast<T*>(this); }
         bool IsUsingMouseScrolling() const { return useMousewheelForScrolling; }
+        T& SetVisible(bool visible) { this->visible = visible; return *static_cast<T*>(this); }
+        bool IsVisible() const { return visible; }
+        T& SetData(std::any data) { this->data = data; return *static_cast<T*>(this); }
+        std::any GetData() const { return data; }
 
         void Reset() { SetOffset({0, 0}); };
 
@@ -100,6 +109,15 @@ namespace RIS::UI
             case Anchor::BottomRight:
                 pos = ps - position - s;
                 break;
+            case Anchor::CenterX:
+                pos.x = (ps.x / 2) - (s.x / 2) + position.x;
+                break;
+            case Anchor::CenterY:
+                pos.y = (ps.y / 2) - (s.y / 2) + position.y;
+                break;
+            case Anchor::Center:
+                pos = (ps / 2.0f) - (s / 2.0f) + position;
+                break;
             case Anchor::Top:
             case Anchor::TopLeft:
             default:
@@ -110,9 +128,10 @@ namespace RIS::UI
 
     protected:
         std::string name;
-        glm::vec2 position;
+        glm::vec2 position = glm::vec2(0, 0);
         glm::vec2 size = glm::vec2(64, 32);
         float scale = 1.0f;
+        bool visible = true;
         glm::vec2 offset = glm::vec2(0, 0);
         glm::vec2 maxOffset = glm::vec2(0, 0);
         glm::vec2 offsetStep = glm::vec2(0, 0);
@@ -122,6 +141,7 @@ namespace RIS::UI
         Graphics::Font::Ptr font;
         float fontSize = 16.0f;
         glm::vec2 parentSize;
+        std::any data;
 
     };
 }

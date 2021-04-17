@@ -23,6 +23,13 @@ namespace RIS::UI
         return *this;
     }
 
+    Panel& Panel::SetActive(bool active)
+    {
+        this->active = active;
+        ForeachDispatch(components, [active](auto &comp){ comp.SetActive(active); });
+        return *this;
+    }
+
     void Panel::OnChar(uint32_t c)
     {
         if(!visible) return;

@@ -20,7 +20,11 @@ namespace RIS::UI
         Label& operator=(Label&&) = default;
 
         Label& SetTextColor(const glm::vec4 &color);
+        glm::vec4 GetTextColor() const;
         Label& SetText(const std::string &text);
+        std::string GetText() const;
+
+        glm::vec2 GetSize() const;
 
         void Draw(Graphics::SpriteRenderer &renderer, glm::vec2 offset);
 

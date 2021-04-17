@@ -14,8 +14,15 @@
 
 namespace RIS::UI
 {
-    class Button;
+    struct ButtonTextures
+    {
+        Graphics::Texture::Ptr normal;
+        Graphics::Texture::Ptr hover;
+        Graphics::Texture::Ptr click;
+        Graphics::Texture::Ptr disabled;
+    };
 
+    class Button;
     using ButtonFunc = std::function<void(Button&)>;
 
     class Button : public Component<Button>
@@ -30,15 +37,20 @@ namespace RIS::UI
         Button& SetText(const std::string &text);
         std::string GetText() const;
         Button& SetTextColor(const glm::vec4 &color);
+        glm::vec4 GetTextColor() const;
         Button& SetCallback(ButtonFunc func);
-        Button& SetActive(bool isActive);
         Button& SetToggleMode(bool isToggle);
+        bool IsToggleMode() const;
         Button& SetToggle(bool toggleOn);
         bool IsToggle() const;
         Button& SetNormalTexture(Graphics::Texture::Ptr normalTexture);
         Button& SetHoverTexture(Graphics::Texture::Ptr hoverTexture);
         Button& SetDownTexture(Graphics::Texture::Ptr downTexture);
+        Button& SetTextures(const ButtonTextures &textures);
+        Button& SetContinuous(bool isContinuous);
+        bool IsContinuous() const;
 
+        void Update(const Timer &timer);
         void Draw(Graphics::SpriteRenderer &renderer, glm::vec2 offset);
 
         void OnMouseMove(float x, float y);
@@ -51,6 +63,10 @@ namespace RIS::UI
         bool isToggle = false;
         bool toggleOn = false;
 
+        bool isContinuous = false;
+        float continuousTimeout = 0;
+        float continuousTick = 0.2f;
+
         glm::vec4 textColor = glm::vec4(0, 0, 0, 1);
 
         glm::vec4 normalColor = glm::vec4(1, 1, 1, 1);
@@ -62,8 +78,6 @@ namespace RIS::UI
         bool isClickedDown = false;
 
         ButtonFunc callback;
-
-        bool active = true;
 
     };
 }

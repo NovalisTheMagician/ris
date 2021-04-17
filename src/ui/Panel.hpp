@@ -35,6 +35,8 @@ namespace RIS::UI
         Panel& SetSize(const glm::vec2 &size);
         Panel& SetColor(const glm::vec4 &color);
 
+        Panel& SetActive(bool active);
+
         void OnChar(uint32_t c);
         void OnMouseMove(float x, float y);
         void OnMouseDown(Input::InputKey mouseCode);

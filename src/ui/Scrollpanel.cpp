@@ -12,18 +12,19 @@ namespace RIS::UI
                                         .SetAnchor(Anchor::TopLeft)
                                         .SetMaxOffset(scrollSize)
                                         .SetOffsetStep(scrollStep)
-                                        .UseMouseScrolling(true);
+                                        .UseMouseScrolling(true)
+                                        .SetFont(parentPanel.GetFont())
+                                        .SetFontSize(parentPanel.GetFontSize());
 
-        parentPanel.CreateButton()
+        auto &upBtn = parentPanel.CreateButton()
                     .SetName("scroll_up_button")
                     .SetSize({scrollAreaWidth, scrollAreaWidth})
                     .SetPosition({0, 0})
                     .SetText("/\\")
                     .SetFontSize(10.0f)
                     .SetAnchor(Anchor::TopRight)
-                    .SetNormalTexture(buttonTextures.upNormal)
-                    .SetHoverTexture(buttonTextures.upHover)
-                    .SetDownTexture(buttonTextures.upClick)
+                    .SetTextures(buttonTextures.up)
+                    .SetContinuous(true)
                     .SetCallback([&contentPanel](Button&)
                     {
                         glm::vec2 offset = contentPanel.GetOffset();
@@ -31,22 +32,27 @@ namespace RIS::UI
                         contentPanel.SetOffset(offset);
                     });
 
-        parentPanel.CreateButton()
+        auto &downBtn = parentPanel.CreateButton()
                     .SetName("scroll_down_button")
                     .SetSize({scrollAreaWidth, scrollAreaWidth})
                     .SetPosition({0, 0})
                     .SetText("\\/")
                     .SetFontSize(10.0f)
                     .SetAnchor(Anchor::BottomRight)
-                    .SetNormalTexture(buttonTextures.downNormal)
-                    .SetHoverTexture(buttonTextures.downHover)
-                    .SetDownTexture(buttonTextures.downClick)
+                    .SetTextures(buttonTextures.down)
+                    .SetContinuous(true)
                     .SetCallback([&contentPanel](Button&)
                     {
                         glm::vec2 offset = contentPanel.GetOffset();
                         offset.y -= contentPanel.GetOffsetStep().y;
                         contentPanel.SetOffset(offset);
                     });
+
+        if(buttonTextures.up.normal)
+        {
+            upBtn.SetText("");
+            downBtn.SetText("");
+        }
 
         return contentPanel;
     }

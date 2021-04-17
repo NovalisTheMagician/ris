@@ -27,15 +27,14 @@ namespace RIS::UI
         return *this;
     }
 
+    glm::vec4 Button::GetTextColor() const
+    {
+        return textColor;
+    }
+
     Button& Button::SetCallback(ButtonFunc func)
     {
         callback = func;
-        return *this;
-    }
-
-    Button& Button::SetActive(bool isActive)
-    {
-        active = isActive;
         return *this;
     }
 
@@ -43,6 +42,11 @@ namespace RIS::UI
     {
         this->isToggle = isToggle;
         return *this;
+    }
+
+    bool Button::IsToggleMode() const
+    {
+        return isToggle;
     }
 
     Button& Button::SetToggle(bool isToggle)
@@ -72,6 +76,40 @@ namespace RIS::UI
     {
         this->downImage = downTexture;
         return *this;
+    }
+
+    Button& Button::SetTextures(const ButtonTextures &textures)
+    {
+        normalImage = textures.normal;
+        hoverImage = textures.hover;
+        downImage = textures.click;
+        inactiveImage = textures.disabled;
+        return *this;
+    }
+
+    Button& Button::SetContinuous(bool isContinuous)
+    {
+        this->isContinuous = isContinuous;
+        return *this;
+    }
+
+    bool Button::IsContinuous() const
+    {
+        return isContinuous;
+    }
+
+    void Button::Update(const Timer &timer)
+    {
+        if(isClickedDown && isContinuous)
+        {
+            continuousTimeout += timer.Delta();
+
+            if(continuousTimeout >= continuousTick)
+            {
+                continuousTimeout -= continuousTick;
+                callback(*this);
+            }
+        }
     }
 
     void Button::Draw(Graphics::SpriteRenderer &renderer, glm::vec2 offset)
@@ -141,7 +179,7 @@ namespace RIS::UI
         if(!visible) return;
         if(button == Input::InputKey::MOUSE_LEFT && isClickedDown)
         {
-            if(active && isInBounds)
+            if(active && isInBounds && !isContinuous)
             {
                 toggleOn = !toggleOn;
                 callback(*this);

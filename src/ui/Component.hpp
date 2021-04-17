@@ -69,6 +69,8 @@ namespace RIS::UI
         bool IsVisible() const { return visible; }
         T& SetData(std::any data) { this->data = data; return *static_cast<T*>(this); }
         std::any GetData() const { return data; }
+        T& SetActive(bool active) { this->active = active; return *static_cast<T*>(this); }
+        bool IsActive() const { return active; }
 
         void Reset() { SetOffset({0, 0}); };
 
@@ -79,6 +81,7 @@ namespace RIS::UI
         void OnMouseUp(Input::InputKey button) {}
         void OnMouseWheel(float x, float y) 
         { 
+            if(!visible) return;
             if(useMousewheelForScrolling) 
             {
                 offset += offsetStep * glm::vec2(x, y);
@@ -132,6 +135,7 @@ namespace RIS::UI
         glm::vec2 size = glm::vec2(64, 32);
         float scale = 1.0f;
         bool visible = true;
+        bool active = true;
         glm::vec2 offset = glm::vec2(0, 0);
         glm::vec2 maxOffset = glm::vec2(0, 0);
         glm::vec2 offsetStep = glm::vec2(0, 0);

@@ -86,6 +86,22 @@ if($build) {
             Move-Item -Path "$workingDir$($file.BaseName).dds" -Destination $targetDir -Force
         }
         if(!$silent) { Write-Host }
+
+        if(!$silent) { Write-Host "UI" -NoNewline }
+        $subDir = "ui/"
+        $fileFilter = $imageFileFilter
+        $workingDir = "$assetPath$subDir"
+        $targetDir = "$buildPath$subDir"
+        if(!(Test-Path -Path $targetDir)) {
+            New-Item -Path $targetDir -ItemType Directory -Force | Out-Null
+        }
+        $files = Get-ChildItem -File -Path "$workingDir*" -Include $fileFilter
+        foreach($file in $files) {
+            if(!$silent) { Write-Host "." -NoNewline }
+            Start-Process -FilePath "$toolsPath$textureTool" -Wait -NoNewWindow -ArgumentList $textureArgs, "-f $textureFormat", $file.Name -WorkingDirectory $workingDir -RedirectStandardOutput ".\NUL"
+            Move-Item -Path "$workingDir$($file.BaseName).dds" -Destination $targetDir -Force
+        }
+        if(!$silent) { Write-Host }
     }
 
     if($shaders -or $all) {

@@ -8,6 +8,7 @@
 #include "graphics/VertexTypes.hpp"
 #include "graphics/Font.hpp"
 #include "graphics/Texture.hpp"
+#include "graphics/Colors.hpp"
 
 #include <glm/glm.hpp>
 
@@ -32,9 +33,9 @@ namespace RIS::Graphics
         void End();
         void SetViewport(float width, float height, bool flip = false);
 
-        void DrawTexture(const Texture &texture, const glm::vec2 &position = {}, const glm::vec2 &size = {1, 1}, const glm::vec4 &tint = {1, 1, 1, 1});
-        void DrawRect(const glm::vec2 &position = {}, const glm::vec2 &size = {1, 1}, const glm::vec4 &tint = {1, 1, 1, 1});
-        void DrawString(const std::string_view string, const Font &font, float size, const glm::vec2 &position = {}, const glm::vec4 &tint = {1, 1, 1, 1});
+        void DrawTexture(const Texture &texture, const glm::vec2 &position = {}, const glm::vec2 &size = {1, 1}, const glm::vec4 &tint = Colors::White);
+        void DrawRect(const glm::vec2 &position = {}, const glm::vec2 &size = {1, 1}, const glm::vec4 &tint = Colors::White);
+        void DrawString(const std::string_view string, const Font &font, float size, const glm::vec2 &position = {}, const glm::vec4 &tint = Colors::White);
 
     private:
         static constexpr int MAX_STRING_LEN = 1024;

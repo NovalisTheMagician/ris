@@ -16,10 +16,26 @@ namespace RIS::UI
         return *this;
     }
 
+    glm::vec4 Label::GetTextColor() const
+    {
+        return fontColor;
+    }
+
     Label& Label::SetText(const string &text)
     {
         this->text = text;
         return *this;
+    }
+
+    std::string Label::GetText() const
+    {
+        return text;
+    }
+
+    glm::vec2 Label::GetSize() const
+    {
+        auto metrics = font->MeasureString(text, fontSize);
+        return {metrics.width, metrics.height};
     }
 
     void Label::Draw(Graphics::SpriteRenderer &renderer, glm::vec2 offset)

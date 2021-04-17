@@ -6,3 +6,4 @@
 #include "loader/FontLoader.hpp"
 #include "loader/ShaderLoader.hpp"
 #include "loader/ModelLoader.hpp"
+#include "loader/MapLoader.hpp"

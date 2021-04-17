@@ -20,6 +20,7 @@ namespace RIS::Graphics
     class Image;
     class Shader;
     class Texture;
+    class MapMesh;
     namespace Animation
     {
         class Animation;
@@ -87,5 +88,5 @@ namespace RIS::Loader
 
     };
 
-    using AssetCache = TAssetCache<Graphics::Font, Graphics::Mesh, Graphics::Model, Graphics::Shader, Graphics::Texture, Graphics::Image, Graphics::Animation::Skeleton, Graphics::Animation::Animation, std::string>;
+    using AssetCache = TAssetCache<Graphics::Font, Graphics::Mesh, Graphics::Model, Graphics::Shader, Graphics::Texture, Graphics::Image, Graphics::Animation::Skeleton, Graphics::Animation::Animation, Graphics::MapMesh, std::string>;
 }

@@ -2,16 +2,16 @@
 
 namespace RIS::Graphics
 {
-    Model::Model(std::shared_ptr<Mesh> mesh, std::shared_ptr<Texture> texture)
+    Model::Model(Mesh::Ptr mesh, Texture::Ptr texture)
         : mesh(mesh), texture(texture)
     {}
 
-    std::shared_ptr<Mesh> Model::GetMesh()
+    Mesh::Ptr Model::GetMesh()
     {
         return mesh;
     }
 
-    std::shared_ptr<Texture> Model::GetTexture()
+    Texture::Ptr Model::GetTexture()
     {
         return texture;
     }

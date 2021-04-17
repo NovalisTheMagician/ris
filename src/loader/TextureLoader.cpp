@@ -9,6 +9,9 @@ namespace RIS::Loader
     {
         if(bytes.size() == 0)
             return nullptr;
+        
+        if(bool *flip = std::any_cast<bool>(&param))
+            return std::make_shared<Graphics::Texture>(bytes, flip);
         return std::make_shared<Graphics::Texture>(bytes);
     }
 }

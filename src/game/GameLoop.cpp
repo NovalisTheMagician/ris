@@ -31,6 +31,9 @@
 #include "graphics/Transform.hpp"
 #include "graphics/Model.hpp"
 #include "graphics/Font.hpp"
+#include "graphics/Colors.hpp"
+#include "graphics/Texture.hpp"
+#include "graphics/MapMesh.hpp"
 
 #include "ui/Scrollpanel.hpp"
 #include "ui/TabbedPanel.hpp"
@@ -84,18 +87,29 @@ namespace RIS::Game
 
         Graphics::Shader::Ptr modelVertexShader = Loader::Load<Graphics::Shader>("shaders/mAnim.glsl", resourcePack, Graphics::ShaderType::VERTEX);
         Graphics::Shader::Ptr modelFragmentShader = Loader::Load<Graphics::Shader>("shaders/mUnlit.glsl", resourcePack, Graphics::ShaderType::FRAGMENT);
+        Graphics::Shader::Ptr mapVertexShader = Loader::Load<Graphics::Shader>("shaders/mapVertex.glsl", resourcePack, Graphics::ShaderType::VERTEX);
+        Graphics::Shader::Ptr mapFragmentShader = Loader::Load<Graphics::Shader>("shaders/mapFragment.glsl", resourcePack, Graphics::ShaderType::FRAGMENT);
 
         Graphics::Animation::Skeleton::Ptr skeleton = Loader::Load<Graphics::Animation::Skeleton>("meshes/John.glb", resourcePack);
         Graphics::Animation::Animation::Ptr animation = Loader::Load<Graphics::Animation::Animation>("meshes/John.glb", resourcePack);
 
+        Graphics::MapMesh::Ptr map = Loader::Load<Graphics::MapMesh>("maps/test.poly", resourcePack);
+
         Graphics::VertexArray modelLayout(VertexType::ModelVertexFormat);
+        Graphics::VertexArray mapLayout(VertexType::MapVertexFormat);
+
+        Graphics::Sampler mapSampler(Graphics::Sampler::Nearest());
 
         Graphics::ProgramPipeline pipeline;
         pipeline.SetShader(*modelVertexShader);
         pipeline.SetShader(*modelFragmentShader);
 
+        Graphics::ProgramPipeline mapPipeline;
+        mapPipeline.SetShader(*mapVertexShader);
+        mapPipeline.SetShader(*mapFragmentShader);
+
         //Graphics::Sampler sampler(Graphics::MinFilter::LINEAR_MIPMAP_LINEAR, Graphics::MagFilter::LINEAR, 16.0f);
-        Graphics::Sampler sampler = Graphics::Sampler::Trilinear(16.0f);
+        Graphics::Sampler sampler(Graphics::Sampler::Trilinear(16.0f));
 
         Graphics::UniformBuffer viewProjBuffer(glm::mat4{});
         Graphics::UniformBuffer worldBuffer(glm::mat4{});
@@ -130,7 +144,7 @@ namespace RIS::Game
         glm::vec3 camPos(std::cos(0.0f) * dist, 5, std::sin(0.0f) * dist);
         float x = 0;
 
-        glm::vec4 clearColor(0.392f, 0.584f, 0.929f, 1.0f);
+        glm::vec4 clearColor(Graphics::Colors::CornflowerBlue);
 
         Timer timer;
 
@@ -223,6 +237,7 @@ namespace RIS::Game
             //glViewport(0, 0, width, height);
             defaultFramebuffer.Clear(clearColor, 1.0f);
 
+            //model drawing
             pipeline.Use();
             viewProjBuffer.Bind(0);
             worldBuffer.Bind(1);
@@ -235,6 +250,20 @@ namespace RIS::Game
             sampler.Bind(0);
             //cubeModel->GetMesh()->Draw();
             cubeModel->Draw();
+
+            //worldBuffer.UpdateData(glm::mat4(1.0f));
+            worldBuffer.UpdateData(glm::scale(glm::mat4(1.0f), glm::vec3(0.1f)));
+
+            //map drawing
+            mapPipeline.Use();
+            viewProjBuffer.Bind(0);
+            worldBuffer.Bind(1);
+
+            mapLayout.Bind();
+            map->Bind(mapLayout);
+            mapSampler.Bind(0);
+
+            map->Draw();
 
 #pragma region DebugDraw
 
@@ -420,13 +449,13 @@ namespace RIS::Game
         panels[2].get().SetColor(Graphics::Colors::Green);
 
         UI::ScrollButtons sb;
-        sb.upNormal = Loader::Load<Graphics::Texture>("textures/scroll_arrow_up.dds", resourcePack);
-        sb.upHover = Loader::Load<Graphics::Texture>("textures/scroll_arrow_up_hover.dds", resourcePack);
-        sb.upClick = Loader::Load<Graphics::Texture>("textures/scroll_arrow_up_click.dds", resourcePack);
+        sb.up.normal = Loader::Load<Graphics::Texture>("ui/scroll_arrow_up.dds", resourcePack);
+        sb.up.hover = Loader::Load<Graphics::Texture>("ui/scroll_arrow_up_hover.dds", resourcePack);
+        sb.up.click = Loader::Load<Graphics::Texture>("ui/scroll_arrow_up_click.dds", resourcePack);
 
-        sb.downNormal = Loader::Load<Graphics::Texture>("textures/scroll_arrow_down.dds", resourcePack);
-        sb.downHover = Loader::Load<Graphics::Texture>("textures/scroll_arrow_down_hover.dds", resourcePack);
-        sb.downClick = Loader::Load<Graphics::Texture>("textures/scroll_arrow_down_click.dds", resourcePack);
+        sb.down.normal = Loader::Load<Graphics::Texture>("ui/scroll_arrow_down.dds", resourcePack);
+        sb.down.hover = Loader::Load<Graphics::Texture>("ui/scroll_arrow_down_hover.dds", resourcePack);
+        sb.down.click = Loader::Load<Graphics::Texture>("ui/scroll_arrow_down_click.dds", resourcePack);
 
         auto &scrollPanel = UI::MakeScrollable(panels[0], {0, 60}, sb, {36, 36}, 24);
         auto &testbtn = scrollPanel.CreateButton()
@@ -447,7 +476,7 @@ namespace RIS::Game
 
         for(int i = 0; i < 10; ++i)
         {
-            scrollPanel.CreateButton().SetText(fmt::format("Test {}", i)).SetSize({74, 24}).SetPosition({0, (i+2) * 36}).SetToggleMode(true).SetFontSize(16).SetFont(font);
+            scrollPanel.CreateButton().SetText(fmt::format("Test {}", i)).SetSize({74, 24}).SetPosition({0, (i+2) * 36}).SetToggleMode(true).SetFontSize(16).SetFont(font).SetActive(i % 2);
         }
         
         ui.PushMenu("mainMenu");

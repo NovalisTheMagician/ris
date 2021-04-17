@@ -31,8 +31,9 @@ namespace RIS::Graphics
         return numIndices;
     }
 
-    void Mesh::Draw() const
+    void Mesh::Draw(int count, int offset) const
     {
-        glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, nullptr);
+        count = count == -1 ? numIndices : count;
+        glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_SHORT, reinterpret_cast<void*>(offset * sizeof(std::uint16_t)));
     }
 }

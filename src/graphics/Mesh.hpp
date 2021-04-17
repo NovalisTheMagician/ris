@@ -4,11 +4,15 @@
 #include "graphics/VertexTypes.hpp"
 #include "graphics/VertexArray.hpp"
 
+#include <memory>
+
 namespace RIS::Graphics
 {
     class Mesh
     {
     public:
+        using Ptr = std::shared_ptr<Mesh>;
+
         Mesh(Buffer &&vertexBuffer, Buffer &&indexBuffer, int numIndices);
 
         Mesh() = default;
@@ -18,7 +22,7 @@ namespace RIS::Graphics
         Mesh &operator=(Mesh &&) = default;
 
         void Bind(VertexArray &vao) const;
-        void Draw() const;
+        void Draw(int count = -1, int offset = 0) const;
 
         const Buffer& GetVertexBuffer() const;
         const Buffer& GetIndexBuffer() const;

@@ -14,7 +14,7 @@ namespace RIS::Graphics
     public:
         using Ptr = std::shared_ptr<Model>;
 
-        Model(std::shared_ptr<Mesh> mesh, std::shared_ptr<Texture> texture);
+        Model(Mesh::Ptr mesh, Texture::Ptr texture);
 
         ~Model() = default;
         Model(const Model&) = delete;
@@ -22,15 +22,15 @@ namespace RIS::Graphics
         Model(Model&&) = default;
         Model& operator=(Model&&) = default;
 
-        std::shared_ptr<Mesh> GetMesh();
-        std::shared_ptr<Texture> GetTexture();
+        Mesh::Ptr GetMesh();
+        Texture::Ptr GetTexture();
 
         void Bind(VertexArray &vao) const;
         void Draw() const;
 
     private:
-        std::shared_ptr<Mesh> mesh;
-        std::shared_ptr<Texture> texture;
+        Mesh::Ptr mesh;
+        Texture::Ptr texture;
 
     };
 }

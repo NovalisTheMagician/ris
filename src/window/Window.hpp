@@ -60,6 +60,8 @@ namespace RIS::Window
     private:
         static void FramebufferResize(GLFWwindow *window, int width, int height);
 
+        void CenterWindow(GLFWwindow *window, GLFWmonitor *monitor);
+
     private:
         GLFWwindow *window;
 

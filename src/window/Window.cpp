@@ -90,6 +90,8 @@ namespace RIS::Window
             throw WindowException(fmt::format("Window creation failed (Error code: {}): {}", std::to_string(ec), errorString));
         }
 
+        CenterWindow(window, glfwGetPrimaryMonitor());
+
         glfwSetWindowUserPointer(window, this);
         glfwSetFramebufferSizeCallback(window, Window::FramebufferResize);
 
@@ -104,6 +106,26 @@ namespace RIS::Window
 
     void Window::PostInit()
     {
+    }
+
+    void Window::CenterWindow(GLFWwindow *window, GLFWmonitor *monitor)
+    {
+        if (!monitor)
+            return;
+
+        const GLFWvidmode *mode = glfwGetVideoMode(monitor);
+        if (!mode)
+            return;
+
+        int monitorX, monitorY;
+        glfwGetMonitorPos(monitor, &monitorX, &monitorY);
+
+        int windowWidth, windowHeight;
+        glfwGetWindowSize(window, &windowWidth, &windowHeight);
+
+        glfwSetWindowPos(window,
+                        monitorX + (mode->width - windowWidth) / 2,
+                        monitorY + (mode->height - windowHeight) / 2);
     }
 
     void Window::RegisterScriptFunctions()

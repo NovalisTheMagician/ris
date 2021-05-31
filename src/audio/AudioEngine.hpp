@@ -6,6 +6,8 @@
 
 #include <soloud.h>
 
+#include <misc/Timer.hpp>
+
 namespace RIS::Audio
 {
     struct AudioException : public RISException
@@ -24,9 +26,7 @@ namespace RIS::Audio
         AudioEngine &operator=(const AudioEngine &) = delete;
         AudioEngine &operator=(AudioEngine &&) = delete;
 
-        void PostInit();
-
-        void PlaySound(const int &soundId);
+        void Update(const Timer timer);
 
     private:
         SoLoud::Soloud soloud;

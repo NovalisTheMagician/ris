@@ -25,6 +25,7 @@ namespace RIS::Graphics
         , vertexLayout(VertexType::SpriteVertexFormat)
         , viewProjectionBuffer(sizeof(glm::mat4))
         , worldBuffer(sizeof(WorldBufferData))
+        , textPropertyBuffer(sizeof(TextPropertyData))
         , white(Colors::White)
     {
         vertexShader = Loader::Load<Shader>("shaders/spriteVertex.glsl", resourcePack, ShaderType::VERTEX);
@@ -43,6 +44,7 @@ namespace RIS::Graphics
         vertices[5] = { {1, 0}, {1, 0} };
 
         vertexSpriteBuffer.UpdateData(vertices);
+        textPropertyBuffer.UpdateData<TextPropertyData>({0.5f, 0.2f});
     }
 
     void SpriteRenderer::Begin()
@@ -57,6 +59,7 @@ namespace RIS::Graphics
         vertexLayout.Bind();
 
         viewProjectionBuffer.Bind(0);
+        textPropertyBuffer.Bind(2);
 
         pipeline.Use();
     }
@@ -75,6 +78,11 @@ namespace RIS::Graphics
             viewProjectionBuffer.UpdateData(glm::ortho(0.0f, width, 0.0f, height, -1.0f, 1.0f));
         else
             viewProjectionBuffer.UpdateData(glm::ortho(0.0f, width, height, 0.0f, -1.0f, 1.0f));
+    }
+
+    void SpriteRenderer::SetTextProperty(float buffer, float gamma)
+    {
+        textPropertyBuffer.UpdateData<TextPropertyData>({buffer, gamma});
     }
 
     void SpriteRenderer::DrawTexture(const Texture &texture, const glm::vec2 &position, const glm::vec2 &size, const glm::vec4 &tint)

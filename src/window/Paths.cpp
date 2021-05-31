@@ -74,4 +74,11 @@ namespace RIS::Window
         return std::filesystem::temp_directory_path();
 #endif
     }
+
+    void CreatePaths()
+    {
+        std::filesystem::create_directories(GetConfigPath());
+        std::filesystem::create_directories(GetSavePath());
+        std::filesystem::create_directories(GetModPath());
+    }
 }

@@ -57,6 +57,7 @@ namespace RIS::UI
         void Print(const std::string &msg);
 
         void BindFunc(const std::string &name, ConsoleFunc func);
+        void UnbindFunc(const std::string &name);
 
         bool IsOpen();
 

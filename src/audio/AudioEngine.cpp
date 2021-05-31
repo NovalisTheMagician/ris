@@ -18,13 +18,8 @@ namespace RIS::Audio
         soloud.deinit();
     }
 
-    void AudioEngine::PostInit()
+    void AudioEngine::Update(const Timer timer)
     {
-
-    }
-
-    void AudioEngine::PlaySound(const int &soundId)
-    {
-
+        soloud.update3dAudio();
     }
 }

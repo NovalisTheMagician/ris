@@ -32,6 +32,7 @@ namespace RIS::Graphics
         void Begin();
         void End();
         void SetViewport(float width, float height, bool flip = false);
+        void SetTextProperty(float buffer, float gamma);
 
         void DrawTexture(const Texture &texture, const glm::vec2 &position = {}, const glm::vec2 &size = {1, 1}, const glm::vec4 &tint = Colors::White);
         void DrawRect(const glm::vec2 &position = {}, const glm::vec2 &size = {1, 1}, const glm::vec4 &tint = Colors::White);
@@ -46,13 +47,19 @@ namespace RIS::Graphics
             glm::vec4 tint;
         };
 
+        struct TextPropertyData
+        {
+            float buffer;
+            float gamma;
+        };
+
     private:
         DynamicVertexBuffer vertexSpriteBuffer, vertexTextBuffer;
         Sampler sampler;
         Shader::Ptr vertexShader, fragmentSpriteShader, fragmentTextShader;
         ProgramPipeline pipeline;
         VertexArray vertexLayout;
-        UniformBuffer viewProjectionBuffer, worldBuffer;
+        UniformBuffer viewProjectionBuffer, worldBuffer, textPropertyBuffer;
         Texture white;
 
     };

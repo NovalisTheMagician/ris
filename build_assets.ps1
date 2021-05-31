@@ -36,7 +36,8 @@ $textureArgs = "-nologo -y"
 
 $textureFormat = "BC3_UNORM"
 $imageFormat = "R8G8B8A8_UNORM"
-$fontTextureFormat = "BC4_UNORM"
+#$fontTextureFormat = "BC4_UNORM"
+$fontTextureFormat = "R8_UNORM"
 $fontMapSize = "1024"
 
 if($clear) {

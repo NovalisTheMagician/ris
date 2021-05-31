@@ -254,6 +254,10 @@ namespace RIS::UI
 
     bool Userinterface::OnKeyUp(Input::InputKey key)
     {
+        if(console.IsOpen())
+        {
+            return true;
+        }
         if(!activeMenus.empty())
         {
             activeMenus.top().get().OnKeyUp(key);

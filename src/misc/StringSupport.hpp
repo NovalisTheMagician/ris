@@ -52,18 +52,31 @@ namespace RIS
 		return str;
 	}
 
+	inline std::string& upperCase(std::string &str)
+	{
+		std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c){ return std::toupper(c); });
+		return str;
+	}
+
 	inline std::wstring lowerCase(const std::wstring &str)
 	{
 		std::wstring newStr(str);
 		std::transform(str.begin(), str.end(), newStr.begin(), std::towlower);
-		return str;
+		return newStr;
 	}
 
 	inline std::string lowerCase(const std::string &str)
 	{
 		std::string newStr(str);
 		std::transform(str.begin(), str.end(), newStr.begin(), [](unsigned char c){ return std::tolower(c); });
-		return str;
+		return newStr;
+	}
+
+	inline std::string upperCase(const std::string &str)
+	{
+		std::string newStr(str);
+		std::transform(str.begin(), str.end(), newStr.begin(), [](unsigned char c){ return std::toupper(c); });
+		return newStr;
 	}
 
 	inline std::vector<std::string> split(const std::string &str, const std::string &delimiter)

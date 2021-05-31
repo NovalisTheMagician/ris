@@ -153,7 +153,7 @@ int main(int argc, char *argv[])
 
         window->PostInit();
         renderer->PostInit();
-        audio->PostInit();
+        //audio->PostInit();
         userinterface->PostInit(resourcePack);
         //scriptEngine->PostInit();
     }

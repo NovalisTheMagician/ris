@@ -74,6 +74,11 @@ namespace RIS::UI
         funcVars.insert_or_assign(lowerCase(name), func);
     }
 
+    void Console::UnbindFunc(const std::string &name)
+    {
+        funcVars.erase(name);
+    }
+
     bool Console::IsOpen()
     {
         return isOpen;

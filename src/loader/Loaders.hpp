@@ -1,5 +1,7 @@
 #pragma once
 
+#include "loader/Loader.hpp"
+
 #include "loader/TextLoader.hpp"
 #include "loader/TextureLoader.hpp"
 #include "loader/ImageLoader.hpp"

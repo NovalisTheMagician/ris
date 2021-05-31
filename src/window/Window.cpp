@@ -104,29 +104,6 @@ namespace RIS::Window
 
     void Window::PostInit()
     {
-        auto &console = GetUserinterface().GetConsole();
-        console.BindFunc("exit", [this](const std::vector<std::string> &params){ Exit(0); return ""; });
-        console.BindFunc("vsync", [this](const std::vector<std::string> &params)
-        { 
-            if(params.size() == 0)
-            {
-                const auto &config = GetConfig();
-                return std::to_string(config.GetValue("r_vsync", false));
-            }
-            else
-            {
-                try
-                {
-                    bool value = std::stoi(params.at(0));
-                    SetVsync(value);
-                }
-                catch(const std::exception&)
-                {
-                    return "Invalid Value"s;
-                }
-            }
-            return std::string(); 
-        });
     }
 
     void Window::RegisterScriptFunctions()

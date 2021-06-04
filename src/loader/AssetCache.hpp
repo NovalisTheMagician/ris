@@ -34,7 +34,7 @@ namespace RIS::Loader
     class TAssetCache
     {
     private:
-        using TVariant = std::variant<std::weak_ptr<AssetTypes>...>;
+        using TVariant = std::variant<std::shared_ptr<AssetTypes>...>;
         struct RefCount
         {
             TVariant asset;
@@ -66,14 +66,20 @@ namespace RIS::Loader
         template<typename AssetType>
         std::shared_ptr<AssetType> Get(const std::string &name)
         {
-            std::weak_ptr<AssetType> weakptr = std::get<std::weak_ptr<AssetType>>(assets.at(GetTypeName<AssetType>(name)).asset);
-            return weakptr.lock();
+            std::shared_ptr<AssetType> weakptr = std::get<std::shared_ptr<AssetType>>(assets.at(GetTypeName<AssetType>(name)).asset);
+            //return weakptr.lock();
+            return weakptr;
         }
 
         void Cleanup()
         {
             std::for_each(std::begin(assets), std::end(assets), [](auto &value){ value.second.count--; });
             std::experimental::erase_if(assets, [](const auto &value){ return value.second.count <= 0; });
+        }
+
+        void Clear()
+        {
+            assets.clear();
         }
 
     private:

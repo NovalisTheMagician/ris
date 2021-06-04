@@ -177,7 +177,14 @@ int main(int argc, char *argv[])
 
     logger.Info("System init OK");
 
-    Game::GameLoop loop(std::move(resourcePack));
+    std::string startMap = "maps/menu";
+    if(args.IsSet("-map"))
+    {
+        startMap = args.GetParameter("-map");
+        logger.Info(fmt::format("Loading to map {}", startMap));
+    }
+
+    Game::GameLoop loop(std::move(resourcePack), startMap);
     int res = 0;
     try
     {
@@ -191,6 +198,8 @@ int main(int argc, char *argv[])
     }
 
     logger.Info("Exit game");
+
+    Loader::GetCache().Clear();
 
     Logger::Destroy();
     return res;

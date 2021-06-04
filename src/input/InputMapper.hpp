@@ -1,10 +1,10 @@
 #pragma once
 
-#include <unordered_map>
 #include <string_view>
-#include <functional>
-#include <variant>
+#include <algorithm>
+#include <optional>
 #include <fstream>
+#include <array>
 
 #include <glm/glm.hpp>
 
@@ -13,21 +13,34 @@
 #include "input/KeyDefs.hpp"
 #include "input/ActionEvent.hpp"
 
+#include <iostream>
+
 namespace RIS::Input
 {
     constexpr std::string_view BINDINGS_FILE_NAME = "keyboard_bindings.cfg";
+
+    struct ActionState
+    {
+        bool held, pressed, released;
+    };
 
     template<typename Action>
     class InputMapper
     {
     public:
-        using ActionFunc = std::function<void(ActionEvent<Action>)>;
-
-    public:
-        InputMapper() : callback([](auto){}) {}
-        InputMapper(std::string_view mappingFile)
-            : callback([](auto){})
+        InputMapper()
         {
+            std::fill(std::begin(mapping), std::end(mapping), InputKey::NONE);
+            std::fill(std::begin(currentStates), std::end(currentStates), false);
+            std::fill(std::begin(previousStates), std::end(previousStates), false);
+        }
+
+        InputMapper(std::string_view mappingFile)
+        {
+            std::fill(std::begin(mapping), std::end(mapping), InputKey::NONE);
+            std::fill(std::begin(currentStates), std::end(currentStates), false);
+            std::fill(std::begin(previousStates), std::end(previousStates), false);
+
             std::ifstream mappingStream(mappingFile);
             if(mappingStream)
             {
@@ -35,35 +48,40 @@ namespace RIS::Input
             }
         }
 
-        template<typename T>
-        void SetCallback(T func)
+        void Set(Action action, InputKey key)
         {
-            callback = func;
+            auto index = magic_enum::enum_index<Action>(action);
+            if(index)
+                mapping[*index] = key;
         }
 
-        void Map(InputKey key, Action action)
+        InputKey Get(Action action) const
         {
-            auto found = std::find_if(std::begin(primaryMapping), std::end(primaryMapping), [action](const auto &v){ return v.second == action; });
-            if(found != std::end(primaryMapping))
-                primaryMapping.erase(found);
-            primaryMapping.insert_or_assign(key, action);
+            auto index = magic_enum::enum_index<Action>(action);
+            if(index)
+                return mapping[*index];
+            return InputKey::NONE;
         }
 
-        void Clear(Action action)
+        std::optional<Action> Get(InputKey key) const
         {
-            auto found = std::find_if(std::begin(primaryMapping), std::end(primaryMapping), [action](const auto &v){ return v.second == action; });
-            if(found != std::end(primaryMapping))
-                primaryMapping.erase(found);
+            auto found = std::find(std::begin(mapping), std::end(mapping), key);
+            if(found != std::end(mapping))
+            {
+                std::size_t index = std::distance(std::begin(mapping), found);
+                return magic_enum::enum_value<Action>(index);
+            }
+            return std::nullopt;
         }
 
         void Clear()
         {
-            primaryMapping.clear();
+            std::fill(std::begin(mapping), std::end(mapping), InputKey::NONE);
         }
 
         bool IsEmpty() const
         {
-            return primaryMapping.empty();
+            return std::all_of(std::begin(mapping), std::end(mapping), [](const auto &v){ return v == InputKey::NONE; });
         }
 
         void SaveMapping(std::string_view mappingFile) const
@@ -71,53 +89,97 @@ namespace RIS::Input
             std::ofstream output(mappingFile);
             if(output)
             {
-                for(auto it = std::begin(primaryMapping); it != std::end(primaryMapping); ++it)
+                for(std::size_t i = 0; i < mapping.size(); ++i)
                 {
-                    auto key = (*it).first;
-                    auto action = (*it).second;
+                    auto key = mapping[i];
+                    auto action = magic_enum::enum_value<Action>(i);
 
                     output << magic_enum::enum_name<Action>(action) << " = " << ToString(key) << "\n";
                 }
             }
         }
 
-        void OnInputDown(InputKey key) const
+        ActionState GetState(Action action) const
         {
-            auto found = primaryMapping.find(key);
-            if(found != std::end(primaryMapping))
+            auto index = magic_enum::enum_index<Action>(action);
+            if(index)
+                return actionStates[*index];
+            return {false, false, false};
+        }
+
+        glm::vec2 GetMouse() const
+        {
+            return positionDiff;
+        }
+
+        glm::vec2 GetWheel() const
+        {
+            return wheelDiff;
+        }
+
+        void Update()
+        {
+            for (std::size_t i = 0; i < actionStates.size(); ++i)
             {
-                ActionEvent<Action> e = { EventType::KEY, BinaryEvent<Action>{ EventState::DOWN, (*found).second } };
-                callback(e);
+                ActionState& state = actionStates.at(i);
+                state.held = currentStates[i];
+                state.pressed = currentStates[i] && !previousStates[i];
+                state.released = !currentStates[i] && previousStates[i];
+                previousStates[i] = currentStates[i];
+            }
+
+            positionDiff = currentPosition - lastPosition;
+            lastPosition = currentPosition;
+            wheelDiff = currentWheel - lastWheel;
+            lastWheel = currentWheel;
+        }
+
+        void OnInputDown(InputKey key)
+        {
+            auto action = Get(key);
+            if(action)
+            {
+                auto index = magic_enum::enum_index<Action>(*action);
+                if(index)
+                    currentStates[*index] = true;
             }
         }
 
-        void OnInputUp(InputKey key) const
+        void OnInputUp(InputKey key)
         {
-            auto found = primaryMapping.find(key);
-            if(found != std::end(primaryMapping))
+            auto action = Get(key);
+            if(action)
             {
-                ActionEvent<Action> e = { EventType::KEY, BinaryEvent<Action>{ EventState::UP, (*found).second } };
-                callback(e);
+                auto index = magic_enum::enum_index<Action>(*action);
+                if(index)
+                    currentStates[*index] = false;
             }
         }
 
-        void OnMouseMove(float x, float y) const
+        void OnMouseMove(float x, float y)
         {
-            ActionEvent<Action> e = { EventType::MOUSE_MOVE, glm::vec2{ x, y } };
-            callback(e);
+            currentPosition = glm::vec2(x, y);
         }
 
-        void OnMouseWheel(float x, float y) const
+        void OnMouseWheel(float x, float y)
         {
-            ActionEvent<Action> e = { EventType::MOUSE_WHEEL, glm::vec2{ x, y } };
-            callback(e);
+            currentWheel = glm::vec2(x, y);
         }
 
     private:
-        std::unordered_map<InputKey, Action> primaryMapping;
-        //std::unordered_map<InputKey, Action> secondaryMapping;
+        std::array<InputKey, magic_enum::enum_count<Action>()> mapping;
 
-        ActionFunc callback;
+        std::array<bool, magic_enum::enum_count<Action>()> currentStates;
+        std::array<bool, magic_enum::enum_count<Action>()> previousStates;
+        std::array<ActionState, magic_enum::enum_count<Action>()> actionStates;
+
+        glm::vec2 currentPosition;
+        glm::vec2 lastPosition;
+        glm::vec2 positionDiff;
+
+        glm::vec2 currentWheel;
+        glm::vec2 lastWheel;
+        glm::vec2 wheelDiff;
 
     };
 }

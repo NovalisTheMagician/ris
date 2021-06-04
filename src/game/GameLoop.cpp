@@ -20,11 +20,8 @@ using namespace std::literals;
 namespace RIS::Game
 {
     GameLoop::GameLoop(Loader::ResourcePack &&resourcePack, std::string_view loadMap)
-        : resourcePack(std::move(resourcePack)), state(LoadScene(loadMap, this->resourcePack))
-    {
-        auto path = Window::GetConfigPath() / Input::BINDINGS_FILE_NAME;
-        inputMapper = Input::InputMapper<Action>(path.generic_string());
-    }
+        : resourcePack(std::move(resourcePack)), inputMapper((Window::GetConfigPath() / Input::BINDINGS_FILE_NAME).generic_string()), state(LoadScene(loadMap, this->resourcePack, inputMapper))
+    {}
 
     int GameLoop::Start()
     {
@@ -52,23 +49,26 @@ namespace RIS::Game
         Timer timer;
 
         float accumulator = 0.0f;
-        float delta = 1.0f / config.GetValue("g_physfps", 60.0f);
+        float delta = 1.0f / config.GetValue("g_physfps", 144.0f);
 
-        std::visit([&](auto &&s){ inputMapper.SetCallback([&s](auto e){ s.OnAction(e); }); s.Start(); }, state);
+        std::visit([&](auto &&s){ s.Start(); }, state);
 
         while (!window.HandleMessages())
         {
             timer.Update();
             input.Update();
             interface.Update(timer);
+            inputMapper.Update();
 
             auto nextState = std::visit([](auto &&s){ return s.GetNextState(); }, state);
             if(nextState)
             {
                 std::visit([](auto &&s){ s.End(); }, state);
                 state = std::move(*nextState);
-                std::visit([&](auto &&s){ inputMapper.SetCallback([&s](auto e){ s.OnAction(e); }); s.Start(); }, state);
+                std::visit([&](auto &&s){ s.Start(); }, state);
             }
+
+            //handle input
 
             float frameTime = timer.Delta();
             if(frameTime >= 0.25f)

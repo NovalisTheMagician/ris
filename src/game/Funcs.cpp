@@ -72,7 +72,7 @@ namespace RIS::Game
             if(!action)
                 return fmt::format("Unkown Action {}", actionName);
 
-            inputMapper.Map(*key, *action);
+            inputMapper.Set(*action, *key);
             
             return ""s;
         });
@@ -92,7 +92,7 @@ namespace RIS::Game
 
             if(auto action = magic_enum::enum_cast<Action>(actionName))
             {
-                inputMapper.Clear(*action);
+                inputMapper.Set(*action, Input::InputKey::NONE);
                 return fmt::format("cleared binding for {}", actionName);
             }
             

@@ -11,18 +11,32 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <fmt/format.h>
+
 namespace RIS::Game
 {
-    PlayScene::PlayScene(SceneData sceneData)
-        : sceneData(sceneData)
+    PlayScene::PlayScene(SceneData sceneData, Loader::ResourcePack &resourcePack, Input::InputMapper<Action> &inputMapper)
+        : sceneData(sceneData), resourcePack(std::ref(resourcePack)), inputMapper(std::ref(inputMapper))
     {
         auto &config = GetConfig();
         width = config.GetValue("r_width", 800.0f);
         height = config.GetValue("r_height", 600.0f);
+        float fov = config.GetValue("r_fov", 75.0f);
+
+        camera = Graphics::Camera(glm::radians(fov), width / height);
     }
 
     void PlayScene::Start()
     {
+        GetConsole().BindFunc("map", [this](const std::vector<std::string> &params)
+        {
+            if(params.size() > 0)
+                nextMap = params.at(0);
+            return "";
+        });
+
+        GetWindow().SetRelativeMouse(true);
+
         mapLayout = VertexType::MapVertexFormat;
         mapPipeline.SetShader(*sceneData.mapVertexShader);
         mapPipeline.SetShader(*sceneData.mapFragmentShader);
@@ -32,18 +46,55 @@ namespace RIS::Game
 
         viewProjBuffer = Graphics::UniformBuffer(glm::mat4{});
         worldBuffer = Graphics::UniformBuffer(glm::mat4{});
+
+        camera.GetTransform().position = glm::vec3(20, 20, 20);
     }
 
     void PlayScene::End()
     {
-
+        GetWindow().SetRelativeMouse(false);
     }
+
+    float speed = 15;
 
     void PlayScene::Update(const Timer &timer, float timeStep)
     {
-        projection = glm::perspective(glm::radians(75.0f), width / height, 0.1f, 1000.0f);
-        view = glm::lookAt(glm::vec3(20, 20, 20), glm::vec3(), glm::vec3(0, 1, 0));
-        world = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
+        glm::vec3 camVelocity(0, 0, 0);
+        glm::vec2 camRot(0, 0);
+
+        auto &input = inputMapper.get();
+        if(input.GetState(Action::OPEN_MENU).pressed)
+            GetConsole().Print("Open Menu");
+        if(input.GetState(Action::QUICK_EXIT).pressed)
+            GetWindow().Exit(0);
+
+        if(input.GetState(Action::MOVE_FORWARD).held)
+            camVelocity.z += speed;
+        if(input.GetState(Action::MOVE_BACKWARD).held)
+            camVelocity.z -= speed;
+        if(input.GetState(Action::STRAFE_RIGHT).held)
+            camVelocity.x += speed;
+        if(input.GetState(Action::STRAFE_LEFT).held)
+            camVelocity.x -= speed;
+        if(input.GetState(Action::JUMP).held)
+            camVelocity.y += speed;
+        if(input.GetState(Action::CROUCH).held)
+            camVelocity.y -= speed;
+
+        camRot = -input.GetMouse() * 0.1f;
+
+        camera.AddYaw(camRot.x * timeStep);
+        camera.AddPitch(camRot.y * timeStep);
+
+        camera.GetTransform().position += camera.YawDirection() * camVelocity.z * timeStep;
+        camera.GetTransform().position += camera.Right() * camVelocity.x * timeStep;
+        camera.GetTransform().position += glm::vec3(0, 1, 0) * camVelocity.y * timeStep;
+        //camera.AddYaw(glm::radians(15.0f) * timeStep);
+
+        world = glm::mat4(1.0f);
+        //world = glm::translate(world, glm::vec3(0, -20, 0));
+        //world = glm::rotate(world, glm::radians(270.0f), glm::vec3(0, 1, 0));
+        world = glm::scale(world, glm::vec3(0.1f));
     }
 
     void PlayScene::Draw(float interpol)
@@ -56,7 +107,8 @@ namespace RIS::Game
         mapPipeline.Use();
 
         //view = glm::lookAt(camPos, glm::vec3(), glm::vec3(0, 1, 0));
-        viewProjBuffer.UpdateData(projection * view);
+        viewProjBuffer.UpdateData(camera.ViewProj());
+        //viewProjBuffer.UpdateData(projection * view);
         worldBuffer.UpdateData(world);
 
         viewProjBuffer.Bind(0);
@@ -67,35 +119,10 @@ namespace RIS::Game
         sceneData.mapMesh->Draw();
     }
 
-    void PlayScene::OnAction(Input::ActionEvent<Action> e)
-    {
-        if(e.type == Input::EventType::KEY)
-        {
-            auto actionEvent = std::get<Input::BinaryEvent<Action>>(e.value);
-            switch(actionEvent.action)
-            {
-            case Action::OPEN_MENU:
-                    if(actionEvent.state == Input::EventState::UP)
-                        GetConsole().Print("Open Menu");
-                break;
-            case Action::QUICK_EXIT:
-                    if(actionEvent.state == Input::EventState::UP)
-                        GetWindow().Exit(0);
-                break;
-            };
-        }
-        else if(e.type == Input::EventType::MOUSE_MOVE)
-        {
-
-        }
-        else //if(e.type == Input::EventType::MOUSE_WHEEL)
-        {
-
-        }
-    }
-
     std::optional<State> PlayScene::GetNextState() const
     {
+        if(!nextMap.empty())
+            return LoadScene(nextMap, resourcePack, inputMapper);
         return std::nullopt;
     }
 }

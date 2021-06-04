@@ -31,8 +31,8 @@ namespace RIS::Game
 
     private:
         Loader::ResourcePack resourcePack;
-        State state;
         Input::InputMapper<Action> inputMapper;
+        State state;
 
     };
 }

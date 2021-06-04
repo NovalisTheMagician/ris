@@ -1,11 +1,115 @@
 #include "graphics/Camera.hpp"
 
 #include <glm/glm.hpp>
+#include <glm/gtx/rotate_vector.hpp>
 
 namespace RIS::Graphics
 {
-    Camera::Camera()
-    {
+    Camera::Camera(float fov, float aspect)
+        : fov(fov), aspect(aspect), projection(glm::perspective(fov, aspect, 0.1f, 1000.0f)), yaw(0), pitch(0), roll(0)
+    {}
 
+    void Camera::SetFoV(float fov)
+    {
+        this->fov = fov;
+        projection = glm::perspective(fov, aspect, 0.1f, 1000.0f);
+    }
+
+    void Camera::SetAspect(float aspect)
+    {
+        this->aspect = aspect;
+        projection = glm::perspective(fov, aspect, 0.1f, 1000.0f);
+    }
+
+    Transform& Camera::GetTransform()
+    {
+        return transform;
+    }
+
+    glm::vec3 Camera::Direction() const
+    {
+        glm::vec3 ref(0, 0, -1);
+        return transform.rotation * ref;
+    }
+
+    glm::vec3 Camera::Up() const
+    {
+        glm::vec3 ref(0, 1, 0);
+        return transform.rotation * ref;
+    }
+
+    glm::vec3 Camera::Right() const
+    {
+        glm::vec3 ref(1, 0, 0);
+        return transform.rotation * ref;
+    }
+
+    glm::vec3 Camera::YawDirection() const
+    {
+        glm::quat rot({0, yaw, 0});
+        glm::vec3 ref(0, 0, -1);
+        return rot * ref;
+    }
+
+    float& Camera::Yaw()
+    {
+        return yaw;
+    }
+
+    float& Camera::Pitch()
+    {
+        return pitch;
+    }
+
+    float& Camera::Roll()
+    {
+        return roll;
+    }
+
+    void Camera::AddYaw(float amount)
+    {
+        yaw += amount;
+        while(yaw >= glm::two_pi<float>())
+            yaw -= glm::two_pi<float>();
+        while(yaw < 0)
+            yaw += glm::two_pi<float>();
+        transform.rotation = glm::quat({pitch, yaw, roll});
+    }
+
+    void Camera::AddPitch(float amount)
+    {
+        pitch += amount;
+        if(pitch >= glm::half_pi<float>())
+            pitch = glm::half_pi<float>();
+        if(pitch <= -glm::half_pi<float>())
+            pitch = -glm::half_pi<float>();
+        transform.rotation = glm::quat({pitch, yaw, roll});
+    }
+
+    void Camera::AddRoll(float amount)
+    {
+        roll += amount;
+        while(roll >= glm::two_pi<float>())
+            roll -= glm::two_pi<float>();
+        while(roll < 0)
+            roll += glm::two_pi<float>();
+        transform.rotation = glm::quat({pitch, yaw, roll});
+    }
+
+    glm::mat4 Camera::ViewProj() const
+    {
+        return Projection() * View();
+    }
+
+    glm::mat4 Camera::View() const
+    {
+        glm::vec3 direction = Direction();
+        glm::vec3 up = Up();
+        return glm::lookAt(transform.position, transform.position + direction, up);
+    }
+
+    glm::mat4 Camera::Projection() const
+    {
+        return projection;
     }
 }

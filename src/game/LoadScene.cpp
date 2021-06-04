@@ -12,8 +12,8 @@
 
 namespace RIS::Game
 {
-    LoadScene::LoadScene(std::string_view mapName, Loader::ResourcePack &resourcePack)
-        : resourcePack(std::ref(resourcePack)), doneLoading(false), mapName(mapName)
+    LoadScene::LoadScene(std::string_view mapName, Loader::ResourcePack &resourcePack, Input::InputMapper<Action> &inputMapper)
+        : resourcePack(std::ref(resourcePack)), inputMapper(std::ref(inputMapper)), doneLoading(false), mapName(mapName)
     {
 
     }
@@ -47,16 +47,12 @@ namespace RIS::Game
         backbuffer.Clear(Graphics::Colors::Yellow, 1.0f);
     }
 
-    void LoadScene::OnAction(Input::ActionEvent<Action> e)
-    {
-
-    }
-
     std::optional<State> LoadScene::GetNextState() const
     {
         if(doneLoading)
         {
-            return PlayScene(sceneData);
+            Loader::GetCache().Cleanup();
+            return PlayScene(sceneData, resourcePack, inputMapper);
         }
         return std::nullopt;
     }

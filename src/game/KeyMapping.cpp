@@ -11,18 +11,18 @@ namespace RIS::Game
     {
         if(inputMapper.IsEmpty())
         {
-            inputMapper.Map(Input::InputKey::W, Action::MOVE_FORWARD);
-            inputMapper.Map(Input::InputKey::S, Action::MOVE_BACKWARD);
-            inputMapper.Map(Input::InputKey::A, Action::STRAFE_LEFT);
-            inputMapper.Map(Input::InputKey::D, Action::STRAFE_RIGHT);
-            inputMapper.Map(Input::InputKey::SPACE, Action::JUMP);
-            inputMapper.Map(Input::InputKey::LEFT_CONTROL, Action::CROUCH);
+            inputMapper.Set(Action::MOVE_FORWARD, Input::InputKey::W);
+            inputMapper.Set(Action::MOVE_BACKWARD, Input::InputKey::S);
+            inputMapper.Set(Action::STRAFE_LEFT, Input::InputKey::A);
+            inputMapper.Set(Action::STRAFE_RIGHT, Input::InputKey::D);
+            inputMapper.Set(Action::JUMP, Input::InputKey::SPACE);
+            inputMapper.Set(Action::CROUCH, Input::InputKey::LEFT_CONTROL);
 
-            inputMapper.Map(Input::InputKey::ESCAPE, Action::OPEN_MENU);
+            inputMapper.Set(Action::OPEN_MENU, Input::InputKey::ESCAPE);
 
-            inputMapper.Map(Input::InputKey::F5, Action::QUICK_SAVE);
-            inputMapper.Map(Input::InputKey::F9, Action::QUICK_LOAD);
-            inputMapper.Map(Input::InputKey::F7, Action::QUICK_EXIT);
+            inputMapper.Set(Action::QUICK_SAVE, Input::InputKey::F5);
+            inputMapper.Set(Action::QUICK_LOAD, Input::InputKey::F9);
+            inputMapper.Set(Action::QUICK_EXIT, Input::InputKey::F7);
 
             auto path = Window::GetConfigPath();
             path /= Input::BINDINGS_FILE_NAME;

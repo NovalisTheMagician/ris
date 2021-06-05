@@ -51,7 +51,7 @@ namespace RIS::Loader
         std::vector<VertexType::MapVertex> vertices;
         std::vector<std::uint16_t> indices;
         std::vector<Graphics::MapSection> sections;
-        for(std::size_t s = 0; s < header.numSections; ++s)
+        for(int s = 0; s < header.numSections; ++s)
         {
             polysection section = {};
             readBytes(&section, sizeof section);
@@ -59,11 +59,11 @@ namespace RIS::Loader
             std::string textureName(section.texture);
             textureName = fmt::format("textures/{}.dds", textureName);
             auto &sec = sections.emplace_back();
-            sec.texture = Load<Graphics::Texture>(resourcePack.Read(textureName), textureName, true, resourcePack);
+            sec.texture = Load<Graphics::Texture>(resourcePack.Read(textureName), textureName, false, resourcePack);
             sec.offset = indices.size();
 
             int sectionIndices = 0;
-            for(std::size_t p = 0; p < section.numPolygons; ++p)
+            for(int p = 0; p < section.numPolygons; ++p)
             {
                 polydata data = {};
                 readBytes(&data, sizeof data);

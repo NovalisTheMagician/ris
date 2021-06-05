@@ -12,20 +12,29 @@
 
 #include <fmt/format.h>
 
-namespace RIS::Graphics
+namespace RIS
 {
-    class Model;
-    class Mesh;
-    class Font;
-    class Image;
-    class Shader;
-    class Texture;
-    class MapMesh;
-    namespace Animation
+    namespace Physics
     {
-        class Animation;
-        class Skeleton;
+        class WorldSolids;
     }
+
+    namespace Graphics
+    {
+        class Model;
+        class Mesh;
+        class Font;
+        class Image;
+        class Shader;
+        class Texture;
+        class MapMesh;
+        namespace Animation
+        {
+            class Animation;
+            class Skeleton;
+        }
+    }
+    
 }
 
 namespace RIS::Loader
@@ -94,5 +103,5 @@ namespace RIS::Loader
 
     };
 
-    using AssetCache = TAssetCache<Graphics::Font, Graphics::Mesh, Graphics::Model, Graphics::Shader, Graphics::Texture, Graphics::Image, Graphics::Animation::Skeleton, Graphics::Animation::Animation, Graphics::MapMesh, std::string>;
+    using AssetCache = TAssetCache<Graphics::Font, Graphics::Mesh, Graphics::Model, Graphics::Shader, Graphics::Texture, Graphics::Image, Graphics::Animation::Skeleton, Graphics::Animation::Animation, Graphics::MapMesh, Physics::WorldSolids, std::string>;
 }

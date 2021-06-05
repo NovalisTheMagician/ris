@@ -55,7 +55,7 @@ namespace RIS::Game
         GetWindow().SetRelativeMouse(false);
     }
 
-    float speed = 15;
+    float speed = 64;
 
     void PlayScene::Update(const Timer &timer, float timeStep)
     {
@@ -86,15 +86,20 @@ namespace RIS::Game
         camera.AddYaw(camRot.x * timeStep);
         camera.AddPitch(camRot.y * timeStep);
 
-        camera.GetTransform().position += camera.YawDirection() * camVelocity.z * timeStep;
-        camera.GetTransform().position += camera.Right() * camVelocity.x * timeStep;
-        camera.GetTransform().position += glm::vec3(0, 1, 0) * camVelocity.y * timeStep;
-        //camera.AddYaw(glm::radians(15.0f) * timeStep);
+        glm::vec3 pos = camera.GetTransform().position;
+
+        pos += camera.YawDirection() * camVelocity.z * timeStep;
+        pos += camera.Right() * camVelocity.x * timeStep;
+        pos += glm::vec3(0, 1, 0) * camVelocity.y * timeStep;
+
+        glm::vec3 tmp;
+        if(!sceneData.worldSolids->Collides(pos, tmp))
+            camera.GetTransform().position = pos;
 
         world = glm::mat4(1.0f);
         //world = glm::translate(world, glm::vec3(0, -20, 0));
         //world = glm::rotate(world, glm::radians(270.0f), glm::vec3(0, 1, 0));
-        world = glm::scale(world, glm::vec3(0.1f));
+        //world = glm::scale(world, glm::vec3(0.1f));
     }
 
     void PlayScene::Draw(float interpol)

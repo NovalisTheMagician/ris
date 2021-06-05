@@ -34,7 +34,9 @@ namespace RIS::Game
         if(!sceneData.mapMesh)
         {
             std::string polyFile = fmt::format("{}.poly", mapName);
+            std::string solidsFile = fmt::format("{}.brush", mapName);
             sceneData.mapMesh = Loader::Load<Graphics::MapMesh>(polyFile, resourcePack);
+            sceneData.worldSolids = Loader::Load<Physics::WorldSolids>(solidsFile, resourcePack);
 
             doneLoading = true;
         }

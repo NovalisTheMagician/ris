@@ -20,6 +20,8 @@
 #include "graphics/Sampler.hpp"
 #include "graphics/Camera.hpp"
 
+#include "physics/WorldSolids.hpp"
+
 #include "game/Actions.hpp"
 #include "game/MapProps.hpp"
 
@@ -29,6 +31,8 @@ namespace RIS::Game
     {
         Graphics::MapMesh::Ptr mapMesh;
         MapProps mapProps;
+        Physics::WorldSolids::Ptr worldSolids;
+
         Graphics::Shader::Ptr mapVertexShader;
         Graphics::Shader::Ptr mapFragmentShader;
     };

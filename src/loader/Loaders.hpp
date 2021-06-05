@@ -9,3 +9,4 @@
 #include "loader/ShaderLoader.hpp"
 #include "loader/ModelLoader.hpp"
 #include "loader/MapLoader.hpp"
+#include "loader/WorldSolidsLoader.hpp"

@@ -4,7 +4,7 @@
 
 #include "graphics/GLObject.hpp"
 
-#include <glad/glad.h>
+#include <glad2/gl.h>
 
 #include <vector>
 #include <memory>

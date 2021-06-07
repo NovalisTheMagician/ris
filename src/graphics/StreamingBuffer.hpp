@@ -1,7 +1,7 @@
 #pragma once
 
 #include "graphics/Buffer.hpp"
-#include <glad/glad.h>
+#include <glad2/gl.h>
 
 #include <gsl/span>
 

@@ -1,6 +1,6 @@
 #include "graphics/Buffer.hpp"
 
-#include <glad/glad.h>
+#include <glad2/gl.h>
 
 namespace RIS::Graphics
 {

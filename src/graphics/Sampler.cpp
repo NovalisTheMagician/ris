@@ -1,7 +1,5 @@
 #include "graphics/Sampler.hpp"
 
-#include <glad/glad.h>
-
 #include <utility>
 
 namespace RIS::Graphics

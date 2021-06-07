@@ -4,7 +4,7 @@
 
 #include <stdexcept>
 
-#include <glad/glad.h>
+#include <glad2/gl.h>
 
 #include <vector>
 

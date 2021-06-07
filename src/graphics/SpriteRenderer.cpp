@@ -9,7 +9,7 @@
 
 #include <vector>
 
-#include <glad/glad.h>
+#include <glad2/gl.h>
 
 #include <glm/gtc/matrix_transform.hpp>
 

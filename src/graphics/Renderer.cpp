@@ -1,7 +1,7 @@
 #include "graphics/Renderer.hpp"
 #include "RIS.hpp"
 
-#include <glad/glad.h>
+#include <glad2/gl.h>
 
 #include <glm/glm.hpp>
 
@@ -32,7 +32,7 @@ namespace RIS::Graphics
     {
         auto &log = Logger::Instance();
 
-        if(!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
+        if(!gladLoadGL(reinterpret_cast<GLADloadfunc>(glfwGetProcAddress)))
         {
             throw RendererException("Couldn't load GL functions");
         }

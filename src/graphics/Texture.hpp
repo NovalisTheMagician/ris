@@ -4,7 +4,7 @@
 
 #include <glm/glm.hpp>
 
-#include <glad/glad.h>
+#include <glad2/gl.h>
 
 #include "graphics/Buffer.hpp"
 

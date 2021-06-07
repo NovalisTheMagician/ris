@@ -1,6 +1,7 @@
 #include "graphics/Renderer.hpp"
 #include "RIS.hpp"
 
+#define GLAD_GL_IMPLEMENTATION
 #include <glad2/gl.h>
 
 #include <glm/glm.hpp>

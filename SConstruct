@@ -20,7 +20,7 @@ if(sys.platform == 'linux'):
     cl_flags = ['-std=c++17', '-pthread']
     lk_flags = ['-pthread']
     inc_path = ['#src']
-    libs = ['glfw', 'libz', 'libzip', 'fmt', 'glad', 'base64', 'boxer', 'soloud', 'dl', 'gtk-3', 'gobject-2.0', 'glib-2.0', 'asound'] 
+    libs = ['glfw', 'libz', 'libzip', 'fmt', 'base64', 'boxer', 'soloud', 'dl', 'gtk-3', 'gobject-2.0', 'glib-2.0', 'asound'] 
 
     if int(debug):
         cl_flags.append(['-g', '-Wall', '-pedantic'])
@@ -39,8 +39,8 @@ elif(sys.platform == 'win32'):
     inc_path = ['#src', os.environ['INC_PATH']]
     lib_path = [os.environ['LIB_PATH']]
     
-    libs_rel = ['glfw3', 'soloud', 'libz', 'libzip', 'fmt', 'glad', 'boxer', 'base64', 'lua54']
-    libs_deb = ['glfw3d', 'soloudd', 'libzd', 'libzipd', 'fmtd', 'gladd', 'boxerd', 'base64d', 'lua54d']
+    libs_rel = ['glfw3', 'soloud', 'libz', 'libzip', 'fmt', 'boxer', 'base64', 'lua54']
+    libs_deb = ['glfw3d', 'soloudd', 'libzd', 'libzipd', 'fmtd', 'boxerd', 'base64d', 'lua54d']
     
     libs = ['user32', 'kernel32', 'gdi32', 'shell32', 'opengl32', 'ws2_32', 'advapi32']
 

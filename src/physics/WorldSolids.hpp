@@ -15,7 +15,7 @@ namespace RIS::Physics
     public:
         WorldSolids(std::vector<Brush> &&brushes);
 
-        bool Collides(const glm::vec3 &position, glm::vec3 &adjustedPos) const;
+        bool Collides(const glm::vec3 &oldPosition, const glm::vec3 &newPosition, glm::vec3 &adjustedPos) const;
 
     private:
         std::vector<Brush> brushes;

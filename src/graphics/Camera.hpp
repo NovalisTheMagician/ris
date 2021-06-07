@@ -23,13 +23,15 @@ namespace RIS::Graphics
 
         glm::vec3 YawDirection() const;
 
-        float& Yaw();
-        float& Pitch();
-        float& Roll();
-
         void AddYaw(float amount);
         void AddPitch(float amount);
         void AddRoll(float amount);
+
+        void SetYaw(float amount);
+        void SetPitch(float amount);
+        void SetRoll(float amount);
+
+        glm::vec3& Position();
 
         glm::mat4 ViewProj() const;
         glm::mat4 View() const;

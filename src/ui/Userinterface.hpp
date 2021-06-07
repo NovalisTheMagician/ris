@@ -49,6 +49,10 @@ namespace RIS::UI
         void PushMenu(const std::string &menuName);
         void PopMenu();
 
+        std::optional<std::reference_wrapper<Panel>> GetMenu(const std::string &menuName);
+
+        bool IsMenuOpen() const;
+
         Graphics::Font::Ptr GetDefaultFont() const;
 
     private:

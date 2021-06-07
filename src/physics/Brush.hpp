@@ -8,6 +8,7 @@ namespace RIS::Physics
     struct Plane
     {
         glm::vec3 normal;
+        glm::vec3 point;
         float d;
     };
 

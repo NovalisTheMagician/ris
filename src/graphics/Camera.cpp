@@ -51,21 +51,6 @@ namespace RIS::Graphics
         return rot * ref;
     }
 
-    float& Camera::Yaw()
-    {
-        return yaw;
-    }
-
-    float& Camera::Pitch()
-    {
-        return pitch;
-    }
-
-    float& Camera::Roll()
-    {
-        return roll;
-    }
-
     void Camera::AddYaw(float amount)
     {
         yaw += amount;
@@ -94,6 +79,41 @@ namespace RIS::Graphics
         while(roll < 0)
             roll += glm::two_pi<float>();
         transform.rotation = glm::quat({pitch, yaw, roll});
+    }
+
+    void Camera::SetYaw(float amount)
+    {
+        yaw = amount;
+        while(yaw >= glm::two_pi<float>())
+            yaw -= glm::two_pi<float>();
+        while(yaw < 0)
+            yaw += glm::two_pi<float>();
+        transform.rotation = glm::quat({pitch, yaw, roll});
+    }
+
+    void Camera::SetPitch(float amount)
+    {
+        pitch = amount;
+        if(pitch >= glm::half_pi<float>())
+            pitch = glm::half_pi<float>();
+        if(pitch <= -glm::half_pi<float>())
+            pitch = -glm::half_pi<float>();
+        transform.rotation = glm::quat({pitch, yaw, roll});
+    }
+
+    void Camera::SetRoll(float amount)
+    {
+        roll = amount;
+        while(roll >= glm::two_pi<float>())
+            roll -= glm::two_pi<float>();
+        while(roll < 0)
+            roll += glm::two_pi<float>();
+        transform.rotation = glm::quat({pitch, yaw, roll});
+    }
+
+    glm::vec3& Camera::Position()
+    {
+        return transform.position;
     }
 
     glm::mat4 Camera::ViewProj() const

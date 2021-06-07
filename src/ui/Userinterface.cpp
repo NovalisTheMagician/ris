@@ -1,6 +1,7 @@
 #include "RIS.hpp"
 #include "loader/Loader.hpp"
 #include "input/Input.hpp"
+#include "window/Window.hpp"
 
 #include "ui/Userinterface.hpp"
 
@@ -153,6 +154,7 @@ namespace RIS::UI
             auto &menu = menus.at(menuName);
             menu.Reset();
             activeMenus.push(std::ref(menu));
+            GetWindow().SetRelativeMouse(false);
         }
     }
 
@@ -161,7 +163,24 @@ namespace RIS::UI
         if(!activeMenus.empty())
         {
             activeMenus.pop();
+
+            if(activeMenus.empty())
+                GetWindow().SetRelativeMouse(true);
         }
+    }
+
+    std::optional<std::reference_wrapper<Panel>> Userinterface::GetMenu(const std::string &menuName)
+    {
+        if(menus.count(menuName) > 0)
+        {
+            return std::ref(menus.at(menuName));
+        }
+        return std::nullopt;
+    }
+
+    bool Userinterface::IsMenuOpen() const
+    {
+        return !activeMenus.empty();
     }
 
     Graphics::Font::Ptr Userinterface::GetDefaultFont() const

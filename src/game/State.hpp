@@ -44,10 +44,11 @@ namespace RIS::Game
     class PlayScene
     {
     public:
-        PlayScene(SceneData sceneData, Loader::ResourcePack &resourcePack, Input::InputMapper<Action> &inputMapper);
+        PlayScene(SceneData sceneData, Loader::ResourcePack &resourcePack);
 
         void Start();
         void End();
+        void HandleInput(const Input::InputMapper<Action> &inputMapper);
         void Update(const Timer &timer, float timeStep);
         void Draw(float interpol);
 
@@ -56,7 +57,6 @@ namespace RIS::Game
     private:
         SceneData sceneData;
         std::reference_wrapper<Loader::ResourcePack> resourcePack;
-        std::reference_wrapper<Input::InputMapper<Action>> inputMapper;
 
         float width, height;
 
@@ -72,6 +72,9 @@ namespace RIS::Game
 
         Graphics::Camera camera;
 
+        glm::vec3 camVelocity;
+        glm::vec2 camRot;
+
         std::string nextMap;
 
     };
@@ -79,10 +82,11 @@ namespace RIS::Game
     class LoadScene
     {
     public:
-        LoadScene(std::string_view mapName, Loader::ResourcePack &resourcePack, Input::InputMapper<Action> &inputMapper);
+        LoadScene(std::string_view mapName, Loader::ResourcePack &resourcePack);
 
         void Start();
         void End();
+        void HandleInput(const Input::InputMapper<Action> &inputMapper);
         void Update(const Timer &timer, float timeStep);
         void Draw(float interpol);
 
@@ -90,7 +94,6 @@ namespace RIS::Game
 
     private:
         std::reference_wrapper<Loader::ResourcePack> resourcePack;
-        std::reference_wrapper<Input::InputMapper<Action>> inputMapper;
         bool doneLoading;
         std::string mapName;
         SceneData sceneData;

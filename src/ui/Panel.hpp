@@ -17,9 +17,12 @@
 #include <vector>
 #include <list>
 #include <optional>
+#include <functional>
 
 namespace RIS::UI
 {
+    using CallbackFunc = std::function<void()>;
+
     class Panel : public Component<Panel>
     {
     private:
@@ -36,6 +39,10 @@ namespace RIS::UI
         Panel& SetColor(const glm::vec4 &color);
 
         Panel& SetActive(bool active);
+
+        Panel& SetBackAction(CallbackFunc func);
+        Panel& SetBackButton(Input::InputKey backKey);
+        Input::InputKey GetBackButton() const;
 
         void OnChar(uint32_t c);
         void OnMouseMove(float x, float y);
@@ -80,6 +87,9 @@ namespace RIS::UI
 
         Graphics::Texture::Ptr backgroundImage;
         Graphics::Framebuffer panelFramebuffer;
+
+        CallbackFunc backCallback;
+        Input::InputKey backKey = Input::InputKey::ESCAPE;
 
     };
 }

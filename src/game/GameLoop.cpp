@@ -20,7 +20,9 @@ using namespace std::literals;
 namespace RIS::Game
 {
     GameLoop::GameLoop(Loader::ResourcePack &&resourcePack, std::string_view loadMap)
-        : resourcePack(std::move(resourcePack)), inputMapper((Window::GetConfigPath() / Input::BINDINGS_FILE_NAME).generic_string()), state(LoadScene(loadMap, this->resourcePack, inputMapper))
+        : resourcePack(std::move(resourcePack))
+        , inputMapper((Window::GetConfigPath() / Input::BINDINGS_FILE_NAME).generic_string())
+        , state(LoadScene(loadMap, this->resourcePack))
     {}
 
     int GameLoop::Start()
@@ -41,6 +43,8 @@ namespace RIS::Game
         input.RegisterWheel([this](float x, float y){ inputMapper.OnMouseWheel(x, y); return true; }, true);
         input.RegisterKeyDown([this](Input::InputKey key){ inputMapper.OnInputDown(key); return true; }, true);
         input.RegisterKeyUp([this](Input::InputKey key){ inputMapper.OnInputUp(key); return true; }, true);
+
+        window.SetRelativeMouse(true);
 
         InitMenus();
         InitKeyMapping();
@@ -68,7 +72,7 @@ namespace RIS::Game
                 std::visit([&](auto &&s){ s.Start(); }, state);
             }
 
-            //handle input
+            std::visit([this](auto &&s){ s.HandleInput(inputMapper); }, state);
 
             float frameTime = timer.Delta();
             if(frameTime >= 0.25f)

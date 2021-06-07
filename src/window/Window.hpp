@@ -37,6 +37,8 @@ namespace RIS::Window
         void PostInit();
 
         void SetRelativeMouse(bool setRelative);
+        void SetCursorPos(float x, float y);
+        void CenterCursor();
 
         void SetWindowIcon(std::shared_ptr<Graphics::Image> icon);
         void SetCursorIcon(std::shared_ptr<Graphics::Image> cursor, int xHot, int yHot);
@@ -64,6 +66,7 @@ namespace RIS::Window
 
     private:
         GLFWwindow *window;
+        float virtX = 0, virtY = 0;
 
     };
 }

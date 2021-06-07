@@ -1,12 +1,18 @@
 #include "ui/Panel.hpp"
 
+#include "RIS.hpp"
+#include "ui/Userinterface.hpp"
+
 #include <algorithm>
 #include <numeric>
 
 namespace RIS::UI
 {
     Panel::Panel(Graphics::Framebuffer &parentFramebuffer, Graphics::Font::Ptr defaultFont, glm::vec2 parentSize)
-        : Component(parentFramebuffer, defaultFont, parentSize), panelFramebuffer(static_cast<int>(size.x), static_cast<int>(size.y))
+        : Component(parentFramebuffer, defaultFont, parentSize)
+        , panelFramebuffer(static_cast<int>(size.x)
+        , static_cast<int>(size.y))
+        , backCallback([](){ GetUserinterface().PopMenu(); })
     {}
 
     Panel& Panel::SetSize(const glm::vec2 &size)
@@ -28,6 +34,23 @@ namespace RIS::UI
         this->active = active;
         ForeachDispatch(components, [active](auto &comp){ comp.SetActive(active); });
         return *this;
+    }
+
+    Panel& Panel::SetBackAction(CallbackFunc func)
+    {
+        backCallback = func;
+        return *this;
+    }
+
+    Panel& Panel::SetBackButton(Input::InputKey backKey)
+    {
+        this->backKey = backKey;
+        return *this;
+    }
+
+    Input::InputKey Panel::GetBackButton() const
+    {
+        return backKey;
     }
 
     void Panel::OnChar(uint32_t c)
@@ -78,6 +101,11 @@ namespace RIS::UI
     void Panel::OnKeyDown(Input::InputKey keyCode)
     {
         if(!visible) return;
+        if(keyCode == backKey && backCallback != nullptr)
+        {
+            backCallback();
+            return;
+        }
         ForeachDispatch(components, [keyCode](auto &&comp){ comp.OnKeyDown(keyCode); });
     }
 

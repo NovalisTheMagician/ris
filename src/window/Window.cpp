@@ -42,7 +42,7 @@ namespace RIS::Window
         int width = config.GetValue("r_width", 800);
         int height = config.GetValue("r_height", 600);
         int fullscreen = config.GetValue("r_fullscreen", 0);
-        bool vsync = config.GetValue("r_vsync", false);
+        bool vsync = config.GetValue("r_vsync", true);
         int msaa = config.GetValue("r_msaa", 0);
         bool autoIconify = config.GetValue("r_autoiconify", true);
 
@@ -154,11 +154,29 @@ namespace RIS::Window
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
             if(glfwRawMouseMotionSupported())
                 glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, true);
+            SetCursorPos(virtX, virtY);
         }
         else
         {
+            double x, y;
+            glfwGetCursorPos(window, &x, &y);
+            virtX = static_cast<float>(x);
+            virtY = static_cast<float>(y);
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         }
+    }
+
+    void Window::SetCursorPos(float x, float y)
+    {
+        glfwSetCursorPos(window, x, y);
+    }
+    
+    void Window::CenterCursor()
+    {
+        int width;
+        int height;
+        glfwGetWindowSize(window, &width, &height);
+        SetCursorPos(width / 2.0f, height / 2.0f);
     }
 
     void Window::SetWindowIcon(std::shared_ptr<Graphics::Image> icon)

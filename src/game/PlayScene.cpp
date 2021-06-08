@@ -45,13 +45,13 @@ namespace RIS::Game
         mapPipeline.SetShader(*sceneData.mapVertexShader);
         mapPipeline.SetShader(*sceneData.mapFragmentShader);
 
-        sampler = Graphics::Sampler::Trilinear(16.0f);
-        //sampler = Graphics::Sampler::Nearest(16.0f);
+        //sampler = Graphics::Sampler::Trilinear(16.0f);
+        sampler = Graphics::Sampler::Nearest(16.0f);
 
         viewProjBuffer = Graphics::UniformBuffer(glm::mat4{});
         worldBuffer = Graphics::UniformBuffer(glm::mat4{});
 
-        camera.Position() = glm::vec3(-256, 40, -256);
+        camera.Position() = glm::vec3(0, 40, 0); // (-256 -256 40)
         camera.SetYaw(glm::radians(180.0f));
         camera.SetPitch(0);
     }
@@ -60,7 +60,7 @@ namespace RIS::Game
     {
     }
 
-    float speed = 64;
+    float speed = 96;
 
     void PlayScene::HandleInput(const Input::InputMapper<Action> &input)
     {
@@ -88,6 +88,8 @@ namespace RIS::Game
         camRot += -input.GetMouse() * 0.1f;
     }
 
+    float camRadius = 1.0f;
+
     void PlayScene::Update(const Timer &timer, float timeStep)
     {
         camera.AddYaw(camRot.x * timeStep);
@@ -96,15 +98,24 @@ namespace RIS::Game
         glm::vec3 pos = camera.Position();
         glm::vec3 oldPos = camera.Position();
 
-        pos += camera.YawDirection() * camVelocity.z * timeStep;
-        pos += camera.Right() * camVelocity.x * timeStep;
-        pos += glm::vec3(0, 1, 0) * camVelocity.y * timeStep;
+        glm::vec3 movement(0, 0, 0);
+        movement += camera.YawDirection() * camVelocity.z * timeStep;
+        movement += camera.Right() * camVelocity.x * timeStep;
+        movement += glm::vec3(0, 1, 0) * camVelocity.y * timeStep;
 
-        glm::vec3 correctedPos = oldPos;
+        pos.x = sceneData.worldSolids->Collides(oldPos + glm::vec3(movement.x, 0, 0), camRadius) ? oldPos.x : oldPos.x + movement.x;
+        pos.y = sceneData.worldSolids->Collides(oldPos + glm::vec3(0, movement.y, 0), camRadius) ? oldPos.y : oldPos.y + movement.y;
+        pos.z = sceneData.worldSolids->Collides(oldPos + glm::vec3(0, 0, movement.z), camRadius) ? oldPos.z : oldPos.z + movement.z;
+
+        camera.Position() = pos;
+
+        /*
+        glm::vec3 correctedPos = pos;
         if(sceneData.worldSolids->Collides(oldPos, pos, correctedPos))
             camera.Position() = correctedPos;
         else
             camera.Position() = pos;
+        */
 
         world = glm::mat4(1.0f);
         //world = glm::translate(world, glm::vec3(0, -20, 0));

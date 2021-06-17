@@ -96,7 +96,7 @@ namespace RIS::UI
     protected:
         glm::vec2 GetAnchoredPosition() const
         {
-            glm::vec2 pos;
+            glm::vec2 pos = position;
             glm::vec2 ps = parentSize;
             glm::vec2 s = size;
             switch(anchor)
@@ -123,7 +123,6 @@ namespace RIS::UI
                 break;
             case Anchor::Top:
             case Anchor::TopLeft:
-            default:
                 pos = position;
             }
             return pos;

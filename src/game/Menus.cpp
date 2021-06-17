@@ -27,7 +27,7 @@ namespace RIS::Game
 
         auto font = Loader::Load<Graphics::Font>("fonts/IMMORTAL.json", resourcePack);
 
-        auto &rootPanel = ui.CreateMenu("mainMenu").SetSize({90, 300}).SetPosition({24, 24}).SetColor(Graphics::Colors::Cyan);
+        auto &rootPanel = ui.CreateMenu("mainMenu").SetSize({90, 300}).SetPosition({24, 24}).SetColor(Graphics::Colors::Cyan).SetAnchor(UI::Anchor::Center);
         auto &btn1 = rootPanel.CreateButton()
                                 .SetCallback([](UI::Button&){ GetConsole().Print("test"); })
                                 .SetText("Play")
@@ -35,7 +35,8 @@ namespace RIS::Game
                                 .SetPosition({0, 0})
                                 .SetFontSize(16)
                                 .SetFont(font)
-                                .SetName("btn_play");
+                                .SetName("btn_play")
+                                .SetAnchor(UI::Anchor::CenterX);
         
         auto &btn2 = rootPanel.CreateButton()
                                 .SetCallback([&ui](UI::Button&){ ui.PushMenu("optionsMenu"); })
@@ -43,7 +44,8 @@ namespace RIS::Game
                                 .SetSize({74, 24})
                                 .SetPosition({0, 36})
                                 .SetFontSize(16)
-                                .SetFont(font);
+                                .SetFont(font)
+                                .SetAnchor(UI::Anchor::CenterX);
         
         auto &btn3 = rootPanel.CreateButton()
                                 .SetCallback([](UI::Button&){ GetWindow().Exit(0); })
@@ -51,7 +53,8 @@ namespace RIS::Game
                                 .SetSize({74, 24})
                                 .SetPosition({0, 36 * 2})
                                 .SetFontSize(16)
-                                .SetFont(font);
+                                .SetFont(font)
+                                .SetAnchor(UI::Anchor::CenterX);
 
         if(auto b = rootPanel.GetComponent<UI::Button>("btn_play"))
         {

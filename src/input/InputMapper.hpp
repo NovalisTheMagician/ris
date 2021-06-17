@@ -1,5 +1,7 @@
 #pragma once
 
+#include <magic_enum.hpp>
+
 #include <string_view>
 #include <algorithm>
 #include <optional>
@@ -8,12 +10,7 @@
 
 #include <glm/glm.hpp>
 
-#include <magic_enum.hpp>
-
 #include "input/KeyDefs.hpp"
-#include "input/ActionEvent.hpp"
-
-#include <iostream>
 
 namespace RIS::Input
 {
@@ -41,7 +38,7 @@ namespace RIS::Input
             std::fill(std::begin(currentStates), std::end(currentStates), false);
             std::fill(std::begin(previousStates), std::end(previousStates), false);
 
-            std::ifstream mappingStream(mappingFile);
+            std::ifstream mappingStream{std::string(mappingFile)};
             if(mappingStream)
             {
                 // read input mappings
@@ -86,15 +83,17 @@ namespace RIS::Input
 
         void SaveMapping(std::string_view mappingFile) const
         {
-            std::ofstream output(mappingFile);
-            if(output)
+            std::ofstream outputStream{std::string(mappingFile)};
+            if(outputStream)
             {
                 for(std::size_t i = 0; i < mapping.size(); ++i)
                 {
                     auto key = mapping[i];
                     auto action = magic_enum::enum_value<Action>(i);
 
-                    output << magic_enum::enum_name<Action>(action) << " = " << ToString(key) << "\n";
+                    auto actionName = magic_enum::enum_name<Action>(action);
+
+                    outputStream << actionName << " = " << ToString(key) << "\n";
                 }
             }
         }

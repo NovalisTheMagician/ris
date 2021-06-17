@@ -148,7 +148,7 @@ namespace RIS::UI
         panelFramebuffer.Clear(color, 1.0f);
         renderer.SetViewport(size.x, size.y, true);
         ForeachDispatch(components, [&renderer, this](auto &&comp){ comp.Draw(renderer, this->offset); });
-        parentFramebuffer.Bind();
+        parentFramebuffer.get().Bind();
         renderer.SetViewport(parentSize.x, parentSize.y, true);
         renderer.DrawTexture(panelFramebuffer.ColorTexture(), pos, size);
     }

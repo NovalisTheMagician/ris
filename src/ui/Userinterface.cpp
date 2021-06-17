@@ -29,24 +29,17 @@ namespace RIS::UI
         screenWidth = config.GetValue("r_width", 800);
         screenHeight = config.GetValue("r_height", 600);
 
-        uiWidth = config.GetValue("ui_width", 1920);
-        uiHeight = config.GetValue("ui_height", 1080);
+        uiScale = config.GetValue("ui_scale", 1.0f);
+
+        uiWidth = screenWidth;
+        uiHeight = screenHeight;
 
         uiFramebuffer = Graphics::Framebuffer(uiWidth, uiHeight);
 
         console.InitLimits(glm::vec2(screenWidth, screenHeight), resourcePack);
 
-        /*
-        fpsLabel = Label::Create(defaultFont);
-        fpsLabel->SetPosition({0, 0});
-        fpsLabel->SetText("0");
-        fpsLabel->SetTextColor({1, 1, 1, 1});
-        fpsLabel->SetFont(defaultFont);
-        fpsLabel->SetFontSize(16);
-        */
-
-        //console.BindFunc("fps", Helpers::BoolFunc(showFps, "Show FPS", "Hide FPS"));
-        //console.BindFunc("frametime", Helpers::BoolFunc(showFrametime, "Show Frametime", "Hide Frametime"));
+        console.BindFunc("fps", Helpers::BoolFunc(showFps, "Show FPS", "Hide FPS"));
+        console.BindFunc("frametime", Helpers::BoolFunc(showFrametime, "Show Frametime", "Hide Frametime"));
 
         auto &input = GetInput();
         input.RegisterChar([this](uint32_t ch){ return OnChar(ch); });
@@ -82,10 +75,7 @@ namespace RIS::UI
     void Userinterface::Draw()
     {
         renderer->Begin();
-        /*
-        if(showFps)
-            fpsLabel->Draw(*renderer, glm::vec2());
-        */
+
         uiFramebuffer.Bind();
         uiFramebuffer.Clear(Graphics::Colors::Transparent, 1.0f);
 
@@ -99,6 +89,15 @@ namespace RIS::UI
 
         console.Draw(*renderer);
 
+        if(showFps)
+        {
+            float fontSize = debugFontSize * uiScale;
+
+            renderer->DrawString(std::to_string(fps), *defaultFont, fontSize, glm::vec2(0, 0));
+            if(showFrametime)
+                renderer->DrawString(std::to_string(1.0f / fps), *defaultFont, fontSize, glm::vec2(0, defaultFont->GetMaxHeight(fontSize)));
+        }
+
         renderer->End();
     }
 
@@ -107,23 +106,16 @@ namespace RIS::UI
 
     void Userinterface::Update(const Timer &timer)
     {
-        /*
         frameTime = timer.Delta();
 
         nFrames++;
         lastTime += frameTime;
         if(lastTime >= 1.0f)
         {
-            float fps = static_cast<float>(nFrames);
+            fps = nFrames;
             nFrames = 0;
             lastTime -= 1.0f;
-
-            if(!showFrametime)
-                fpsLabel->SetText(std::to_string(static_cast<int>(fps)));
-            else
-                fpsLabel->SetText(std::to_string(1 / fps));
         }
-        */
         
         if(!activeMenus.empty())
             activeMenus.top().get().Update(timer);
@@ -151,10 +143,11 @@ namespace RIS::UI
     {
         if(menus.count(menuName) > 0)
         {
+            if(activeMenus.empty())
+                GetWindow().SetRelativeMouse(false);
             auto &menu = menus.at(menuName);
             menu.Reset();
             activeMenus.push(std::ref(menu));
-            GetWindow().SetRelativeMouse(false);
         }
     }
 

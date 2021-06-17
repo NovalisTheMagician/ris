@@ -76,10 +76,12 @@ namespace RIS::UI
         int uiWidth, uiHeight;
         float uiScale = 1.0f;
 
-        //Label fpsLabel;
-        //bool showFps = false;
-        //bool showFrametime = false;
-        //float frameTime;
+        bool showFps = false;
+        bool showFrametime = false;
+        float frameTime;
+        int fps;
+
+        float debugFontSize = 16.0f;
 
         std::stack<std::reference_wrapper<Panel>> activeMenus;
         std::unordered_map<std::string, Panel> menus;

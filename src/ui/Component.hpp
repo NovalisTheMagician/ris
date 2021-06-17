@@ -42,7 +42,7 @@ namespace RIS::UI
     template<typename T>
     struct Component
     {
-        Component(Graphics::Framebuffer &parentFramebuffer, Graphics::Font::Ptr defaultFont, glm::vec2 parentSize) : parentFramebuffer(parentFramebuffer), font(defaultFont), parentSize(parentSize) {}
+        Component(Graphics::Framebuffer &parentFramebuffer, Graphics::Font::Ptr defaultFont, glm::vec2 parentSize) : parentFramebuffer(std::ref(parentFramebuffer)), font(defaultFont), parentSize(parentSize) {}
         T& SetName(const std::string &name) { this->name = name; return *static_cast<T*>(this); }
         std::string GetName() const { return name; }
         T& SetAnchor(Anchor anchor) { this->anchor = anchor; return *static_cast<T*>(this); }
@@ -141,7 +141,7 @@ namespace RIS::UI
         glm::vec2 offsetStep = glm::vec2(0, 0);
         bool useMousewheelForScrolling = false;
         Anchor anchor = Anchor::TopLeft;
-        Graphics::Framebuffer &parentFramebuffer;
+        std::reference_wrapper<Graphics::Framebuffer> parentFramebuffer;
         Graphics::Font::Ptr font;
         float fontSize = 16.0f;
         glm::vec2 parentSize;

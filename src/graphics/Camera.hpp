@@ -9,11 +9,14 @@ namespace RIS::Graphics
     class Camera
     {
     public:
-        Camera() = default;
+        Camera();
         Camera(float fov, float aspect);
+        Camera(float fov, float aspect, float nearPlane, float farPlane);
 
         void SetFoV(float fov);
         void SetAspect(float aspect);
+        void SetNear(float nearPlane);
+        void SetFar(float farPlane);
 
         Transform& GetTransform();
 
@@ -38,7 +41,7 @@ namespace RIS::Graphics
         glm::mat4 Projection() const;
 
     private:
-        float fov, aspect;
+        float fov, aspect, nearPlane, farPlane;
 
         glm::mat4 projection;
         glm::mat4 view;

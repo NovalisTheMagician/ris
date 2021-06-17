@@ -5,20 +5,40 @@
 
 namespace RIS::Graphics
 {
+    Camera::Camera()
+        : Camera(glm::radians(75.0f), 1.0f)
+    {}
+
     Camera::Camera(float fov, float aspect)
-        : fov(fov), aspect(aspect), projection(glm::perspective(fov, aspect, 0.1f, 1000.0f)), yaw(0), pitch(0), roll(0)
+        : Camera(fov, aspect, 0.1f, 10000.0f)
+    {}
+
+    Camera::Camera(float fov, float aspect, float nearPlane, float farPlane)
+        : fov(fov), aspect(aspect), nearPlane(nearPlane), farPlane(farPlane), projection(glm::perspective(fov, aspect, nearPlane, farPlane)), yaw(0), pitch(0), roll(0)
     {}
 
     void Camera::SetFoV(float fov)
     {
         this->fov = fov;
-        projection = glm::perspective(fov, aspect, 0.1f, 1000.0f);
+        projection = glm::perspective(fov, aspect, nearPlane, farPlane);
     }
 
     void Camera::SetAspect(float aspect)
     {
         this->aspect = aspect;
-        projection = glm::perspective(fov, aspect, 0.1f, 1000.0f);
+        projection = glm::perspective(fov, aspect, nearPlane, farPlane);
+    }
+
+    void Camera::SetNear(float nearPlane)
+    {
+        this->nearPlane = nearPlane;
+        projection = glm::perspective(fov, aspect, nearPlane, farPlane);
+    }
+
+    void Camera::SetFar(float farPlane)
+    {
+        this->farPlane = farPlane;
+        projection = glm::perspective(fov, aspect, nearPlane, farPlane);
     }
 
     Transform& Camera::GetTransform()

@@ -103,9 +103,15 @@ namespace RIS::Game
         movement += camera.Right() * camVelocity.x * timeStep;
         movement += glm::vec3(0, 1, 0) * camVelocity.y * timeStep;
 
+        
         pos.x = sceneData.worldSolids->Collides(oldPos + glm::vec3(movement.x, 0, 0), camRadius) ? oldPos.x : oldPos.x + movement.x;
         pos.y = sceneData.worldSolids->Collides(oldPos + glm::vec3(0, movement.y, 0), camRadius) ? oldPos.y : oldPos.y + movement.y;
         pos.z = sceneData.worldSolids->Collides(oldPos + glm::vec3(0, 0, movement.z), camRadius) ? oldPos.z : oldPos.z + movement.z;
+
+        //glm::vec3 resolv;
+        //pos.x = sceneData.worldSolids->Collides(oldPos, oldPos + glm::vec3(movement.x, 0, 0), camRadius, resolv) ? resolv.x : oldPos.x + movement.x;
+        //pos.y = sceneData.worldSolids->Collides(oldPos, oldPos + glm::vec3(0, movement.y, 0), camRadius, resolv) ? resolv.y : oldPos.y + movement.y;
+        //pos.z = sceneData.worldSolids->Collides(oldPos, oldPos + glm::vec3(0, 0, movement.z), camRadius, resolv) ? resolv.z : oldPos.z + movement.z;
 
         camera.Position() = pos;
 

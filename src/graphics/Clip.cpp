@@ -1,4 +1,4 @@
-#include "Animation.hpp"
+#include "graphics/Animation.hpp"
 
 #include <limits>
 
@@ -6,9 +6,6 @@
 
 namespace RIS::Graphics::Animation
 {
-    template class TClip<TransformTrack>;
-    template class TClip<FastTransformTrack>;
-
     template<typename TRACK>
     TClip<TRACK>::TClip()
         : name("No Name"), startTime(0.0f), endTime(0.0f), looping(true)
@@ -191,4 +188,7 @@ namespace RIS::Graphics::Animation
         result.RecalculateDuration();
         return result;
     }
+
+    template class TClip<TransformTrack>;
+    template class TClip<FastTransformTrack>;
 }

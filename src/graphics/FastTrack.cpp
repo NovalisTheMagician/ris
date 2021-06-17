@@ -4,10 +4,6 @@
 
 namespace RIS::Graphics::Animation
 {
-    template class FastTrack<float, 1>;
-    template class FastTrack<glm::vec3, 3>;
-    template class FastTrack<glm::quat, 4>;
-
     template<typename T, unsigned int N>
     void FastTrack<T, N>::UpdateIndexLookupTable()
     {
@@ -75,9 +71,9 @@ namespace RIS::Graphics::Animation
         return static_cast<int>(sampledFrames.at(index));
     }
 
-    template FastTrack<float, 1>        OptimizeTrack(const Track<float, 1> &input);
-    template FastTrack<glm::vec3, 3>    OptimizeTrack(const Track<glm::vec3, 3> &input);
-    template FastTrack<glm::quat, 4>    OptimizeTrack(const Track<glm::quat, 4> &input);
+    template class FastTrack<float, 1>;
+    template class FastTrack<glm::vec3, 3>;
+    template class FastTrack<glm::quat, 4>;
 
     template<typename T, unsigned int N>
     FastTrack<T, N> OptimizeTrack(const Track<T, N> &input)
@@ -91,4 +87,8 @@ namespace RIS::Graphics::Animation
         result.UpdateIndexLookupTable();
         return result;
     }
+
+    template FastTrack<float, 1>        OptimizeTrack(const Track<float, 1> &input);
+    template FastTrack<glm::vec3, 3>    OptimizeTrack(const Track<glm::vec3, 3> &input);
+    template FastTrack<glm::quat, 4>    OptimizeTrack(const Track<glm::quat, 4> &input);
 }

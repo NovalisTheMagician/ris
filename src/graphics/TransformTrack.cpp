@@ -2,9 +2,6 @@
 
 namespace RIS::Graphics::Animation
 {
-    template class TTransformTrack<VectorTrack, QuaternionTrack>;
-    template class TTransformTrack<FastVectorTrack, FastQuaternionTrack>;
-
     template<typename VTRACK, typename QTRACK>
     TTransformTrack<VTRACK, QTRACK>::TTransformTrack()
         : id(0)
@@ -140,6 +137,9 @@ namespace RIS::Graphics::Animation
             result.scale = scaleTrack.Sample(time, looping);
         return result;
     }
+
+    template class TTransformTrack<VectorTrack, QuaternionTrack>;
+    template class TTransformTrack<FastVectorTrack, FastQuaternionTrack>;
 
     FastTransformTrack OptimizeTransformTrack(const TransformTrack &input)
     {

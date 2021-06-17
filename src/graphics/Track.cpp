@@ -54,10 +54,6 @@ namespace RIS::Graphics::Animation
         }
     }
 
-    template class Track<float, 1>;
-    template class Track<glm::vec3, 3>;
-    template class Track<glm::quat, 4>;
-
     template<typename T, unsigned int N>
     Track<T, N>::Track()
         : interpolation(Interpolation::LINEAR)
@@ -288,4 +284,8 @@ namespace RIS::Graphics::Animation
 
         return Hermite(t, point1, slope1, point2, slope2);
     }
+
+    template class Track<float, 1>;
+    template class Track<glm::vec3, 3>;
+    template class Track<glm::quat, 4>;
 }

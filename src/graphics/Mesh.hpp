@@ -31,6 +31,6 @@ namespace RIS::Graphics
     private:
         Buffer vertexBuffer;
         Buffer indexBuffer;
-        const int numIndices;
+        int numIndices;
     };
 }

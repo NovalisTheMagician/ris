@@ -289,7 +289,7 @@ namespace RIS::Loader
         if(!warn.empty()) logger.Warning(warn);
         if(result)
         {
-            const auto &nodeBoneMap = GLTFHelper::CreateNodeBoneMap(model, model.skins.at(0));
+            //const auto &nodeBoneMap = GLTFHelper::CreateNodeBoneMap(model, model.skins.at(0));
 
             auto checkAttribs = [](const std::map<std::string, int> &attribs)
             {

@@ -49,13 +49,13 @@ namespace RIS::UI
             contentPanels.push_back(panel);
         }
 
-        for(int i = 0; i < size; ++i)
+        for(size_t i = 0; i < size; ++i)
         {
             buttons[i].get().SetCallback([contentPanels, buttons, size](Button &button)
             {
                 size_t index = std::any_cast<size_t>(button.GetData());
 
-                for(int i = 0; i < size; ++i)
+                for(size_t i = 0; i < size; ++i)
                 {
                     buttons[i].get().SetToggle(false);
                     contentPanels[i].get().SetVisible(false);

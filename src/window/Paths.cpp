@@ -30,18 +30,19 @@ namespace RIS::Window
 
     static std::filesystem::path GetHomePath()
     {
+        auto gameName = GetFSFriendlyName(Version::GAME_NAME);
 #ifdef _WIN32
         char docPath[MAX_PATH];
         SHGetSpecialFolderPathA(nullptr, docPath, CSIDL_MYDOCUMENTS, false);
         std::filesystem::path path(docPath);
-        return path / GetFSFriendlyName(Version::GAME_NAME);
+        return path / gameName;
 #elif __linux__
         const char *homeDir;
         if ((homeDir = getenv("HOME")) == NULL) {
             homeDir = getpwuid(getuid())->pw_dir;
         }
         std::filesystem::path path(homeDir);
-        return path / ("." + std::string(Version::GAME_NAME));
+        return path / ("." + gameName);
 #elif __EMSCRIPTEN__
         return "";
 #endif

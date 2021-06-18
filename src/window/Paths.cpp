@@ -15,13 +15,24 @@
 
 namespace RIS::Window
 {
+    static std::string GetFSFriendlyName(std::string_view name)
+    {
+#ifdef _WIN32
+        return std::string(name);
+#else
+        std::string newName(name);
+        newName.erase(std::remove_if(newName.begin(), newName.end(), [](unsigned char x) { return std::isspace(x); }), newName.end());
+        return newName;
+#endif
+    }
+
     static std::filesystem::path GetHomePath()
     {
 #ifdef _WIN32
         char docPath[MAX_PATH];
         SHGetSpecialFolderPathA(nullptr, docPath, CSIDL_MYDOCUMENTS, false);
         std::filesystem::path path(docPath);
-        return path / Version::GAME_NAME;
+        return path / GetFSFriendlyName(Version::GAME_NAME);
 #elif __linux__
         const char *homeDir;
         if ((homeDir = getenv("HOME")) == NULL) {
@@ -69,7 +80,7 @@ namespace RIS::Window
     std::filesystem::path GetTempPath()
     {
 #ifdef __EMSCRIPTEN__
-        return "Temp";
+        return "Temp/";
 #else
         return std::filesystem::temp_directory_path();
 #endif

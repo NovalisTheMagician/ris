@@ -2,6 +2,8 @@
 
 #include "misc/Version.hpp"
 
+#include <algorithm>
+
 #ifdef _WIN32
 #include <Shlobj.h>
 #elif __linux__

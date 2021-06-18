@@ -29,16 +29,24 @@ namespace RIS::Game
 
     void PlayScene::Start()
     {
-        GetConsole().BindFunc("map", [this](const std::vector<std::string> &params)
+        auto &console = GetConsole();
+
+        console.BindFunc("map", [this](const std::vector<std::string> &params)
         {
             if(params.size() > 0)
                 nextMap = params.at(0);
             return "";
         });
 
-        GetConsole().BindFunc("pos", [this](const std::vector<std::string> &params)
+        console.BindFunc("pos", [this](const std::vector<std::string> &params)
         {
             return fmt::format("{} {} {}", camera.Position().x, camera.Position().y, camera.Position().z);
+        });
+
+        console.BindFunc("rot", [this](const std::vector<std::string> &params)
+        {
+            auto angles = camera.GetAngles();
+            return fmt::format("{} {} {}", glm::degrees(angles.x), glm::degrees(angles.y), glm::degrees(angles.z));
         });
 
         mapLayout = VertexType::MapVertexFormat;
@@ -52,7 +60,7 @@ namespace RIS::Game
         worldBuffer = Graphics::UniformBuffer(glm::mat4{});
 
         camera.Position() = glm::vec3(0, 40, 0); // (-256 -256 40)
-        camera.SetYaw(glm::radians(180.0f));
+        //camera.SetYaw(glm::radians(180.0f));
         camera.SetPitch(0);
     }
 
@@ -129,6 +137,11 @@ namespace RIS::Game
         //world = glm::scale(world, glm::vec3(0.1f));
 
         camRot = glm::vec2(0, 0);
+
+        auto &debugData = GetUserinterface().GetDebugData();
+        auto angles = camera.GetAngles();
+        debugData.insert_or_assign("Position", fmt::format("{:.2f} {:.2f} {:.2f}", camera.Position().x, camera.Position().y, camera.Position().z));
+        debugData.insert_or_assign("Orientation", fmt::format("{:.2f} {:.2f} {:.2f}", glm::degrees(angles.x), glm::degrees(angles.y), glm::degrees(angles.z)));
     }
 
     void PlayScene::Draw(float interpol)

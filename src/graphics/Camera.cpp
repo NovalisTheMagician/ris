@@ -74,7 +74,7 @@ namespace RIS::Graphics
     void Camera::AddYaw(float amount)
     {
         yaw += amount;
-        while(yaw >= glm::two_pi<float>())
+        while(yaw > glm::two_pi<float>())
             yaw -= glm::two_pi<float>();
         while(yaw < 0)
             yaw += glm::two_pi<float>();
@@ -104,7 +104,7 @@ namespace RIS::Graphics
     void Camera::SetYaw(float amount)
     {
         yaw = amount;
-        while(yaw >= glm::two_pi<float>())
+        while(yaw > glm::two_pi<float>())
             yaw -= glm::two_pi<float>();
         while(yaw < 0)
             yaw += glm::two_pi<float>();
@@ -129,6 +129,11 @@ namespace RIS::Graphics
         while(roll < 0)
             roll += glm::two_pi<float>();
         transform.rotation = glm::quat({pitch, yaw, roll});
+    }
+
+    glm::vec3 Camera::GetAngles() const
+    {
+        return glm::vec3(pitch, yaw, roll);
     }
 
     glm::vec3& Camera::Position()

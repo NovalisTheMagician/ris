@@ -55,6 +55,8 @@ namespace RIS::UI
 
         Graphics::Font::Ptr GetDefaultFont() const;
 
+        std::unordered_map<std::string, std::string>& GetDebugData();
+
     private:
         bool OnChar(uint32_t character);
         bool OnMouseMove(float x, float y);
@@ -82,8 +84,11 @@ namespace RIS::UI
         int fps;
 
         float debugFontSize = 16.0f;
+        bool showDebugData = false;
 
         std::stack<std::reference_wrapper<Panel>> activeMenus;
         std::unordered_map<std::string, Panel> menus;
+
+        std::unordered_map<std::string, std::string> debugData;
     };
 }

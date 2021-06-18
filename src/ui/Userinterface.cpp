@@ -40,6 +40,7 @@ namespace RIS::UI
 
         console.BindFunc("fps", Helpers::BoolFunc(showFps, "Show FPS", "Hide FPS"));
         console.BindFunc("frametime", Helpers::BoolFunc(showFrametime, "Show Frametime", "Hide Frametime"));
+        console.BindFunc("debugdata", Helpers::BoolFunc(showDebugData, "Show Debugging Information", "Hide Debugging Information"));
 
         auto &input = GetInput();
         input.RegisterChar([this](uint32_t ch){ return OnChar(ch); });
@@ -89,13 +90,28 @@ namespace RIS::UI
 
         console.Draw(*renderer);
 
+        float verticalOffset = 0.0f;
+        float fontSize = debugFontSize * uiScale;
+        float verticalAdvance = defaultFont->GetMaxHeight(fontSize);
         if(showFps)
         {
-            float fontSize = debugFontSize * uiScale;
-
-            renderer->DrawString(std::to_string(fps), *defaultFont, fontSize, glm::vec2(0, 0));
+            renderer->DrawString(std::to_string(fps), *defaultFont, fontSize, glm::vec2(0, verticalOffset));
+            verticalOffset += verticalAdvance;
             if(showFrametime)
-                renderer->DrawString(std::to_string(1.0f / fps), *defaultFont, fontSize, glm::vec2(0, defaultFont->GetMaxHeight(fontSize)));
+            {
+                renderer->DrawString(std::to_string(1.0f / fps), *defaultFont, fontSize, glm::vec2(0, verticalOffset));
+                verticalOffset += verticalAdvance;
+            } 
+        }
+
+        if(showDebugData)
+        {
+            for(auto &[name, value] : debugData)
+            {
+                std::string str = fmt::format("{}: {}", name, value);
+                renderer->DrawString(str, *defaultFont, fontSize, glm::vec2(0, verticalOffset));
+                verticalOffset += verticalAdvance;
+            }
         }
 
         renderer->End();
@@ -194,6 +210,11 @@ namespace RIS::UI
             return true;
         }
         return false;
+    }
+
+    std::unordered_map<std::string, std::string>& Userinterface::GetDebugData()
+    {
+        return debugData;
     }
 
     bool Userinterface::OnMouseMove(float x, float y)

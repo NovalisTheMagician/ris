@@ -34,6 +34,8 @@ namespace RIS::Graphics
         void SetPitch(float amount);
         void SetRoll(float amount);
 
+        glm::vec3 GetAngles() const;
+
         glm::vec3& Position();
 
         glm::mat4 ViewProj() const;
@@ -44,11 +46,8 @@ namespace RIS::Graphics
         float fov, aspect, nearPlane, farPlane;
 
         glm::mat4 projection;
-        glm::mat4 view;
 
         Transform transform;
-
-        glm::vec3 position;
 
         float yaw, pitch, roll;
 

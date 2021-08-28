@@ -40,8 +40,10 @@ namespace RIS::Game
         {
             std::string polyFile = fmt::format("{}.poly", mapName);
             std::string solidsFile = fmt::format("{}.brush", mapName);
-            sceneData.mapMesh = Loader::Load<Graphics::MapMesh>(polyFile, resourcePack);
-            sceneData.worldSolids = Loader::Load<Physics::WorldSolids>(solidsFile, resourcePack);
+            std::string entityFile = fmt::format("{}.entity", mapName);
+            if(!(sceneData.mapMesh = Loader::Load<Graphics::MapMesh>(polyFile, resourcePack))) throw RISException(fmt::format("Could not load poly file {}", polyFile));
+            if(!(sceneData.worldSolids = Loader::Load<Physics::WorldSolids>(solidsFile, resourcePack))) throw RISException(fmt::format("Could not load solids file {}", solidsFile));
+            if(!(sceneData.mapEntities = Loader::Load<MapEntities>(entityFile, resourcePack))) throw RISException(fmt::format("Could not load entity file {}", entityFile));
 
             doneLoading = true;
         }

@@ -91,8 +91,8 @@ namespace RIS::UI
         console.Draw(*renderer);
 
         float verticalOffset = 0.0f;
-        float fontSize = debugFontSize * uiScale;
-        float verticalAdvance = defaultFont->GetMaxHeight(fontSize);
+        const float fontSize = debugFontSize * uiScale;
+        const float verticalAdvance = defaultFont->GetMaxHeight(fontSize);
         if(showFps)
         {
             renderer->DrawString(std::to_string(fps), *defaultFont, fontSize, glm::vec2(0, verticalOffset));

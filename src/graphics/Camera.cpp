@@ -41,6 +41,11 @@ namespace RIS::Graphics
         projection = glm::perspective(fov, aspect, nearPlane, farPlane);
     }
 
+    float Camera::GetFov() const
+    {
+        return fov;
+    }
+
     Transform& Camera::GetTransform()
     {
         return transform;

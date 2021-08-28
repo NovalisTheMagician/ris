@@ -14,6 +14,10 @@
 
 #include <fmt/format.h>
 
+#include <algorithm>
+
+using namespace std::literals::string_literals;
+
 namespace RIS::Game
 {
     PlayScene::PlayScene(SceneData sceneData, Loader::ResourcePack &resourcePack)
@@ -49,6 +53,17 @@ namespace RIS::Game
             return fmt::format("{} {} {}", glm::degrees(angles.x), glm::degrees(angles.y), glm::degrees(angles.z));
         });
 
+        console.BindFunc("fov", [this](const std::vector<std::string> &params)
+        {
+            if(params.size() == 0)
+                return std::to_string(glm::degrees(camera.GetFov()));
+            float value = std::stof(params.at(0));
+            if(value < 45.0f || value > 120.0f)
+                return "Fov not in range [45 | 120]"s;
+            camera.SetFoV(glm::radians(value));
+            return ""s;
+        });
+
         mapLayout = VertexType::MapVertexFormat;
         mapPipeline.SetShader(*sceneData.mapVertexShader);
         mapPipeline.SetShader(*sceneData.mapFragmentShader);
@@ -59,7 +74,17 @@ namespace RIS::Game
         viewProjBuffer = Graphics::UniformBuffer(glm::mat4{});
         worldBuffer = Graphics::UniformBuffer(glm::mat4{});
 
-        camera.Position() = glm::vec3(0, 40, 0); // (-256 -256 40)
+        auto &entities = *sceneData.mapEntities;
+
+        auto it = std::find_if(std::begin(entities), std::end(entities), [](const auto &entity){ return entity.Classname() == "info_player_start"; });
+        if(it != std::end(entities))
+        {
+            const MapProps &props = (*it).Props();
+            camera.Position() = props.GetOrDefault("origin", glm::vec3());
+            camera.SetYaw(props.GetOrDefault("angle", 0.0f));
+        }
+
+        //camera.Position() = glm::vec3(0, 40, 0); // (-256 -256 40)
         //camera.SetYaw(glm::radians(180.0f));
         camera.SetPitch(0);
     }
@@ -110,7 +135,6 @@ namespace RIS::Game
         movement += camera.YawDirection() * camVelocity.z * timeStep;
         movement += camera.Right() * camVelocity.x * timeStep;
         movement += glm::vec3(0, 1, 0) * camVelocity.y * timeStep;
-
         
         pos.x = sceneData.worldSolids->Collides(oldPos + glm::vec3(movement.x, 0, 0), camRadius) ? oldPos.x : oldPos.x + movement.x;
         pos.y = sceneData.worldSolids->Collides(oldPos + glm::vec3(0, movement.y, 0), camRadius) ? oldPos.y : oldPos.y + movement.y;
@@ -125,7 +149,7 @@ namespace RIS::Game
 
         /*
         glm::vec3 correctedPos = pos;
-        if(sceneData.worldSolids->Collides(oldPos, pos, correctedPos))
+        if(sceneData.worldSolids->Collides(oldPos, pos, correctedPos)) 
             camera.Position() = correctedPos;
         else
             camera.Position() = pos;

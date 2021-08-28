@@ -18,6 +18,8 @@ namespace RIS::Graphics
         void SetNear(float nearPlane);
         void SetFar(float farPlane);
 
+        float GetFov() const;
+
         Transform& GetTransform();
 
         glm::vec3 Direction() const;

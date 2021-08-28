@@ -21,12 +21,9 @@ namespace RIS::Game
     class MapProps
     {
     private:
-        using PropType = std::variant<int, float, std::string, glm::vec2, glm::vec3>;
+        using PropType = std::variant<std::string, int, float, glm::vec2, glm::vec3, bool>;;
 
     public:
-        MapProps() = default;
-        MapProps(const std::vector<std::byte> &bytes);
-
         void Set(const std::string &key, PropType value);
 
         template<typename T>
@@ -42,6 +39,13 @@ namespace RIS::Game
                 }
             }
             return std::nullopt;
+        }
+
+        template<typename T>
+        T GetOrDefault(const std::string &key, T def) const
+        {
+            if(auto value = Get<T>(key)) return *value;
+            return def;
         }
 
     private:

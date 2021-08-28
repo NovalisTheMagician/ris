@@ -7,26 +7,31 @@
 #include "graphics/Buffer.hpp"
 
 #include <fmt/format.h>
+#include <string_view>
+#include <cstdint>
 
 namespace RIS::Loader
 {
+    constexpr char POLY_FILE_MAGIC[4] = {'P', 'O', 'L', 'Y'};
+    constexpr uint32_t POLY_FILE_VERSION = 1;
+
     struct polyheader
     {
         char magic[4];
-        int version;
-        int numSections;
+        uint32_t version;
+        uint32_t numSections;
     };
 
     struct polysection
     {
         char texture[64];
-        int numPolygons;
+        uint32_t numPolygons;
     };
 
     struct polydata
     {
-        int numVertices;
-        int numIndices;
+        uint32_t numVertices;
+        uint32_t numIndices;
     };
 
     template<>
@@ -43,15 +48,15 @@ namespace RIS::Loader
 
         polyheader header = {};
         readBytes(&header, sizeof header);
-        if(header.magic[0] != 'P' || header.magic[1] != 'O' || header.magic[2] != 'L' || header.magic[3] != 'Y')
+        if(std::string_view(header.magic, sizeof header.magic) != std::string_view(POLY_FILE_MAGIC, sizeof POLY_FILE_MAGIC))
             return nullptr;
-        if(header.version != 1)
+        if(header.version != POLY_FILE_VERSION)
             return nullptr;
 
         std::vector<VertexType::MapVertex> vertices;
         std::vector<std::uint16_t> indices;
         std::vector<Graphics::MapSection> sections;
-        for(int s = 0; s < header.numSections; ++s)
+        for(uint32_t s = 0; s < header.numSections; ++s)
         {
             polysection section = {};
             readBytes(&section, sizeof section);
@@ -63,7 +68,7 @@ namespace RIS::Loader
             sec.offset = indices.size();
 
             int sectionIndices = 0;
-            for(int p = 0; p < section.numPolygons; ++p)
+            for(uint32_t p = 0; p < section.numPolygons; ++p)
             {
                 polydata data = {};
                 readBytes(&data, sizeof data);

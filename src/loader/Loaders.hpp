@@ -10,3 +10,4 @@
 #include "loader/ModelLoader.hpp"
 #include "loader/MapLoader.hpp"
 #include "loader/WorldSolidsLoader.hpp"
+#include "loader/MapEntityLoader.hpp"

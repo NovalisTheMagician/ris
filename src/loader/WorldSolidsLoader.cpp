@@ -3,19 +3,24 @@
 #include "physics/WorldSolids.hpp"
 
 #include <fmt/format.h>
+#include <string_view>
+#include <cstdint>
 
 namespace RIS::Loader
 {
+    constexpr char BRUSH_FILE_MAGIC[4] = {'B', 'R', 'U', 'S'};
+    constexpr uint32_t BRUSH_FILE_VERSION = 1;
+
     struct brushheader
     {
         char magic[4];
-        int version;
-        int numBrushes;
+        uint32_t version;
+        uint32_t numBrushes;
     };
 
     struct brushdata
     {
-        int numPlanes;
+        uint32_t numPlanes;
     };
 
     template<>
@@ -32,19 +37,19 @@ namespace RIS::Loader
 
         brushheader header = {};
         readBytes(&header, sizeof header);
-        if(header.magic[0] != 'B' || header.magic[1] != 'R' || header.magic[2] != 'U' || header.magic[3] != 'S')
+        if(std::string_view(header.magic, sizeof header.magic) != std::string_view(BRUSH_FILE_MAGIC, sizeof BRUSH_FILE_MAGIC))
             return nullptr;
-        if(header.version != 1)
+        if(header.version != BRUSH_FILE_VERSION)
             return nullptr;
 
         std::vector<Physics::Brush> brushes;
-        for(int b = 0; b < header.numBrushes; ++b)
+        for(uint32_t b = 0; b < header.numBrushes; ++b)
         {
             brushdata data = {};
             readBytes(&data, sizeof data);
 
             auto &brush = brushes.emplace_back();
-            for(int p = 0; p < data.numPlanes; ++p)
+            for(uint32_t p = 0; p < data.numPlanes; ++p)
             {
                 Physics::Plane plane = {};
                 readBytes(&plane, sizeof plane);

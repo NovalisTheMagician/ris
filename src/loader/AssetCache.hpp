@@ -9,11 +9,18 @@
 #include <string>
 #include <algorithm>
 #include <typeinfo>
+#include <vector>
 
 #include <fmt/format.h>
 
 namespace RIS
 {
+    namespace Game
+    {
+        class MapEntity;
+        using MapEntities = std::vector<MapEntity>;
+    }
+
     namespace Physics
     {
         class WorldSolids;
@@ -103,5 +110,5 @@ namespace RIS::Loader
 
     };
 
-    using AssetCache = TAssetCache<Graphics::Font, Graphics::Mesh, Graphics::Model, Graphics::Shader, Graphics::Texture, Graphics::Image, Graphics::Animation::Skeleton, Graphics::Animation::Animation, Graphics::MapMesh, Physics::WorldSolids, std::string>;
+    using AssetCache = TAssetCache<Graphics::Font, Graphics::Mesh, Graphics::Model, Graphics::Shader, Graphics::Texture, Graphics::Image, Graphics::Animation::Skeleton, Graphics::Animation::Animation, Graphics::MapMesh, Physics::WorldSolids, Game::MapEntities, std::string>;
 }

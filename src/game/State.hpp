@@ -4,6 +4,7 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <vector>
 
 #include <glm/glm.hpp>
 
@@ -23,14 +24,14 @@
 #include "physics/WorldSolids.hpp"
 
 #include "game/Actions.hpp"
-#include "game/MapProps.hpp"
+#include "game/MapEntity.hpp"
 
 namespace RIS::Game
 {
     struct SceneData
     {
         Graphics::MapMesh::Ptr mapMesh;
-        MapProps mapProps;
+        MapEntitiesPtr mapEntities;
         Physics::WorldSolids::Ptr worldSolids;
 
         Graphics::Shader::Ptr mapVertexShader;

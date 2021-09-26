@@ -15,8 +15,12 @@ defines = ['ZIP_STATIC']
 
 debug = ARGUMENTS.get('debug', 0)
 verbose = ARGUMENTS.get('verbose', 0)
+emscripten = ARGUMENTS.get('emscripten', 0)
 
-if(sys.platform == 'linux'):
+if int(emscripten):
+    cxx = ''
+
+elif(sys.platform == 'linux'):
     cl_flags = ['-std=c++17', '-pthread']
     lk_flags = ['-pthread']
     inc_path = ['#src']

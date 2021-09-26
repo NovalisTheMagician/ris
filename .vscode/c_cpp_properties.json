@@ -29,6 +29,21 @@
             "cStandard": "c11",
             "cppStandard": "c++17",
             "intelliSenseMode": "linux-clang-x64"
+        },
+        {
+            "name": "Emscripten (Windows)",
+            "includePath": [
+                "${workspaceFolder}/src/*",
+                "${INC_PATH}/*",
+                "D:/emsdk/upstream/emscripten/system/include/**"
+            ],
+            "defines": [
+                "_DEBUG"
+            ],
+            "compilerPath": "D:/emsdk/upstream/bin/clang++.exe",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "linux-clang-x64"
         }
     ],
     "version": 4

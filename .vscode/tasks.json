@@ -11,6 +11,13 @@
             "group": "build"
         },
         {
+            "label": "build browser client (DEBUG)",
+            "type": "shell",
+            "command": "scons client debug=1 emscripten=1 -j4",
+            "problemMatcher": ["$msCompile", "$gcc"],
+            "group": "build"
+        },
+        {
             "label": "build client (DEBUG) (ST)",
             "type": "shell",
             "command": "scons client debug=1",

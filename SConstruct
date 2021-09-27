@@ -4,6 +4,7 @@ import sys
 game = 'Game'
 
 env = Environment(ENV=os.environ)
+env['USE_EMSCRIPTEN'] = 0
 
 cl_flags = []
 lk_flags = []
@@ -18,7 +19,21 @@ verbose = ARGUMENTS.get('verbose', 0)
 emscripten = ARGUMENTS.get('emscripten', 0)
 
 if int(emscripten):
-    cxx = ''
+    # os.system("D:/emsdk/emsdk_env.ps1")
+    env = Environment(tools=['cc', 'cxx', 'link', 'emscripten'])
+    env['USE_EMSCRIPTEN'] = 1
+    cl_flags = ['-std=c++17']
+    lk_flags = []
+    inc_path = ['#src']
+    libs = ['glfw', 'libz', 'libzip', 'fmt', 'base64', 'soloud'] 
+
+    if int(debug):
+        cl_flags.append(['-g', '-Wall', '-pedantic'])
+        lk_flags.append(['-g'])
+        defines.append(['_DEBUG'])
+    else:
+        cl_flags.append(['-O2'])
+        defines.append(['NDEBUG'])
 
 elif(sys.platform == 'linux'):
     cl_flags = ['-std=c++17', '-pthread']

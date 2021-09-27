@@ -6,7 +6,7 @@ files = Glob('*.cpp')
 rc_files = Glob('*.rc')
 
 objs = env.Object(files)
-if (sys.platform == 'win32'):
+if (sys.platform == 'win32' and not int(env['USE_EMSCRIPTEN'])):
     objs.append(env.RES(rc_files))
 
 for subdir in ['loader', 'game', 'graphics', 'misc', 'network', 'physics', 'audio', 'window', 'ui', 'script', 'input']:

@@ -2,6 +2,8 @@
 
 #include <magic_enum.hpp>
 
+#include <string>
+#include <sstream>
 #include <string_view>
 #include <algorithm>
 #include <optional>
@@ -41,7 +43,37 @@ namespace RIS::Input
             std::ifstream mappingStream{std::string(mappingFile)};
             if(mappingStream)
             {
+                auto trim = [](std::string_view &v)
+                {
+                    v.remove_prefix(std::min(v.find_first_not_of(" "), v.length()));
+                    auto c = v.find_first_of(" ");
+                    if(c != std::string_view::npos)
+                        v.remove_suffix(v.length() - c);
+                };
+
                 // read input mappings
+                std::string line;
+                while(std::getline(mappingStream, line))
+                {
+                    std::string_view l(line);
+
+                    auto sepPos = l.find_first_of("=");
+                    if(sepPos != std::string_view::npos)
+                    {
+                        std::string_view key = l.substr(0, sepPos);
+                        trim(key);
+
+                        std::string_view value = l.substr(sepPos + 1);
+                        trim(value);
+
+                        auto action = magic_enum::enum_cast<Action>(key);
+                        if(action)
+                        {
+                            InputKey inputKey = ToKey(value);
+                            Set(*action, inputKey);
+                        }
+                    }
+                }
             }
         }
 

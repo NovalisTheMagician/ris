@@ -2,11 +2,11 @@
 
 #include "graphics/GLObject.hpp"
 
-#include <stdexcept>
-
 #include <glad2/gl.h>
 
 #include <vector>
+
+#include <gsl/span>
 
 namespace RIS::Graphics
 {
@@ -39,6 +39,12 @@ namespace RIS::Graphics
         void Bind(GLenum target, int bindBase) const;
 
         void* Map(GLenum access, size_t size = 0, size_t offset = 0);
+        template<typename T, size_t Count = 1>
+        gsl::span<T> Map(GLenum access, size_t offset = 0)
+        {
+            T *ptr = reinterpret_cast<T*>(Map(access, Count * sizeof(T), offset));
+            return gsl::span<T>(ptr, Count);
+        }
         void UnMap();
         void Flush(size_t size = 0, size_t offset = 0);
 

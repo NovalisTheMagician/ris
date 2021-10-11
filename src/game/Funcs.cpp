@@ -8,6 +8,7 @@
 
 #include "misc/StringSupport.hpp"
 
+#include <sstream>
 #include <string>
 
 #include <magic_enum.hpp>
@@ -22,7 +23,7 @@ namespace RIS::Game
         auto &console = GetConsole();
         auto &window = GetWindow();
 
-        auto exitFunc = [&window](const auto&){ window.Exit(0); return ""; };
+        auto exitFunc = [&window](const auto&){ window.Exit(0); return ""s; };
         console.BindFunc("exit", exitFunc);
         console.BindFunc("quit", exitFunc);
 
@@ -52,7 +53,7 @@ namespace RIS::Game
         {
             auto &cache = Loader::GetCache();
             cache.Cleanup();
-            return "";
+            return ""s;
         });
 
         console.BindFunc("bind", [this](const std::vector<std::string> &params)
@@ -104,7 +105,7 @@ namespace RIS::Game
             auto path = Window::GetConfigPath();
             path /= Input::BINDINGS_FILE_NAME;
             inputMapper.SaveMapping(path.generic_string());
-            return "Saved keybinds";
+            return "Saved keybinds"s;
         });
 
         console.BindFunc("show_config_path", [](const std::vector<std::string> &params)
@@ -120,6 +121,14 @@ namespace RIS::Game
         console.BindFunc("show_mod_path", [](const std::vector<std::string> &params)
         {
             return Window::GetModPath().generic_string();
+        });
+
+        console.BindFunc("echo", [](const std::vector<std::string> &params)
+        {
+            std::stringstream msg;
+            for(const auto &parm : params)
+                msg << parm << " ";
+            return msg.str();
         });
     }
 }

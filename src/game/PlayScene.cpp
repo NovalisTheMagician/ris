@@ -93,7 +93,7 @@ namespace RIS::Game
     {
     }
 
-    float speed = 96;
+    constexpr float speed = 96;
 
     void PlayScene::HandleInput(const Input::InputMapper<Action> &input)
     {
@@ -121,7 +121,7 @@ namespace RIS::Game
         camRot += -input.GetMouse() * 0.1f;
     }
 
-    float camRadius = 1.0f;
+    constexpr float camRadius = 1.0f;
 
     void PlayScene::Update(const Timer &timer, float timeStep)
     {
